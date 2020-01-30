@@ -19,6 +19,7 @@ type
     OwnerId: Integer;
     Url: string;
     Duration: string;
+    Restricted: Boolean;
   end;
 
   TPlaylist = record
@@ -29,6 +30,16 @@ type
     Image: TJpegImage;
     Id: Integer;
     OwnerId: Integer;
+  end;
+
+  TFriend = record
+    FirstName: string;
+    LastName: string;
+    Status: string;
+    AlbumPhoto: string;
+    Image: TJpegImage;
+    Id: Integer;
+    IsClosed: Boolean;
   end;
 
   TAlbumThumb = record
@@ -43,6 +54,8 @@ type
   end;
 
   TAudioList = TTableData<TAudio>;
+
+  TFriends = TTableData<TFriend>;
 
   TPlaylists = TTableData<TPlaylist>;
 
@@ -96,6 +109,8 @@ type
     ButtonFlatFriends: TButtonFlat;
     TableExPlaylists: TTableEx;
     TableExCurrent: TTableEx;
+    MemoLog: TMemo;
+    TableExFriends: TTableEx;
     procedure FormCreate(Sender: TObject);
     procedure TableExMyMusicItemClick(Sender: TObject; MouseButton: TMouseButton; const Index: Integer);
     procedure FormDestroy(Sender: TObject);
@@ -129,6 +144,9 @@ type
     procedure TableExCurrentDrawCellData(Sender: TObject; ACol, ARow: Integer; Rect: TRect; State: TGridDrawState);
     procedure TableExCurrentItemClick(Sender: TObject; MouseButton: TMouseButton; const Index: Integer);
     procedure TableExPlaylistsItemClick(Sender: TObject; MouseButton: TMouseButton; const Index: Integer);
+    procedure VKLog(Sender: TObject; const Value: string);
+    procedure TableExFriendsDrawCellData(Sender: TObject; ACol, ARow: Integer; Rect: TRect; State: TGridDrawState);
+    procedure TableExFriendsItemClick(Sender: TObject; MouseButton: TMouseButton; const Index: Integer);
   private
     FMouseInScale: Boolean;
     FMouseInButton: Boolean;
@@ -140,22 +158,33 @@ type
     FToken: string;
     FMyMusic: TAudioList;
     FCurrentList: TAudioList;
+    FFriends: TFriends;
     FPlaylists: TPlaylists;
     FPlayingId: Integer;
     FSettings: TSettingsIni;
     FPlayer: TBASSPlayer;
     FAlbumThumbs: TAlbumThumbs;
-    FLoadingList: Boolean;
+    FLoadingMusic: Boolean;
+    FWorkerMusic: Boolean;
+    FDoStopMusicThread: Boolean;
+    FDoStopMusicWorkerThread: Boolean;
     FLoadingPlaylList: Boolean;
+    FWorker2Work: Boolean;
+    FDoStopPlaylistWorkerThread: Boolean;
+    FLoadingFriends: Boolean;
+    FWorkerFriendsWork: Boolean;
+    FDoStopFriendsThread: Boolean;
     FLoadingPlaylists: Boolean;
-    FWorkerWork: Boolean;
-    FShowLeftTime: Boolean;
     FDoStopThreads: Boolean;
+    FShowLeftTime: Boolean;
     FPlayImage, FActiveImage: TPngImage;
+    FPauseImage: TPngImage;
     FEqu: TEquItems;
     FNeedActLeft: Integer;
     FNeedActWidth: Integer;
     FVkId: Integer;
+    FActivePlaylist: Integer;
+    FOpenning: Boolean;
     procedure FOnAudioEnd(Sender: TObject);
     procedure LoadList;
     function FindNext(CurrentId: Integer): Integer;
@@ -181,6 +210,11 @@ type
     procedure FillCurrentFromPlaylist(Index: Integer);
     procedure LoadPlaylist(OwnerId, Id: Integer);
     procedure FAfterLoadingPlaylist;
+    procedure ReloadItems;
+    procedure RunPlaylistPicWorker;
+    procedure LoadFriends;
+    procedure FAfterLoadingFriends;
+    procedure RunFriendsPicWorker;
   public
     { Public declarations }
   end;
@@ -198,11 +232,79 @@ uses
 procedure TFormMain.LabelTimeClick(Sender: TObject);
 begin
   FShowLeftTime := not FShowLeftTime;
+  TimerRefreshTimer(nil);
+end;
+
+procedure TFormMain.LoadFriends;
+begin
+  TableExFriends.Enabled := False;
+  TThread.CreateAnonymousThread(
+    procedure
+    var
+      Users: TVkFriends;
+      Friend: TFriend;
+      i: Integer;
+      IsOk: Boolean;
+    begin
+      FDoStopFriendsThread := True;
+      while FLoadingFriends do
+        Sleep(100);
+      FDoStopFriendsThread := False;
+      FLoadingFriends := True;
+      FFriends.BeginUpdate;
+      FFriends.Clear;
+      IsOk := False;
+      try
+        if VK.Friends.Get(Users, 'nickname, sex, photo_50') then
+        begin
+          for i := Low(Users.Items) to High(Users.Items) do
+          begin
+            if FDoStopThreads or FDoStopFriendsThread then
+              Break;
+            Friend.Id := Users.Items[i].Id;
+            Friend.FirstName := Users.Items[i].FirstName;
+            Friend.LastName := Users.Items[i].LastName;
+            Friend.AlbumPhoto := Users.Items[i].Photo50;
+            Friend.IsClosed := Users.Items[i].CanSeeAudio <> 1;
+            FFriends.Add(Friend);
+          end;
+          Users.Free;
+          IsOk := True;
+        end;
+      finally
+        if IsOk then
+        begin
+          if not FDoStopThreads then
+          begin
+            TThread.Synchronize(TThread.CurrentThread,
+              procedure
+              begin
+                FAfterLoadingFriends;
+              end);
+          end;
+        end;
+        FFriends.EndUpdate;
+        FLoadingFriends := False;
+      end;
+    end).Start;
+end;
+
+procedure TFormMain.FAfterLoadingFriends;
+begin
+  TableExFriends.Enabled := True;
+  RunFriendsPicWorker;
 end;
 
 procedure TFormMain.LoadPlaylist(OwnerId, Id: Integer);
 begin
   TableExCurrent.Enabled := False;
+  if FLoadingPlaylList then
+    Exit;
+  if FWorker2Work then
+    FDoStopPlaylistWorkerThread := True
+  else
+    FDoStopPlaylistWorkerThread := False;
+
   TThread.CreateAnonymousThread(
     procedure
     var
@@ -225,11 +327,12 @@ begin
           begin
             if not FDoStopThreads then
             begin
-              Audio.Artist := Audios[i].artist;
-              Audio.Title := Audios[i].title;
-              Audio.AlbumPhoto := Audios[i].album.thumb.photo_68;
+              Audio.Artist := Audios[i].Artist;
+              Audio.Title := Audios[i].Title;
+              Audio.AlbumPhoto := Audios[i].Album.Thumb.Photo68;
               Audio.Id := Audios[i].Id;
-              Audio.OwnerId := Audios[i].owner_id;
+              Audio.OwnerId := Audios[i].OwnerId;
+              Audio.Restricted := Audios[i].ContentRestricted > 0;
               S := Trunc(Audios[i].duration);
               M := S div 60;
               S := S mod 60;
@@ -241,19 +344,19 @@ begin
           IsOk := True;
         end;
       finally
-        FCurrentList.EndUpdate;
-        FLoadingPlaylList := False;
         if IsOk then
         begin
-          TThread.Synchronize(TThread.CurrentThread,
-            procedure
-            begin
-              if not FDoStopThreads then
+          if not FDoStopThreads then
+          begin
+            TThread.Synchronize(TThread.CurrentThread,
+              procedure
               begin
                 FAfterLoadingPlaylist;
-              end;
-            end);
+              end);
+          end;
         end;
+        FCurrentList.EndUpdate;
+        FLoadingPlaylList := False;
       end;
     end).Start;
 end;
@@ -262,8 +365,8 @@ procedure TFormMain.FAfterLoadingPlaylist;
 begin
   TableExCurrent.Enabled := True;
   Play(0);
-  //LabelAudioCount.Caption := 'Аудиозаписей: ' + Flist.Count.ToString;
-  //RunAlbumPicWorker;
+  LabelAudioCount.Caption := 'Аудиозаписей: ' + FCurrentList.Count.ToString;
+  RunPlaylistPicWorker
 end;
 
 procedure TFormMain.LoadPlaylists;
@@ -275,10 +378,10 @@ begin
       Playlists: TVkPlaylists;
       Playlist: TPlaylist;
       i: Integer;
-      IsOk: Boolean;
+      IsOk, DefImg: Boolean;
     begin
-      IsOk := False;
       FLoadingPlaylists := True;
+      IsOk := False;
       FPlaylists.BeginUpdate;
       FPlaylists.Clear;
       try
@@ -288,12 +391,16 @@ begin
           begin
             if not FDoStopThreads then
             begin
-              Playlist.Description := Playlists[i].description;
-              Playlist.Title := Playlists[i].title;
-              Playlist.AlbumPhoto := Playlists[i].photo.photo_68;
+              Playlist.Description := Playlists[i].Description;
+              Playlist.Title := Playlists[i].Title;
+              if Assigned(Playlists[i].Photo) then
+                Playlist.AlbumPhoto := Playlists[i].Photo.Photo68
+              else
+                Playlist.AlbumPhoto := '';
+              Playlist.Image := FAlbumThumbs.GetImage(Playlist.AlbumPhoto, DefImg);
               Playlist.Id := Playlists[i].Id;
-              Playlist.OwnerId := Playlists[i].owner_id;
-              Playlist.Count := Playlists[i].count;
+              Playlist.OwnerId := Playlists[i].OwnerId;
+              Playlist.Count := Playlists[i].Count;
               FPlaylists.Add(Playlist);
             end;
             Playlists[i].Free;
@@ -301,8 +408,6 @@ begin
           IsOk := True;
         end;
       finally
-        FPlaylists.EndUpdate;
-        FLoadingPlaylists := False;
         if IsOk then
         begin
           TThread.Synchronize(TThread.CurrentThread,
@@ -314,6 +419,8 @@ begin
               end;
             end);
         end;
+        FPlaylists.EndUpdate;
+        FLoadingPlaylists := False;
       end;
     end).Start;
 end;
@@ -321,8 +428,6 @@ end;
 procedure TFormMain.FAfterLoadingPL;
 begin
   TableExPlaylists.Enabled := True;
-  //LabelAudioCount.Caption := 'Аудиозаписей: ' + Flist.Count.ToString;
-  //RunAlbumPicWorker;
 end;
 
 procedure TFormMain.LoadList;
@@ -336,22 +441,29 @@ begin
       i, M, S: Integer;
       IsOk: Boolean;
     begin
-      FLoadingList := True;
+      FDoStopMusicThread := True;
+      FDoStopMusicWorkerThread := True;
+      while FLoadingMusic or FWorkerMusic do
+        Sleep(100);
+      FDoStopMusicThread := False;
+      FDoStopMusicWorkerThread := False;
+      FLoadingMusic := True;
       FMyMusic.BeginUpdate;
       FMyMusic.Clear;
       IsOk := False;
       try
-        if VK.Audio.Get(Audios) then
+        if VK.Audio.Get(Audios, FVkId) then
         begin
           for i := Low(Audios) to High(Audios) do
           begin
-            if not FDoStopThreads then
+            if not (FDoStopThreads or FDoStopMusicThread) then
             begin
               Audio.Artist := Audios[i].artist;
               Audio.Title := Audios[i].title;
-              Audio.AlbumPhoto := Audios[i].album.thumb.photo_68;
+              Audio.AlbumPhoto := Audios[i].Album.Thumb.Photo68;
               Audio.Id := Audios[i].Id;
-              Audio.OwnerId := Audios[i].owner_id;
+              Audio.OwnerId := Audios[i].OwnerId;
+              Audio.Restricted := Audios[i].ContentRestricted > 0;
               S := Trunc(Audios[i].duration);
               M := S div 60;
               S := S mod 60;
@@ -363,19 +475,19 @@ begin
           IsOk := True;
         end;
       finally
-        FMyMusic.EndUpdate;
-        FLoadingList := False;
         if IsOk then
         begin
-          TThread.Synchronize(TThread.CurrentThread,
-            procedure
-            begin
-              if not FDoStopThreads then
+          if (not FDoStopThreads) and (not FDoStopMusicThread) then
+          begin
+            TThread.Synchronize(TThread.CurrentThread,
+              procedure
               begin
                 FAfterLoading;
-              end;
-            end);
+              end);
+          end;
         end;
+        FMyMusic.EndUpdate;
+        FLoadingMusic := False;
       end;
     end).Start;
 end;
@@ -383,7 +495,6 @@ end;
 procedure TFormMain.FAfterLoading;
 begin
   TableExMyMusic.Enabled := True;
-  LabelAudioCount.Caption := 'Аудиозаписей: ' + FMyMusic.Count.ToString;
   RunAlbumPicWorker;
   FillCurrentFromMyMusic;
 end;
@@ -417,22 +528,33 @@ begin
             StretchDraw(Rect, FCurrentList[ARow].Image)
           else
             StretchDraw(Rect, FAlbumThumbs[0].Image);
+
           if FCurrentList[ARow].Id = FPlayingId then
           begin
-            StretchDraw(Rect, FActiveImage);
-            Pen.Width := 2;
-            Pen.Color := clWhite;
-            MoveTo(Rect.Left + 8 + 5, Rect.Bottom - 12);
-            LineTo(Rect.Left + 8 + 5, Round(Rect.Bottom - 12 - 1 - ((15 / 100) * FEqu[1])));
+            if TableExCurrent.ItemUnderMouse = ARow then
+            begin
+              if FPlayer.IsPlay then
+                StretchDraw(Rect, FPauseImage)
+              else
+                StretchDraw(Rect, FPlayImage);
+            end
+            else
+            begin
+              StretchDraw(Rect, FActiveImage);
+              Pen.Width := 2;
+              Pen.Color := clWhite;
+              MoveTo(Rect.Left + 8 + 5, Rect.Bottom - 12);
+              LineTo(Rect.Left + 8 + 5, Round(Rect.Bottom - 12 - 1 - ((15 / 100) * FEqu[1])));
 
-            MoveTo(Rect.Left + 8 + 10, Rect.Bottom - 12);
-            LineTo(Rect.Left + 8 + 10, Round(Rect.Bottom - 12 - 1 - ((15 / 100) * FEqu[2])));
+              MoveTo(Rect.Left + 8 + 10, Rect.Bottom - 12);
+              LineTo(Rect.Left + 8 + 10, Round(Rect.Bottom - 12 - 1 - ((15 / 100) * FEqu[2])));
 
-            MoveTo(Rect.Left + 8 + 15, Rect.Bottom - 12);
-            LineTo(Rect.Left + 8 + 15, Round(Rect.Bottom - 12 - 1 - ((15 / 100) * FEqu[3])));
+              MoveTo(Rect.Left + 8 + 15, Rect.Bottom - 12);
+              LineTo(Rect.Left + 8 + 15, Round(Rect.Bottom - 12 - 1 - ((15 / 100) * FEqu[3])));
 
-            MoveTo(Rect.Left + 8 + 20, Rect.Bottom - 12);
-            LineTo(Rect.Left + 8 + 20, Round(Rect.Bottom - 12 - 1 - ((15 / 100) * FEqu[4])));
+              MoveTo(Rect.Left + 8 + 20, Rect.Bottom - 12);
+              LineTo(Rect.Left + 8 + 20, Round(Rect.Bottom - 12 - 1 - ((15 / 100) * FEqu[4])));
+            end;
           end
           else if TableExCurrent.ItemUnderMouse = ARow then
             StretchDraw(Rect, FPlayImage);
@@ -441,13 +563,11 @@ begin
         begin
           Font.Name := 'Roboto';
           Font.Size := 9;
-          Font.Quality := fqProof;
           TxtRect := Rect;
           TxtRect.Bottom := TxtRect.CenterPoint.Y;
           TxtRect.Inflate(-1, -1);
           TxtRect.Right := TxtRect.Right - 40;
           S := FCurrentList[ARow].Title;
-          Font.Style := [fsBold];
           Font.Color := clBlack;
           TextRect(TxtRect, S, [tfSingleLine, tfBottom, tfLeft, tfEndEllipsis]);
 
@@ -456,7 +576,6 @@ begin
           TxtRect.Inflate(-1, -1);
           TxtRect.Right := TxtRect.Right - 40;
           S := FCurrentList[ARow].Artist;
-          Font.Style := [];
           Font.Color := $00939393;
           TextRect(TxtRect, S, [tfSingleLine, tfTop, tfLeft, tfEndEllipsis]);
 
@@ -464,8 +583,16 @@ begin
           TxtRect.Inflate(-4, -4);
           TxtRect.Left := TxtRect.Right - 40;
           S := FCurrentList[ARow].Duration;
-          Font.Style := [];
           TextRect(TxtRect, S, [tfSingleLine, tfVerticalCenter, tfCenter]);
+
+          if FCurrentList[ARow].Restricted then
+          begin
+            TxtRect := Rect;
+            TxtRect.Inflate(-4, -4);
+            TxtRect.Left := TxtRect.Right - 40 - 50;
+            S := 'x';
+            TextRect(TxtRect, S, [tfSingleLine, tfVerticalCenter, tfCenter]);
+          end;
         end;
     end;
   end;
@@ -475,6 +602,79 @@ procedure TFormMain.TableExCurrentItemClick(Sender: TObject; MouseButton: TMouse
 begin
   if not Play(Index) then
     PlayNext;
+end;
+
+procedure TFormMain.TableExFriendsDrawCellData(Sender: TObject; ACol, ARow: Integer; Rect: TRect;
+  State: TGridDrawState);
+var
+  TxtRect: TRect;
+  S: string;
+begin
+  with TableExFriends.Canvas do
+  begin
+    if not FFriends.IndexIn(ARow) then
+    begin
+      if ACol = 1 then
+      begin
+        TxtRect := Rect;
+        TxtRect.Left := 0;
+        TxtRect.Inflate(-4, -4);
+        S := 'Загрузка...';
+        Font.Style := [];
+        TextRect(TxtRect, S, [tfSingleLine, tfVerticalCenter, tfCenter]);
+      end;
+      Exit;
+    end;
+    case ACol of
+      0:
+        begin
+          Rect.Inflate(-7, -7);
+          if Assigned(FFriends[ARow].Image) then
+            StretchDraw(Rect, FFriends[ARow].Image)
+          else
+            StretchDraw(Rect, FAlbumThumbs[0].Image);
+        end;
+      1:
+        begin
+          Font.Name := 'Roboto';
+          Font.Size := 9;
+          TxtRect := Rect;
+          TxtRect.Bottom := TxtRect.CenterPoint.Y;
+          TxtRect.Inflate(-1, -1);
+          TxtRect.Right := TxtRect.Right - 40;
+          S := FFriends[ARow].FirstName + ' ' + FFriends[ARow].LastName;
+          Font.Color := clBlack;
+          TextRect(TxtRect, S, [tfSingleLine, tfBottom, tfLeft, tfEndEllipsis]);
+
+          TxtRect := Rect;
+          TxtRect.Top := TxtRect.CenterPoint.Y;
+          TxtRect.Inflate(-1, -1);
+          TxtRect.Right := TxtRect.Right - 40;
+          S := FFriends[ARow].Status;
+          Font.Color := $00939393;
+          TextRect(TxtRect, S, [tfSingleLine, tfTop, tfLeft, tfEndEllipsis]);
+        end;
+    end;
+  end;
+end;
+
+procedure TFormMain.TableExFriendsItemClick(Sender: TObject; MouseButton: TMouseButton; const Index: Integer);
+var
+  Params: TVkAudioParams;
+  Audios: TVkAudios;
+begin
+  if not FFriends.IndexIn(Index) then
+    Exit;
+  FVkId := FFriends[Index].Id;
+  Params.OwnerId(FVkId);
+  Params.Count(1);
+  if VK.Audio.Get(Audios, Params) then
+  begin
+    Audios[0].Free;
+    ReloadItems;
+  end
+  else
+    ShowMessage('Музыка закрыта или её нет');
 end;
 
 procedure TFormMain.TableExMyMusicDrawCellData(Sender: TObject; ACol, ARow: Integer; Rect: TRect;
@@ -508,20 +708,28 @@ begin
             StretchDraw(Rect, FAlbumThumbs[0].Image);
           if FMyMusic[ARow].Id = FPlayingId then
           begin
-            StretchDraw(Rect, FActiveImage);
-            Pen.Width := 2;
-            Pen.Color := clWhite;
-            MoveTo(Rect.Left + 8 + 5, Rect.Bottom - 12);
-            LineTo(Rect.Left + 8 + 5, Round(Rect.Bottom - 12 - 1 - ((15 / 100) * FEqu[1])));
+            if TableExMyMusic.ItemUnderMouse = ARow then
+              if FPlayer.IsPlay then
+                StretchDraw(Rect, FPauseImage)
+              else
+                StretchDraw(Rect, FPlayImage)
+            else
+            begin
+              StretchDraw(Rect, FActiveImage);
+              Pen.Width := 2;
+              Pen.Color := clWhite;
+              MoveTo(Rect.Left + 8 + 5, Rect.Bottom - 12);
+              LineTo(Rect.Left + 8 + 5, Round(Rect.Bottom - 12 - 1 - ((15 / 100) * FEqu[1])));
 
-            MoveTo(Rect.Left + 8 + 10, Rect.Bottom - 12);
-            LineTo(Rect.Left + 8 + 10, Round(Rect.Bottom - 12 - 1 - ((15 / 100) * FEqu[2])));
+              MoveTo(Rect.Left + 8 + 10, Rect.Bottom - 12);
+              LineTo(Rect.Left + 8 + 10, Round(Rect.Bottom - 12 - 1 - ((15 / 100) * FEqu[2])));
 
-            MoveTo(Rect.Left + 8 + 15, Rect.Bottom - 12);
-            LineTo(Rect.Left + 8 + 15, Round(Rect.Bottom - 12 - 1 - ((15 / 100) * FEqu[3])));
+              MoveTo(Rect.Left + 8 + 15, Rect.Bottom - 12);
+              LineTo(Rect.Left + 8 + 15, Round(Rect.Bottom - 12 - 1 - ((15 / 100) * FEqu[3])));
 
-            MoveTo(Rect.Left + 8 + 20, Rect.Bottom - 12);
-            LineTo(Rect.Left + 8 + 20, Round(Rect.Bottom - 12 - 1 - ((15 / 100) * FEqu[4])));
+              MoveTo(Rect.Left + 8 + 20, Rect.Bottom - 12);
+              LineTo(Rect.Left + 8 + 20, Round(Rect.Bottom - 12 - 1 - ((15 / 100) * FEqu[4])));
+            end;
           end
           else if TableExMyMusic.ItemUnderMouse = ARow then
             StretchDraw(Rect, FPlayImage);
@@ -530,13 +738,11 @@ begin
         begin
           Font.Name := 'Roboto';
           Font.Size := 9;
-          Font.Quality := fqProof;
           TxtRect := Rect;
           TxtRect.Bottom := TxtRect.CenterPoint.Y;
           TxtRect.Inflate(-1, -1);
           TxtRect.Right := TxtRect.Right - 40;
           S := FMyMusic[ARow].Title;
-          Font.Style := [fsBold];
           Font.Color := clBlack;
           TextRect(TxtRect, S, [tfSingleLine, tfBottom, tfLeft, tfEndEllipsis]);
 
@@ -545,7 +751,6 @@ begin
           TxtRect.Inflate(-1, -1);
           TxtRect.Right := TxtRect.Right - 40;
           S := FMyMusic[ARow].Artist;
-          Font.Style := [];
           Font.Color := $00939393;
           TextRect(TxtRect, S, [tfSingleLine, tfTop, tfLeft, tfEndEllipsis]);
 
@@ -553,7 +758,6 @@ begin
           TxtRect.Inflate(-4, -4);
           TxtRect.Left := TxtRect.Right - 40;
           S := FMyMusic[ARow].Duration;
-          Font.Style := [];
           TextRect(TxtRect, S, [tfSingleLine, tfVerticalCenter, tfCenter]);
         end;
     end;
@@ -564,6 +768,7 @@ procedure TFormMain.FillCurrentFromMyMusic;
 var
   i: Integer;
 begin
+  FActivePlaylist := -1;
   FCurrentList.BeginUpdate;
   FCurrentList.Clear;
   for i := 0 to FMyMusic.Count - 1 do
@@ -571,13 +776,14 @@ begin
     FCurrentList.Add(FMyMusic[i]);
   end;
   FCurrentList.EndUpdate;
+  LabelAudioCount.Caption := 'Аудиозаписей: ' + FCurrentList.Count.ToString;
 end;
 
 procedure TFormMain.FillCurrentFromPlaylist(Index: Integer);
 begin
   if not FPlaylists.IndexIn(Index) then
     Exit;
-
+  FActivePlaylist := FPlaylists[Index].Id;
   LoadPlaylist(FPlaylists[Index].OwnerId, FPlaylists[Index].Id);
 end;
 
@@ -636,31 +842,41 @@ var
   IsDone, FRes: Boolean;
 begin
   Result := False;
+  if FOpenning then
+    Exit;
+  FOpenning := True;
   if FCurrentList.IndexIn(Index) then
   begin
-    if FPlayer.IsPlay then
-      if FPlayingId = FCurrentList[Index].Id then
-        Exit(True);
-
-    ClearInfo;
+    if FPlayingId = FCurrentList[Index].Id then
+    begin
+      if FPlayer.IsPlay then
+        FPlayer.Pause
+      else
+        FPlayer.Resume;
+      FOpenning := False;
+      Exit(True);
+    end;
     TableExCurrent.ItemIndex := Index;
     FPlayer.Stop;
     Audio := FCurrentList[Index];
+    SetInfo(Audio);
     FPlayingId := Audio.Id;
     if Audio.Url.IsEmpty then
     begin
       if VK.Audio.GetById(Item, [Audio.OwnerId, Audio.Id]) then
       begin
-        Audio.Url := Item.url;
+        Audio.Url := Item.Url;
         FCurrentList[Index] := Audio;
         Item.Free;
       end
       else
+      begin
+        FOpenning := False;
         Exit;
+      end;
     end;
     if not Audio.Url.IsEmpty then
     begin
-      SetInfo(Audio);
       FPlayer.SetStreamURL(Audio.Url);
       IsDone := False;
       FRes := False;
@@ -675,6 +891,7 @@ begin
       Result := FRes;
     end;
   end;
+  FOpenning := False;
 end;
 
 procedure TFormMain.ButtonFlatNextClick(Sender: TObject);
@@ -729,13 +946,13 @@ end;
 
 procedure TFormMain.ButtonFlatDownloadClick(Sender: TObject);
 begin
-  if FCurrentList.IndexIn(TableExMyMusic.ItemIndex) then
+  if FCurrentList.IndexIn(TableExCurrent.ItemIndex) then
   begin
-    SaveDialogMp3.FileName := FCurrentList[TableExMyMusic.ItemIndex].Artist + ' - ' + FCurrentList[TableExMyMusic.ItemIndex].Title
+    SaveDialogMp3.FileName := FCurrentList[TableExCurrent.ItemIndex].Artist + ' - ' + FCurrentList[TableExCurrent.ItemIndex].Title
       + '.mp3';
     if SaveDialogMp3.Execute(Handle) then
     begin
-      DownloadURL(FCurrentList[TableExMyMusic.ItemIndex].Url, SaveDialogMp3.FileName);
+      DownloadURL(FCurrentList[TableExCurrent.ItemIndex].Url, SaveDialogMp3.FileName);
     end;
   end;
 end;
@@ -810,7 +1027,10 @@ begin
         TxtRect := Rect;
         TxtRect.Left := 0;
         TxtRect.Inflate(-4, -4);
-        S := 'Загрузка...';
+        if FLoadingPlaylists then
+          S := 'Загрузка...'
+        else
+          S := 'Пусто';
         Font.Style := [];
         TextRect(TxtRect, S, [tfSingleLine, tfVerticalCenter, tfCenter]);
       end;
@@ -824,22 +1044,31 @@ begin
             StretchDraw(Rect, FPlaylists[ARow].Image)
           else
             StretchDraw(Rect, FAlbumThumbs[0].Image);
-          if FPlaylists[ARow].Id = FPlayingId then
+          if FPlaylists[ARow].Id = FActivePlaylist then
           begin
-            StretchDraw(Rect, FActiveImage);
-            Pen.Width := 2;
-            Pen.Color := clWhite;
-            MoveTo(Rect.Left + 8 + 5, Rect.Bottom - 12);
-            LineTo(Rect.Left + 8 + 5, Round(Rect.Bottom - 12 - 1 - ((15 / 100) * FEqu[1])));
 
-            MoveTo(Rect.Left + 8 + 10, Rect.Bottom - 12);
-            LineTo(Rect.Left + 8 + 10, Round(Rect.Bottom - 12 - 1 - ((15 / 100) * FEqu[2])));
+            if TableExPlaylists.ItemUnderMouse = ARow then
+              if FPlayer.IsPlay then
+                StretchDraw(Rect, FPauseImage)
+              else
+                StretchDraw(Rect, FPlayImage)
+            else
+            begin
+              StretchDraw(Rect, FActiveImage);
+              Pen.Width := 2;
+              Pen.Color := clWhite;
+              MoveTo(Rect.Left + 8 + 5, Rect.Bottom - 12);
+              LineTo(Rect.Left + 8 + 5, Round(Rect.Bottom - 12 - 1 - ((15 / 100) * FEqu[1])));
 
-            MoveTo(Rect.Left + 8 + 15, Rect.Bottom - 12);
-            LineTo(Rect.Left + 8 + 15, Round(Rect.Bottom - 12 - 1 - ((15 / 100) * FEqu[3])));
+              MoveTo(Rect.Left + 8 + 10, Rect.Bottom - 12);
+              LineTo(Rect.Left + 8 + 10, Round(Rect.Bottom - 12 - 1 - ((15 / 100) * FEqu[2])));
 
-            MoveTo(Rect.Left + 8 + 20, Rect.Bottom - 12);
-            LineTo(Rect.Left + 8 + 20, Round(Rect.Bottom - 12 - 1 - ((15 / 100) * FEqu[4])));
+              MoveTo(Rect.Left + 8 + 15, Rect.Bottom - 12);
+              LineTo(Rect.Left + 8 + 15, Round(Rect.Bottom - 12 - 1 - ((15 / 100) * FEqu[3])));
+
+              MoveTo(Rect.Left + 8 + 20, Rect.Bottom - 12);
+              LineTo(Rect.Left + 8 + 20, Round(Rect.Bottom - 12 - 1 - ((15 / 100) * FEqu[4])));
+            end;
           end
           else if TableExPlaylists.ItemUnderMouse = ARow then
             StretchDraw(Rect, FPlayImage);
@@ -848,13 +1077,11 @@ begin
         begin
           Font.Name := 'Roboto';
           Font.Size := 9;
-          Font.Quality := fqProof;
           TxtRect := Rect;
           TxtRect.Bottom := TxtRect.CenterPoint.Y;
           TxtRect.Inflate(-1, -1);
           TxtRect.Right := TxtRect.Right - 40;
           S := FPlaylists[ARow].Title;
-          Font.Style := [fsBold];
           Font.Color := clBlack;
           TextRect(TxtRect, S, [tfSingleLine, tfBottom, tfLeft, tfEndEllipsis]);
 
@@ -863,7 +1090,6 @@ begin
           TxtRect.Inflate(-1, -1);
           TxtRect.Right := TxtRect.Right - 40;
           S := FPlaylists[ARow].Description;
-          Font.Style := [];
           Font.Color := $00939393;
           TextRect(TxtRect, S, [tfSingleLine, tfTop, tfLeft, tfEndEllipsis]);
 
@@ -871,7 +1097,6 @@ begin
           TxtRect.Inflate(-4, -4);
           TxtRect.Left := TxtRect.Right - 40;
           S := FPlaylists[ARow].Count.ToString;
-          Font.Style := [];
           TextRect(TxtRect, S, [tfSingleLine, tfVerticalCenter, tfCenter]);
         end;
     end;
@@ -921,7 +1146,12 @@ begin
       it := Max(1, Min(4, (Trunc(i / 32) + 1)));
       FEqu[it] := (((100 / SpecHeight) * Max(0, Min(100, FFTFallOff[i]))) + FEqu[it]) / 2;
     end;
-    TableExMyMusic.Repaint;
+    if PageControl.ActivePage = TabSheetCurrent then
+      TableExCurrent.Repaint;
+    if PageControl.ActivePage = TabSheetMyMusic then
+      TableExMyMusic.Repaint;
+    if PageControl.ActivePage = TabSheetPlaylists then
+      TableExPlaylists.Repaint;
   end
   else
   begin
@@ -1043,7 +1273,7 @@ begin
   with TDirect2DCanvas.Create(DrawPanel1.Canvas, MRect) do
   begin
     BeginDraw;
-    Brush.Color := PanelNav.Color;
+    Brush.Color := PanelPlayer.Color;
     FillRect(MRect);
 
     //Scale
@@ -1105,6 +1335,8 @@ procedure TFormMain.PlayNext;
 var
   Nxt: Integer;
 begin
+  if FOpenning then
+    Exit;
   Nxt := FindNext(FPlayingId);
   if FCurrentList.IndexIn(Nxt) then
     if not Play(Nxt) then
@@ -1115,6 +1347,8 @@ procedure TFormMain.PlayPrev;
 var
   Nxt: Integer;
 begin
+  if FOpenning then
+    Exit;
   Nxt := FindPrev(FPlayingId);
   if FCurrentList.IndexIn(Nxt) then
     if not Play(Nxt) then
@@ -1127,15 +1361,17 @@ var
   Item: TAudio;
 begin
   for i := 0 to FCurrentList.Count - 1 do
+  begin
     if FCurrentList[i].AlbumPhoto = Url then
     begin
       Item := FCurrentList[i];
       Item.Image := Image;
       FCurrentList[i] := Item;
     end;
+  end;
 end;
 
-procedure TFormMain.RunAlbumPicWorker;
+procedure TFormMain.RunPlaylistPicWorker;
 begin
   TThread.CreateAnonymousThread(
     procedure
@@ -1144,13 +1380,58 @@ begin
       Item: TAudio;
       DefImg: Boolean;
     begin
-      FWorkerWork := True;
+      while FWorker2Work do
+        Sleep(100);
+      if FDoStopThreads or FDoStopPlaylistWorkerThread then
+        Exit;
+      FWorker2Work := True;
       try
-        for i := 0 to FMyMusic.Count - 1 do
+        for i := 0 to FCurrentList.Count - 1 do
+        begin
+          if FDoStopThreads or FDoStopPlaylistWorkerThread then
+            Break;
+          Item := FCurrentList[i];
+          if not Assigned(Item.Image) then
+          begin
+            if not Item.AlbumPhoto.IsEmpty then
+            begin
+              Item.Image := FAlbumThumbs.GetImage(Item.AlbumPhoto, DefImg);
+              if FDoStopThreads or FDoStopPlaylistWorkerThread then
+                Break;
+              TThread.Synchronize(TThread.CurrentThread,
+                procedure
+                begin
+                  FCurrentList[i] := Item;
+                  FCurrentList.UpdateTable;
+                end);
+            end
+          end;
+        end;
+      finally
+        FWorker2Work := False;
+        FDoStopPlaylistWorkerThread := False;
+      end;
+    end).Start;
+end;
+
+procedure TFormMain.RunFriendsPicWorker;
+begin
+  TThread.CreateAnonymousThread(
+    procedure
+    var
+      i: Integer;
+      Item: TFriend;
+      DefImg: Boolean;
+    begin
+      while FWorkerFriendsWork do
+        Sleep(100);
+      FWorkerFriendsWork := True;
+      try
+        for i := 0 to FFriends.Count - 1 do
         begin
           if FDoStopThreads then
             Break;
-          Item := FMyMusic[i];
+          Item := FFriends[i];
           if not Assigned(Item.Image) then
           begin
             if not Item.AlbumPhoto.IsEmpty then
@@ -1163,6 +1444,50 @@ begin
               TThread.Synchronize(TThread.CurrentThread,
                 procedure
                 begin
+                  FFriends[i] := Item;
+                  FFriends.UpdateTable;
+                end);
+            end
+          end;
+        end;
+      finally
+        FWorkerFriendsWork := False;
+      end;
+    end).Start;
+end;
+
+procedure TFormMain.RunAlbumPicWorker;
+begin
+  TThread.CreateAnonymousThread(
+    procedure
+    var
+      i: Integer;
+      Item: TAudio;
+      DefImg: Boolean;
+    begin
+      FDoStopMusicWorkerThread := True;
+      while FWorkerMusic do
+        Sleep(100);
+      FDoStopMusicWorkerThread := False;
+      FWorkerMusic := True;
+      try
+        for i := 0 to FMyMusic.Count - 1 do
+        begin
+          if FDoStopThreads or FDoStopMusicWorkerThread then
+            Break;
+          Item := FMyMusic[i];
+          if not Assigned(Item.Image) then
+          begin
+            if not Item.AlbumPhoto.IsEmpty then
+            begin
+              Item.Image := FAlbumThumbs.GetImage(Item.AlbumPhoto, DefImg);
+              if not DefImg then
+                UpdateImages(Item.AlbumPhoto, Item.Image);
+              if FDoStopThreads or FDoStopMusicWorkerThread then
+                Break;
+              TThread.Synchronize(TThread.CurrentThread,
+                procedure
+                begin
                   FMyMusic[i] := Item;
                   FMyMusic.UpdateTable;
                 end);
@@ -1170,7 +1495,7 @@ begin
           end;
         end;
       finally
-        FWorkerWork := False;
+        FWorkerMusic := False;
       end;
     end).Start;
 end;
@@ -1195,19 +1520,27 @@ var
   Stream: TResourceStream;
 begin
   FPlayingId := -1;
+  FOpenning := False;
   FShowLeftTime := False;
   FDoStopThreads := False;
+  FDoStopMusicWorkerThread := False;
+
   FAlbumThumbs := TAlbumThumbs.Create;
   FPlayImage := TPngImage.Create;
   FPlayImage.LoadFromResourceName(HInstance, 'play');
+  FPauseImage := TPngImage.Create;
+  FPauseImage.LoadFromResourceName(HInstance, 'pause');
   FActiveImage := TPngImage.Create;
   FActiveImage.LoadFromResourceName(HInstance, 'active');
   Stream := TResourceStream.Create(HInstance, 'blank', RT_RCDATA);
-  FAlbumThumbs[FAlbumThumbs.Add(TAlbumThumb.CreateItem(TJpegImage.Create, ''))].Image.LoadFromStream(Stream);
+  i := FAlbumThumbs.Add(TAlbumThumb.CreateItem(TJpegImage.Create, ''));
+  FAlbumThumbs[i].Image.LoadFromStream(Stream);
   Stream.Free;
+
   FSettings := TSettingsIni.Create(ExtractFilePath(ParamStr(0)) + '\config.ini');
   FMyMusic := TAudioList.Create(TableExMyMusic);
   FCurrentList := TAudioList.Create(TableExCurrent);
+  FFriends := TFriends.Create(TableExFriends);
   FPlaylists := TPlaylists.Create(TableExPlaylists);
   FPlayer := TBASSPlayer.Create(Self);
   FToken := FSettings.GetStr('General', 'Token', '');
@@ -1231,7 +1564,7 @@ end;
 procedure TFormMain.Await;
 begin
   FDoStopThreads := True;
-  while FWorkerWork or FLoadingList or FLoadingPlaylists do
+  while FWorkerMusic or FLoadingMusic or FLoadingPlaylists or FWorker2Work or FLoadingFriends or FWorkerFriendsWork do
     Application.ProcessMessages;
 end;
 
@@ -1240,11 +1573,13 @@ begin
   FPlayer.Stop;
   FCurrentList.Free;
   FMyMusic.Free;
+  FFriends.Free;
   FPlaylists.Free;
   FSettings.Free;
-  FAlbumThumbs.Free;
   FPlayImage.Free;
+  FPauseImage.Free;
   FActiveImage.Free;
+  FAlbumThumbs.Free;
 end;
 
 procedure TFormMain.VKAuth(Sender: TObject; var Token: string; var TokenExpiry: Int64; var ChangePasswordHash: string);
@@ -1269,12 +1604,27 @@ begin
             VK.Login;
           end);
       end).Start;
-  end;
+  end
+  else
+    ShowMessage(Text);
 end;
 
 procedure TFormMain.VKErrorLogin(Sender: TObject; E: Exception; Code: Integer; Text: string);
 begin
   ShowMessage(Text);
+end;
+
+procedure TFormMain.VKLog(Sender: TObject; const Value: string);
+begin
+  MemoLog.Lines.Add(Value);
+end;
+
+procedure TFormMain.ReloadItems;
+begin
+  TimerRefresh.Enabled := False;
+  LoadList;
+  LoadPlaylists;
+  TimerRefresh.Enabled := True;
 end;
 
 procedure TFormMain.VKLogin(Sender: TObject);
@@ -1286,14 +1636,14 @@ begin
   if VK.Users.Get(User) then
   begin
     FVkId := User.id;
-    Caption := 'VK Audio Player [' + User.first_name + ']';
+    //FVkId := 295621104;
+    Caption := 'VK Audio Player [' + User.FirstName + ']';
     User.Free;
-    LoadList;
-    LoadPlaylists;
+    ReloadItems;
+    LoadFriends;
   end
   else
     FVkId := -1;
-  TimerRefresh.Enabled := True;
 end;
 
 { TAlbumThumb }
@@ -1311,7 +1661,10 @@ var
   i: Integer;
 begin
   for i := 0 to Count - 1 do
+  try
     Items[i].Image.Free;
+  except
+  end;
   inherited;
 end;
 

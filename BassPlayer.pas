@@ -14,9 +14,10 @@ type
   private
     FOnEnd: TAudioEnd;
     FIsPlay: Boolean;
+    FOpenning: BOOL;
     function GetLastErrorCode: Integer;
     function GetSize: Int64;
-    procedure UnloadRadio;
+    procedure UnloadChannel;
     procedure SetPosition(const Value: Int64);
     function GetPosition: Int64;
     procedure DoOnEnd(handle: HSYNC; channel, data: Cardinal; user: Pointer);
@@ -109,13 +110,14 @@ begin
   begin
     BASS_PluginLoad(PChar(BASS_FOLDER + 'libbass.dll'), 0 or BASS_UNICODE);
     BASS_SetConfig(BASS_CONFIG_NET_PREBUF, 0);
+    BASS_SetConfig(BASS_CONFIG_VERIFY, 1024 * 1024);
     Result := True;
   end
   else
     Result := False;
 end;
 
-procedure TBASSPlayer.UnloadRadio;
+procedure TBASSPlayer.UnloadChannel;
 begin
   if FActiveChannel <> 0 then
     BASS_StreamFree(FActiveChannel);
@@ -123,28 +125,36 @@ end;
 
 function TBASSPlayer.Play: Boolean;
 begin
-  FIsPlay := False;
   Result := False;
+  if FOpenning then
+    Exit;
 
-  BASS_StreamFree(FActiveChannel);
+  FOpenning := True;
+  FIsPlay := False;
+
+  UnloadChannel;
 
   FActiveChannel := BASS_StreamCreateURL(PChar(FStreamURL), 0, BASS_STREAM_STATUS or
     BASS_STREAM_AUTOFREE or BASS_UNICODE or BASS_MP3_SETPOS, nil, nil);
-  if FActiveChannel = 0 then
+
+  if FActiveChannel <> 0 then
+  begin
+    if BASS_ChannelPlay(FActiveChannel, False) then
+    begin
+      BASS_ChannelRemoveSync(FActiveChannel, FPlaySync);
+      FPlaySync := BASS_ChannelSetSync(FActiveChannel, BASS_SYNC_END, 1, @FSync, nil);
+      if Assigned(FStatusProc) then
+        FStatusProc(strCompleted, 100);
+
+      Result := True;
+      FIsPlay := True;
+    end;
+  end
+  else
   begin
     FLastErrorCode := Bass_ErrorGetCode;
-    Exit;
   end;
-  if BASS_ChannelPlay(FActiveChannel, False) then
-  begin
-    BASS_ChannelRemoveSync(FActiveChannel, FPlaySync);
-    FPlaySync := BASS_ChannelSetSync(FActiveChannel, BASS_SYNC_END, 1, @FSync, nil);
-    if Assigned(FStatusProc) then
-      FStatusProc(strCompleted, 100);
-
-    Result := True;
-    FIsPlay := True;
-  end;
+  FOpenning := False;
 end;
 
 procedure TBASSPlayer.Pause;
@@ -285,7 +295,7 @@ end;
 
 destructor TBASSPlayer.Destroy;
 begin
-  UnloadRadio;
+  UnloadChannel;
   inherited;
 end;
 

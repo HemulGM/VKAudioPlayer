@@ -454,8 +454,8 @@ object FormMain: TFormMain
             Top = 0
             Width = 122
             Height = 2
-            Brush.Color = 12566463
-            Pen.Color = 12566463
+            Brush.Color = 14406346
+            Pen.Color = 14406346
             Visible = False
           end
           object ShapeActivePage: TShape
@@ -512,7 +512,6 @@ object FormMain: TFormMain
           SubTextFont.Height = -13
           SubTextFont.Name = 'Tahoma'
           SubTextFont.Style = []
-          ExplicitLeft = 122
         end
         object ButtonFlatCurrent: TButtonFlat
           AlignWithMargins = True
@@ -606,7 +605,6 @@ object FormMain: TFormMain
           SubTextFont.Height = -13
           SubTextFont.Name = 'Tahoma'
           SubTextFont.Style = []
-          ExplicitLeft = 207
         end
         object ButtonFlatFriends: TButtonFlat
           AlignWithMargins = True
@@ -653,8 +651,6 @@ object FormMain: TFormMain
           SubTextFont.Height = -13
           SubTextFont.Name = 'Tahoma'
           SubTextFont.Style = []
-          ExplicitLeft = 407
-          ExplicitTop = -3
         end
       end
       object PanelSearch: TPanel
@@ -673,7 +669,8 @@ object FormMain: TFormMain
           Top = 18
           Width = 676
           Height = 36
-          Caption = #1050#1085#1086#1087#1082#1072
+          Anchors = [akLeft, akTop, akRight]
+          Caption = ''
           ColorNormal = clWhite
           ColorOver = clWhite
           ColorPressed = clWhite
@@ -779,6 +776,10 @@ object FormMain: TFormMain
       object TabSheetCurrent: TTabSheet
         Caption = 'TabSheetCurrent'
         TabVisible = False
+        ExplicitLeft = 0
+        ExplicitTop = 0
+        ExplicitWidth = 0
+        ExplicitHeight = 0
         object TableExCurrent: TTableEx
           Left = 0
           Top = 0
@@ -837,6 +838,10 @@ object FormMain: TFormMain
         Caption = 'TabSheetMyMusic'
         ImageIndex = 1
         TabVisible = False
+        ExplicitLeft = 0
+        ExplicitTop = 0
+        ExplicitWidth = 0
+        ExplicitHeight = 0
         object TableExMyMusic: TTableEx
           Left = 0
           Top = 0
@@ -953,6 +958,73 @@ object FormMain: TFormMain
         Caption = 'TabSheetFriends'
         ImageIndex = 3
         TabVisible = False
+        ExplicitLeft = 0
+        ExplicitTop = 0
+        ExplicitWidth = 0
+        ExplicitHeight = 0
+        object MemoLog: TMemo
+          Left = 0
+          Top = 0
+          Width = 663
+          Height = 306
+          Align = alClient
+          BorderStyle = bsNone
+          ScrollBars = ssBoth
+          TabOrder = 0
+        end
+        object TableExFriends: TTableEx
+          Left = 0
+          Top = 0
+          Width = 663
+          Height = 306
+          Align = alClient
+          BevelInner = bvNone
+          BorderStyle = bsNone
+          DefaultRowHeight = 54
+          TabOrder = 1
+          OnDrawCellData = TableExFriendsDrawCellData
+          ItemIndex = -1
+          OnItemClick = TableExFriendsItemClick
+          ProcEmpty = True
+          Columns = <
+            item
+              Caption = 'Album'
+              Width = 54
+              MinWidth = 54
+            end
+            item
+              Caption = #1053#1072#1079#1074#1072#1085#1080#1077
+              Width = 609
+            end>
+          DefaultDataDrawing = False
+          ItemCount = 1
+          LineColor = clWhite
+          LineColorXor = clWhite
+          LineHotColor = 16250098
+          LineSelColor = 15855081
+          FontHotLine.Charset = DEFAULT_CHARSET
+          FontHotLine.Color = 2631720
+          FontHotLine.Height = -11
+          FontHotLine.Name = 'Tahoma'
+          FontHotLine.Style = []
+          FontLine.Charset = DEFAULT_CHARSET
+          FontLine.Color = 2631720
+          FontLine.Height = -11
+          FontLine.Name = 'Tahoma'
+          FontLine.Style = []
+          FontSelLine.Charset = DEFAULT_CHARSET
+          FontSelLine.Color = 4210752
+          FontSelLine.Height = -11
+          FontSelLine.Name = 'Tahoma'
+          FontSelLine.Style = []
+          ShowColumns = False
+          ColumnsFont.Charset = DEFAULT_CHARSET
+          ColumnsFont.Color = 2631720
+          ColumnsFont.Height = -11
+          ColumnsFont.Name = 'Tahoma'
+          ColumnsFont.Style = []
+          SetFocusOnEnter = True
+        end
       end
     end
   end
@@ -965,14 +1037,15 @@ object FormMain: TFormMain
     BaseURL = 'https://api.vk.com/method'
     OnAuth = VKAuth
     OnLogin = VKLogin
+    OnLog = VKLog
     OnError = VKError
     OnErrorLogin = VKErrorLogin
     Left = 56
-    Top = 216
+    Top = 192
   end
   object SaveDialogMp3: TSaveDialog
     Left = 152
-    Top = 288
+    Top = 192
   end
   object TimerRefresh: TTimer
     Enabled = False
@@ -2062,14 +2135,14 @@ object FormMain: TFormMain
     Enabled = False
     Interval = 50
     OnTimer = TimerEquTimer
-    Left = 436
-    Top = 297
+    Left = 380
+    Top = 273
   end
   object TimerAnimate: TTimer
     Enabled = False
-    Interval = 10
+    Interval = 5
     OnTimer = TimerAnimateTimer
-    Left = 524
-    Top = 353
+    Left = 468
+    Top = 273
   end
 end
