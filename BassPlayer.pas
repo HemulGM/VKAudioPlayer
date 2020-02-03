@@ -45,7 +45,7 @@ type
     function Play: Boolean;
     procedure Stop;
     procedure Pause;
-    procedure Resume;
+    function Resume: Boolean;
     procedure SetStreamURL(AUrl: string);
     procedure SetStatusProc(AProc: TStatusProc);
     procedure SetBroadcastInfoProc(AProc: TBroadcastInfoProc);
@@ -166,11 +166,11 @@ begin
     Play;
 end;
 
-procedure TBASSPlayer.Resume;
+function TBASSPlayer.Resume: Boolean;
 begin
   FIsPlay := True;
   if FActiveChannel <> 0 then
-    BASS_ChannelPlay(FActiveChannel, False);
+    Result := BASS_ChannelPlay(FActiveChannel, False);
 end;
 
 procedure TBASSPlayer.SetPosition(const Value: Int64);
@@ -198,6 +198,7 @@ end;
 
 procedure TBASSPlayer.DoOnEnd(handle: HSYNC; channel, data: Cardinal; user: Pointer);
 begin
+  FIsPlay := False;
   if Assigned(FOnEnd) then
     FOnEnd(Self);
 end;

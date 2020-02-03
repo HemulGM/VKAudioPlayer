@@ -1,7 +1,5 @@
 program VKAudioPlayer;
 
-
-
 {$R *.dres}
 
 uses
@@ -24,7 +22,9 @@ begin
   ReportMemoryLeaksOnShutdown := True;
   {$ENDIF}
   Application.CreateForm(TFormMain, FormMain);
+  Application.ProcessMessages;
   FormMain.Show;
+  FormMain.Invalidate;
   FormMain.VK.Login;
   Application.Run;
 end.

@@ -7,14 +7,14 @@ uses
   Vcl.Controls, Vcl.Forms, Vcl.Dialogs, VK.API, VK.Components, HGM.Common.Settings, Vcl.Grids,
   HGM.Controls.VirtualTable, Vcl.ExtCtrls, BassPlayer, Vcl.StdCtrls, HGM.Button, Vcl.ComCtrls,
   HGM.Controls.PanelExt, System.ImageList, Vcl.ImgList, Vcl.Imaging.pngimage,
-  System.Generics.Collections, Vcl.Imaging.jpeg, VK.Entity.Playlist;
+  System.Generics.Collections, Vcl.Imaging.jpeg, VK.Entity.Playlist, VK.Entity.User;
 
 type
   TAudio = record
     Artist: string;
     Title: string;
     AlbumPhoto: string;
-    Image: TJpegImage;
+    Image: TPicture;
     Id: Integer;
     OwnerId: Integer;
     Url: string;
@@ -27,7 +27,7 @@ type
     Title: string;
     AlbumPhoto: string;
     Count: Integer;
-    Image: TJpegImage;
+    Image: TPicture;
     Id: Integer;
     OwnerId: Integer;
   end;
@@ -37,21 +37,23 @@ type
     LastName: string;
     Status: string;
     AlbumPhoto: string;
-    Image: TJpegImage;
+    Image: TPicture;
     Id: Integer;
     IsClosed: Boolean;
   end;
 
   TAlbumThumb = record
-    Image: TJpegImage;
+    Image: TPicture;
     URL: string;
-    class function CreateItem(AImage: TJpegImage; AUrl: string): TAlbumThumb; static;
+    class function CreateItem(AImage: TPicture; AUrl: string): TAlbumThumb; static;
   end;
 
   TAlbumThumbs = class(TList<TAlbumThumb>)
-    function GetImage(Url: string; var Default: Boolean): TJpegImage;
+    function GetImage(Url: string; var UseDefault: Boolean): TPicture;
     destructor Destroy; override;
   end;
+
+  TPlayRepeat = (prNone, prAll, prOne);
 
   TAudioList = TTableData<TAudio>;
 
@@ -111,6 +113,10 @@ type
     TableExCurrent: TTableEx;
     MemoLog: TMemo;
     TableExFriends: TTableEx;
+    ButtonFlatSearch: TButtonFlat;
+    TabSheetSearch: TTabSheet;
+    ButtonFlatShuffle: TButtonFlat;
+    ButtonFlatRepeat: TButtonFlat;
     procedure FormCreate(Sender: TObject);
     procedure TableExMyMusicItemClick(Sender: TObject; MouseButton: TMouseButton; const Index: Integer);
     procedure FormDestroy(Sender: TObject);
@@ -147,6 +153,7 @@ type
     procedure VKLog(Sender: TObject; const Value: string);
     procedure TableExFriendsDrawCellData(Sender: TObject; ACol, ARow: Integer; Rect: TRect; State: TGridDrawState);
     procedure TableExFriendsItemClick(Sender: TObject; MouseButton: TMouseButton; const Index: Integer);
+    procedure ButtonFlatRepeatClick(Sender: TObject);
   private
     FMouseInScale: Boolean;
     FMouseInButton: Boolean;
@@ -185,15 +192,16 @@ type
     FVkId: Integer;
     FActivePlaylist: Integer;
     FOpenning: Boolean;
+    FPlayRepeat: TPlayRepeat;
     procedure FOnAudioEnd(Sender: TObject);
     procedure LoadList;
-    function FindNext(CurrentId: Integer): Integer;
-    function FindPrev(CurrentId: Integer): Integer;
+    function FindNext(CurrentId: Integer; Handle: Boolean): Integer;
+    function FindPrev(CurrentId: Integer; Handle: Boolean): Integer;
     function Play(Index: Integer): Boolean;
     procedure ClearInfo;
     procedure SetInfo(Audio: TAudio);
-    procedure PlayNext;
-    procedure PlayPrev;
+    procedure PlayNext(Handle: Boolean);
+    procedure PlayPrev(Handle: Boolean);
     procedure RunAlbumPicWorker;
     procedure Await;
     procedure FAfterLoading;
@@ -206,7 +214,7 @@ type
     procedure OpenMyMusic;
     procedure LoadPlaylists;
     procedure FillCurrentFromMyMusic;
-    procedure UpdateImages(Url: string; Image: TJpegImage);
+    procedure UpdateImages(Url: string; Image: TPicture);
     procedure FillCurrentFromPlaylist(Index: Integer);
     procedure LoadPlaylist(OwnerId, Id: Integer);
     procedure FAfterLoadingPlaylist;
@@ -215,6 +223,9 @@ type
     procedure LoadFriends;
     procedure FAfterLoadingFriends;
     procedure RunFriendsPicWorker;
+    procedure SetCurrentUser(User: TVkUser);
+    procedure NextRepeat;
+    procedure SetRepeat(Value: TPlayRepeat);
   public
     { Public declarations }
   end;
@@ -225,7 +236,7 @@ var
 implementation
 
 uses
-  VK.Entity.Audio, VK.Audio, VK.Entity.User, HGM.Common.Utils, Direct2D, D2D1, Math, VK.OAuth2;
+  VK.Entity.Audio, VK.Audio, HGM.Common.Utils, Direct2D, D2D1, Math, VK.OAuth2;
 
 {$R *.dfm}
 
@@ -366,7 +377,7 @@ begin
   TableExCurrent.Enabled := True;
   Play(0);
   LabelAudioCount.Caption := 'Аудиозаписей: ' + FCurrentList.Count.ToString;
-  RunPlaylistPicWorker
+  RunPlaylistPicWorker;
 end;
 
 procedure TFormMain.LoadPlaylists;
@@ -490,13 +501,13 @@ begin
         FLoadingMusic := False;
       end;
     end).Start;
+  TableExMyMusic.Repaint;
 end;
 
 procedure TFormMain.FAfterLoading;
 begin
   TableExMyMusic.Enabled := True;
   RunAlbumPicWorker;
-  FillCurrentFromMyMusic;
 end;
 
 procedure TFormMain.TableExCurrentDrawCellData(Sender: TObject; ACol, ARow: Integer; Rect: TRect;
@@ -507,14 +518,14 @@ var
 begin
   with TableExCurrent.Canvas do
   begin
-    if not FCurrentList.IndexIn(ARow) then
+    if (not FCurrentList.IndexIn(ARow)) or (FCurrentList.IsUpdate) then
     begin
       if ACol = 1 then
       begin
         TxtRect := Rect;
         TxtRect.Left := 0;
         TxtRect.Inflate(-4, -4);
-        S := 'Загрузка...';
+        S := 'Нет аудио';
         Font.Style := [];
         TextRect(TxtRect, S, [tfSingleLine, tfVerticalCenter, tfCenter]);
       end;
@@ -525,9 +536,9 @@ begin
         begin
           Rect.Inflate(-7, -7);
           if Assigned(FCurrentList[ARow].Image) then
-            StretchDraw(Rect, FCurrentList[ARow].Image)
+            StretchDraw(Rect, FCurrentList[ARow].Image.Graphic)
           else
-            StretchDraw(Rect, FAlbumThumbs[0].Image);
+            StretchDraw(Rect, FAlbumThumbs[0].Image.Graphic);
 
           if FCurrentList[ARow].Id = FPlayingId then
           begin
@@ -601,7 +612,7 @@ end;
 procedure TFormMain.TableExCurrentItemClick(Sender: TObject; MouseButton: TMouseButton; const Index: Integer);
 begin
   if not Play(Index) then
-    PlayNext;
+    PlayNext(True);
 end;
 
 procedure TFormMain.TableExFriendsDrawCellData(Sender: TObject; ACol, ARow: Integer; Rect: TRect;
@@ -612,7 +623,7 @@ var
 begin
   with TableExFriends.Canvas do
   begin
-    if not FFriends.IndexIn(ARow) then
+    if (not FFriends.IndexIn(ARow)) or (FFriends.IsUpdate) then
     begin
       if ACol = 1 then
       begin
@@ -630,9 +641,9 @@ begin
         begin
           Rect.Inflate(-7, -7);
           if Assigned(FFriends[ARow].Image) then
-            StretchDraw(Rect, FFriends[ARow].Image)
+            StretchDraw(Rect, FFriends[ARow].Image.Graphic)
           else
-            StretchDraw(Rect, FAlbumThumbs[0].Image);
+            StretchDraw(Rect, FAlbumThumbs[0].Image.Graphic);
         end;
       1:
         begin
@@ -658,23 +669,37 @@ begin
   end;
 end;
 
+procedure TFormMain.SetCurrentUser(User: TVkUser);
+begin
+  Caption := 'VK Audio Player [' + User.GetFullName + ']';
+end;
+
 procedure TFormMain.TableExFriendsItemClick(Sender: TObject; MouseButton: TMouseButton; const Index: Integer);
 var
   Params: TVkAudioParams;
   Audios: TVkAudios;
+  User: TVkUser;
 begin
   if not FFriends.IndexIn(Index) then
     Exit;
   FVkId := FFriends[Index].Id;
+  if VK.Users.Get(User, FVkId) then
+  begin
+    SetCurrentUser(User);
+    User.Free;
+  end;
   Params.OwnerId(FVkId);
   Params.Count(1);
   if VK.Audio.Get(Audios, Params) then
   begin
-    Audios[0].Free;
+    if Length(Audios) > 0 then
+      Audios[0].Free
+    else
+      ShowMessage('У выбранного пользователя нет музыки');
     ReloadItems;
   end
   else
-    ShowMessage('Музыка закрыта или её нет');
+    ShowMessage('Музыка закрыта');
 end;
 
 procedure TFormMain.TableExMyMusicDrawCellData(Sender: TObject; ACol, ARow: Integer; Rect: TRect;
@@ -685,14 +710,17 @@ var
 begin
   with TableExMyMusic.Canvas do
   begin
-    if not FMyMusic.IndexIn(ARow) then
+    if (not FMyMusic.IndexIn(ARow)) or (FMyMusic.IsUpdate) then
     begin
       if ACol = 1 then
       begin
         TxtRect := Rect;
         TxtRect.Left := 0;
         TxtRect.Inflate(-4, -4);
-        S := 'Загрузка...';
+        if FLoadingMusic then
+          S := 'Загрузка...'
+        else
+          S := 'Нет аудио';
         Font.Style := [];
         TextRect(TxtRect, S, [tfSingleLine, tfVerticalCenter, tfCenter]);
       end;
@@ -703,9 +731,9 @@ begin
         begin
           Rect.Inflate(-7, -7);
           if Assigned(FMyMusic[ARow].Image) then
-            StretchDraw(Rect, FMyMusic[ARow].Image)
+            StretchDraw(Rect, FMyMusic[ARow].Image.Graphic)
           else
-            StretchDraw(Rect, FAlbumThumbs[0].Image);
+            StretchDraw(Rect, FAlbumThumbs[0].Image.Graphic);
           if FMyMusic[ARow].Id = FPlayingId then
           begin
             if TableExMyMusic.ItemUnderMouse = ARow then
@@ -787,7 +815,7 @@ begin
   LoadPlaylist(FPlaylists[Index].OwnerId, FPlaylists[Index].Id);
 end;
 
-function TFormMain.FindNext(CurrentId: Integer): Integer;
+function TFormMain.FindNext(CurrentId: Integer; Handle: Boolean): Integer;
 var
   i: Integer;
 begin
@@ -796,16 +824,26 @@ begin
   begin
     if FCurrentList[i].Id = CurrentId then
     begin
-      if i < FCurrentList.Count then
-        Result := i + 1
+      if Handle or (FPlayRepeat = prAll) then
+      begin
+        if i < (FCurrentList.Count - 1) then
+          Result := i + 1
+        else
+          Result := 0;
+      end
       else
-        Result := 0;
+        case FPlayRepeat of
+          prNone:
+            Result := -1;
+          prOne:
+            Result := i;
+        end;
       Exit;
     end;
   end;
 end;
 
-function TFormMain.FindPrev(CurrentId: Integer): Integer;
+function TFormMain.FindPrev(CurrentId: Integer; Handle: Boolean): Integer;
 var
   i: Integer;
 begin
@@ -814,10 +852,20 @@ begin
   begin
     if FCurrentList[i].Id = CurrentId then
     begin
-      if i > 0 then
-        Result := i - 1
+      if Handle or (FPlayRepeat = prAll) then
+      begin
+        if i > 0 then
+          Result := i - 1
+        else
+          Result := FCurrentList.Count - 1;
+      end
       else
-        Result := FCurrentList.Count - 1;
+        case FPlayRepeat of
+          prNone:
+            Result := -1;
+          prOne:
+            Result := i;
+        end;
       Exit;
     end;
   end;
@@ -851,8 +899,8 @@ begin
     begin
       if FPlayer.IsPlay then
         FPlayer.Pause
-      else
-        FPlayer.Resume;
+      else if not FPlayer.Resume then
+        FPlayer.Play;
       FOpenning := False;
       Exit(True);
     end;
@@ -896,7 +944,7 @@ end;
 
 procedure TFormMain.ButtonFlatNextClick(Sender: TObject);
 begin
-  PlayNext;
+  PlayNext(True);
 end;
 
 procedure TFormMain.ButtonFlatPlayPauseClick(Sender: TObject);
@@ -911,7 +959,37 @@ end;
 
 procedure TFormMain.ButtonFlatPrevClick(Sender: TObject);
 begin
-  PlayPrev;
+  PlayPrev(True);
+end;
+
+procedure TFormMain.ButtonFlatRepeatClick(Sender: TObject);
+begin
+  NextRepeat;
+end;
+
+procedure TFormMain.NextRepeat;
+begin
+  case FPlayRepeat of
+    prNone:
+      SetRepeat(prAll);
+    prAll:
+      SetRepeat(prOne);
+    prOne:
+      SetRepeat(prNone);
+  end;
+end;
+
+procedure TFormMain.SetRepeat(Value: TPlayRepeat);
+begin
+  FPlayRepeat := Value;
+  case Value of
+    prNone:
+      ButtonFlatRepeat.ImageIndex := 6;
+    prAll:
+      ButtonFlatRepeat.ImageIndex := 9;
+    prOne:
+      ButtonFlatRepeat.ImageIndex := 10;
+  end;
 end;
 
 procedure TFormMain.ButtonFlatCurrentClick(Sender: TObject);
@@ -1009,7 +1087,7 @@ procedure TFormMain.TableExMyMusicItemClick(Sender: TObject; MouseButton: TMouse
 begin
   FillCurrentFromMyMusic;
   if not Play(Index) then
-    PlayNext;
+    PlayNext(True);
 end;
 
 procedure TFormMain.TableExPlaylistsDrawCellData(Sender: TObject; ACol, ARow: Integer; Rect: TRect;
@@ -1020,7 +1098,7 @@ var
 begin
   with TableExPlaylists.Canvas do
   begin
-    if not FPlaylists.IndexIn(ARow) then
+    if (not FPlaylists.IndexIn(ARow)) or (FPlaylists.IsUpdate) then
     begin
       if ACol = 1 then
       begin
@@ -1041,9 +1119,9 @@ begin
         begin
           Rect.Inflate(-7, -7);
           if Assigned(FPlaylists[ARow].Image) then
-            StretchDraw(Rect, FPlaylists[ARow].Image)
+            StretchDraw(Rect, FPlaylists[ARow].Image.Graphic)
           else
-            StretchDraw(Rect, FAlbumThumbs[0].Image);
+            StretchDraw(Rect, FAlbumThumbs[0].Image.Graphic);
           if FPlaylists[ARow].Id = FActivePlaylist then
           begin
 
@@ -1337,10 +1415,10 @@ var
 begin
   if FOpenning then
     Exit;
-  Nxt := FindNext(FPlayingId);
+  Nxt := FindNext(FPlayingId, Handle);
   if FCurrentList.IndexIn(Nxt) then
     if not Play(Nxt) then
-      PlayNext;
+      PlayNext(Handle);
 end;
 
 procedure TFormMain.PlayPrev;
@@ -1349,10 +1427,10 @@ var
 begin
   if FOpenning then
     Exit;
-  Nxt := FindPrev(FPlayingId);
+  Nxt := FindPrev(FPlayingId, Handle);
   if FCurrentList.IndexIn(Nxt) then
     if not Play(Nxt) then
-      PlayPrev;
+      PlayPrev(Handle);
 end;
 
 procedure TFormMain.UpdateImages;
@@ -1502,7 +1580,7 @@ end;
 
 procedure TFormMain.FOnAudioEnd(Sender: TObject);
 begin
-  PlayNext;
+  PlayNext(False);
 end;
 
 procedure TFormMain.FormCloseQuery(Sender: TObject; var CanClose: Boolean);
@@ -1521,6 +1599,7 @@ var
 begin
   FPlayingId := -1;
   FOpenning := False;
+  FLoadingPlaylists := False;
   FShowLeftTime := False;
   FDoStopThreads := False;
   FDoStopMusicWorkerThread := False;
@@ -1533,7 +1612,7 @@ begin
   FActiveImage := TPngImage.Create;
   FActiveImage.LoadFromResourceName(HInstance, 'active');
   Stream := TResourceStream.Create(HInstance, 'blank', RT_RCDATA);
-  i := FAlbumThumbs.Add(TAlbumThumb.CreateItem(TJpegImage.Create, ''));
+  i := FAlbumThumbs.Add(TAlbumThumb.CreateItem(TPicture.Create, ''));
   FAlbumThumbs[i].Image.LoadFromStream(Stream);
   Stream.Free;
 
@@ -1553,11 +1632,22 @@ begin
   end;
   FPlayer.OnEnd := FOnAudioEnd;
   FPlayer.Init(Handle);
+  for i := 0 to PageControl.PageCount - 1 do
+    PageControl.Pages[i].TabVisible := False;
+
   ImageListL.AddImages(ImageList);
+  ColorImages(ImageList, 6, $00ACA09A);
+  ColorImages(ImageList, 7, $00ACA09A);
+  ColorImages(ImageList, 8, $00ACA09A);
   for i := 0 to ImageListL.Count - 1 do
     ColorImages(ImageListL, i, ColorLighter($00B58251, 20));
+
+  ColorImages(ImageListL, 6, ColorLighter($00ACA09A, 20));
+  ColorImages(ImageListL, 7, ColorLighter($00ACA09A, 20));
+  ColorImages(ImageListL, 8, ColorLighter($00ACA09A, 20));
   ClearInfo;
   ButtonFlatMyClick(ButtonFlatMy);
+  SetRepeat(prNone);
   TimerEqu.Enabled := True;
 end;
 
@@ -1604,9 +1694,7 @@ begin
             VK.Login;
           end);
       end).Start;
-  end
-  else
-    ShowMessage(Text);
+  end;
 end;
 
 procedure TFormMain.VKErrorLogin(Sender: TObject; E: Exception; Code: Integer; Text: string);
@@ -1633,11 +1721,11 @@ var
 begin
   FToken := VK.Token;
   FSettings.SetStr('General', 'Token', FToken);
+
   if VK.Users.Get(User) then
   begin
     FVkId := User.id;
-    //FVkId := 295621104;
-    Caption := 'VK Audio Player [' + User.FirstName + ']';
+    SetCurrentUser(User);
     User.Free;
     ReloadItems;
     LoadFriends;
@@ -1648,7 +1736,7 @@ end;
 
 { TAlbumThumb }
 
-class function TAlbumThumb.CreateItem(AImage: TJpegImage; AUrl: string): TAlbumThumb;
+class function TAlbumThumb.CreateItem(AImage: TPicture; AUrl: string): TAlbumThumb;
 begin
   Result.Image := AImage;
   Result.URL := AUrl;
@@ -1668,35 +1756,41 @@ begin
   inherited;
 end;
 
-function TAlbumThumbs.GetImage(Url: string; var Default: Boolean): TJpegImage;
+function TAlbumThumbs.GetImage(Url: string; var UseDefault: Boolean): TPicture;
 var
   i: Integer;
   Mem: TMemoryStream;
   Item: TAlbumThumb;
 begin
-  Default := True;
+  UseDefault := True;
   for i := 0 to Count - 1 do
   begin
-    Default := i = 0;
+    UseDefault := i = 0;
     if Items[i].Url = Url then
-      Exit(Items[i].Image);
+    begin
+      if Assigned(Items[i].Image) then
+        Exit(Items[i].Image)
+      else
+        Exit(Items[0].Image);
+    end;
   end;
   Mem := DownloadURL(Url);
   if Mem.Size > 0 then
   begin
-    Item.Image := TJpegImage.Create;
+    Item.Image := TPicture.Create;
     try
       Item.Image.LoadFromStream(Mem);
-      Default := False;
+      UseDefault := False;
     except
-      begin
-        Item.Image.Free;
-        Item.Image := Items[0].Image;
-      end;
+      Item.Image.Free;
+      Item.Image := nil;
     end;
     Item.URL := Url;
     i := Add(Item);
-    Result := Items[i].Image;
+    if Assigned(Item.Image) then
+      Result := Items[i].Image
+    else
+      Result := Items[0].Image;
   end
   else
     Result := Items[0].Image;
