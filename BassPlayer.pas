@@ -29,6 +29,9 @@ type
     function GetSizeAsBuffer: Int64;
     function GetPositionTime: string;
     function GetPositionTimeLeft: string;
+    function GetPositionByte: Int64;
+    procedure SetPositionByte(const Value: Int64);
+    function GetSizeByte: Int64;
   public
     FStreamURL: string;
     FActiveChannel: HSTREAM;
@@ -55,12 +58,14 @@ type
     function Init(Handle: THandle): Boolean;
     property LastErrorCode: Integer read GetLastErrorCode;
     property Position: Int64 read GetPosition write SetPosition;
+    property PositionByte: Int64 read GetPositionByte write SetPositionByte;
     property PositionPercent: Extended read GetPositionPercent write SetPositionPercent;
     property PositionTime: string read GetPositionTime;
     property PositionTimeLeft: string read GetPositionTimeLeft;
     property Bufferring: Int64 read GetBufferring;
     property BufferringPercent: Extended read GetBufferringPercent;
     property Size: Int64 read GetSize;
+    property SizeByte: Int64 read GetSizeByte;
     property SizeAsBuffer: Int64 read GetSizeAsBuffer;
     property IsPlay: Boolean read FIsPlay;
     property OnEnd: TAudioEnd read FOnEnd write SetOnEnd;
@@ -179,6 +184,12 @@ begin
     BASS_ChannelSetPosition(FActiveChannel, BASS_ChannelSeconds2Bytes(FActiveChannel, Value), BASS_POS_BYTE);
 end;
 
+procedure TBASSPlayer.SetPositionByte(const Value: Int64);
+begin
+  if FActiveChannel <> 0 then
+    BASS_ChannelSetPosition(FActiveChannel, Value, BASS_POS_BYTE);
+end;
+
 procedure TBASSPlayer.SetPositionPercent(const Value: Extended);
 begin
   SetPosition(Round((GetSize / 100) * Value));
@@ -211,9 +222,17 @@ begin
     Result := 0;
 end;
 
+function TBASSPlayer.GetPositionByte: Int64;
+begin
+  if FActiveChannel <> 0 then
+    Result := BASS_ChannelGetPosition(FActiveChannel, BASS_POS_BYTE)
+  else
+    Result := 0;
+end;
+
 function TBASSPlayer.GetPositionPercent: Extended;
 begin
-  Result := Min(Max(0, (100 / Size) * Position), 100);
+  Result := Min(Max(0, (100 / SizeByte) * PositionByte), 100);
 end;
 
 function TBASSPlayer.GetPositionTime: string;
@@ -247,6 +266,14 @@ end;
 function TBASSPlayer.GetSizeAsBuffer: Int64;
 begin
   Result := BASS_StreamGetFilePosition(FActiveChannel, BASS_FILEPOS_END);
+end;
+
+function TBASSPlayer.GetSizeByte: Int64;
+begin
+  if FActiveChannel <> 0 then
+    Result := BASS_ChannelGetLength(FActiveChannel, BASS_POS_BYTE)
+  else
+    Result := 0;
 end;
 
 function TBASSPlayer.GetBufferring: Int64;

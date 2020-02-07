@@ -25,6 +25,7 @@ begin
   Application.ProcessMessages;
   FormMain.Show;
   FormMain.Invalidate;
+  Application.ProcessMessages;
   FormMain.VK.Login;
   Application.Run;
 end.

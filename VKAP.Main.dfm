@@ -3,7 +3,7 @@ object FormMain: TFormMain
   Top = 0
   Caption = 'VK Audio Player'
   ClientHeight = 519
-  ClientWidth = 693
+  ClientWidth = 777
   Color = clWhite
   DoubleBuffered = True
   Font.Charset = DEFAULT_CHARSET
@@ -20,7 +20,7 @@ object FormMain: TFormMain
   object Shape1: TShape
     Left = 0
     Top = 56
-    Width = 693
+    Width = 777
     Height = 1
     Align = alTop
     Brush.Color = 15395049
@@ -32,7 +32,7 @@ object FormMain: TFormMain
   object PanelPlayer: TPanel
     Left = 0
     Top = 0
-    Width = 693
+    Width = 777
     Height = 56
     Align = alTop
     BevelOuter = bvNone
@@ -194,10 +194,11 @@ object FormMain: TFormMain
       SubTextFont.Style = []
     end
     object ButtonFlatDownload: TButtonFlat
-      Left = 652
+      Left = 736
       Top = 0
       Width = 41
       Height = 56
+      Hint = #1057#1086#1093#1088#1072#1085#1080#1090#1100' '#1085#1072' '#1076#1080#1089#1082'...'
       Align = alRight
       Caption = ''
       ColorNormal = 14668740
@@ -239,7 +240,7 @@ object FormMain: TFormMain
       AlignWithMargins = True
       Left = 148
       Top = 3
-      Width = 431
+      Width = 515
       Height = 50
       Margins.Left = 0
       Align = alClient
@@ -248,7 +249,7 @@ object FormMain: TFormMain
       object DrawPanel1: TDrawPanel
         Left = 0
         Top = 39
-        Width = 431
+        Width = 515
         Height = 11
         DefaultPaint = False
         OnMouseEnter = DrawPanel1MouseEnter
@@ -265,7 +266,7 @@ object FormMain: TFormMain
       object PanelTrackSinger: TPanel
         Left = 0
         Top = 0
-        Width = 383
+        Width = 467
         Height = 39
         Align = alClient
         BevelOuter = bvNone
@@ -274,7 +275,7 @@ object FormMain: TFormMain
           AlignWithMargins = True
           Left = 5
           Top = 0
-          Width = 373
+          Width = 457
           Height = 17
           Margins.Left = 5
           Margins.Top = 0
@@ -296,7 +297,7 @@ object FormMain: TFormMain
           AlignWithMargins = True
           Left = 5
           Top = 18
-          Width = 373
+          Width = 457
           Height = 17
           Margins.Left = 5
           Margins.Top = 0
@@ -316,7 +317,7 @@ object FormMain: TFormMain
         end
       end
       object PanelTrackTime: TPanel
-        Left = 383
+        Left = 467
         Top = 0
         Width = 48
         Height = 39
@@ -348,10 +349,11 @@ object FormMain: TFormMain
       end
     end
     object ButtonFlatShuffle: TButtonFlat
-      Left = 582
+      Left = 666
       Top = 0
       Width = 35
       Height = 56
+      Hint = #1055#1077#1088#1077#1084#1077#1096#1072#1090#1100
       Align = alRight
       Caption = ''
       ColorNormal = 14668740
@@ -378,6 +380,7 @@ object FormMain: TFormMain
       Images = ImageList
       ImagesOver = ImageListL
       Transparent = True
+      OnClick = ButtonFlatShuffleClick
       RoundRectParam = 0
       ShowFocusRect = False
       TabOrder = 5
@@ -390,10 +393,11 @@ object FormMain: TFormMain
       SubTextFont.Style = []
     end
     object ButtonFlatRepeat: TButtonFlat
-      Left = 617
+      Left = 701
       Top = 0
       Width = 35
       Height = 56
+      Hint = #1055#1086#1074#1090#1086#1088#1103#1090#1100
       Align = alRight
       Caption = ''
       ColorNormal = 14668740
@@ -437,7 +441,7 @@ object FormMain: TFormMain
     AlignWithMargins = True
     Left = 20
     Top = 57
-    Width = 673
+    Width = 757
     Height = 462
     Margins.Left = 20
     Margins.Top = 0
@@ -452,7 +456,7 @@ object FormMain: TFormMain
       AlignWithMargins = True
       Left = 0
       Top = 427
-      Width = 653
+      Width = 737
       Height = 35
       Margins.Left = 0
       Margins.Top = 0
@@ -484,7 +488,7 @@ object FormMain: TFormMain
       object Shape2: TShape
         Left = 0
         Top = 0
-        Width = 653
+        Width = 737
         Height = 1
         Align = alTop
         Brush.Color = 15460326
@@ -497,7 +501,7 @@ object FormMain: TFormMain
       AlignWithMargins = True
       Left = 0
       Top = 0
-      Width = 653
+      Width = 737
       Height = 111
       Margins.Left = 0
       Margins.Top = 0
@@ -511,7 +515,7 @@ object FormMain: TFormMain
       object Shape3: TShape
         Left = 0
         Top = 110
-        Width = 653
+        Width = 737
         Height = 1
         Align = alBottom
         Brush.Color = 15460326
@@ -522,7 +526,7 @@ object FormMain: TFormMain
       object PanelPageControl: TPanel
         Left = 0
         Top = 65
-        Width = 653
+        Width = 737
         Height = 45
         Align = alBottom
         BevelOuter = bvNone
@@ -530,7 +534,7 @@ object FormMain: TFormMain
         object PanelPageInd: TPanel
           Left = 0
           Top = 43
-          Width = 653
+          Width = 737
           Height = 2
           Align = alBottom
           BevelOuter = bvNone
@@ -738,7 +742,7 @@ object FormMain: TFormMain
           SubTextFont.Name = 'Tahoma'
           SubTextFont.Style = []
         end
-        object ButtonFlatSearch: TButtonFlat
+        object ButtonFlatSearchTab: TButtonFlat
           AlignWithMargins = True
           Left = 389
           Top = 0
@@ -769,7 +773,7 @@ object FormMain: TFormMain
           FontDown.Style = []
           IgnorBounds = True
           ImageIndentLeft = 0
-          OnClick = ButtonFlatFriendsClick
+          OnClick = ButtonFlatSearchTabClick
           OnMouseEnter = ButtonFlatMyMouseEnter
           OnMouseLeave = ButtonFlatMyMouseLeave
           RoundRectParam = 3
@@ -789,18 +793,18 @@ object FormMain: TFormMain
       object PanelSearch: TPanel
         Left = 0
         Top = 0
-        Width = 653
+        Width = 737
         Height = 65
         Align = alClient
         BevelOuter = bvNone
         TabOrder = 1
         DesignSize = (
-          653
+          737
           65)
         object ButtonFlat1: TButtonFlat
           Left = 0
           Top = 18
-          Width = 678
+          Width = 762
           Height = 36
           Anchors = [akLeft, akTop, akRight]
           Caption = ''
@@ -837,10 +841,10 @@ object FormMain: TFormMain
           SubTextFont.Name = 'Tahoma'
           SubTextFont.Style = []
         end
-        object Edit1: TEdit
+        object EditSearch: TEdit
           Left = 15
           Top = 19
-          Width = 569
+          Width = 653
           Height = 33
           Anchors = [akLeft, akTop, akRight]
           AutoSize = False
@@ -852,8 +856,8 @@ object FormMain: TFormMain
           TabOrder = 0
           TextHint = #1055#1086#1080#1089#1082' '#1084#1091#1079#1099#1082#1080
         end
-        object ButtonFlat2: TButtonFlat
-          Left = 593
+        object ButtonFlatSearch: TButtonFlat
+          Left = 677
           Top = 18
           Width = 60
           Height = 36
@@ -883,6 +887,7 @@ object FormMain: TFormMain
           ImageIndentLeft = 15
           ImageIndex = 5
           Images = ImageList
+          OnClick = ButtonFlatSearchClick
           RoundRectParam = 3
           Shape = stRoundRect
           ShowFocusRect = False
@@ -900,9 +905,9 @@ object FormMain: TFormMain
     object PageControl: TPageControl
       Left = 0
       Top = 111
-      Width = 673
+      Width = 757
       Height = 316
-      ActivePage = TabSheetPlaylists
+      ActivePage = TabSheetFriends
       Align = alClient
       Style = tsButtons
       TabOrder = 2
@@ -911,7 +916,7 @@ object FormMain: TFormMain
         object TableExCurrent: TTableEx
           Left = 0
           Top = 0
-          Width = 665
+          Width = 749
           Height = 281
           Align = alClient
           BevelInner = bvNone
@@ -930,7 +935,7 @@ object FormMain: TFormMain
             end
             item
               Caption = #1053#1072#1079#1074#1072#1085#1080#1077
-              Width = 584
+              Width = 668
             end>
           DefaultDataDrawing = False
           ItemCount = 1
@@ -968,7 +973,7 @@ object FormMain: TFormMain
         object TableExMyMusic: TTableEx
           Left = 0
           Top = 0
-          Width = 665
+          Width = 749
           Height = 281
           Align = alClient
           BevelInner = bvNone
@@ -987,7 +992,7 @@ object FormMain: TFormMain
             end
             item
               Caption = #1053#1072#1079#1074#1072#1085#1080#1077
-              Width = 584
+              Width = 668
             end>
           DefaultDataDrawing = False
           ItemCount = 1
@@ -1025,7 +1030,7 @@ object FormMain: TFormMain
         object TableExPlaylists: TTableEx
           Left = 0
           Top = 0
-          Width = 665
+          Width = 749
           Height = 281
           Align = alClient
           BevelInner = bvNone
@@ -1044,7 +1049,7 @@ object FormMain: TFormMain
             end
             item
               Caption = #1053#1072#1079#1074#1072#1085#1080#1077
-              Width = 611
+              Width = 668
             end>
           DefaultDataDrawing = False
           ItemCount = 1
@@ -1082,7 +1087,7 @@ object FormMain: TFormMain
         object MemoLog: TMemo
           Left = 0
           Top = 0
-          Width = 665
+          Width = 749
           Height = 281
           Align = alClient
           BorderStyle = bsNone
@@ -1092,7 +1097,7 @@ object FormMain: TFormMain
         object TableExFriends: TTableEx
           Left = 0
           Top = 0
-          Width = 665
+          Width = 749
           Height = 281
           Align = alClient
           BevelInner = bvNone
@@ -1111,7 +1116,7 @@ object FormMain: TFormMain
             end
             item
               Caption = #1053#1072#1079#1074#1072#1085#1080#1077
-              Width = 584
+              Width = 695
             end>
           DefaultDataDrawing = False
           ItemCount = 1
@@ -1146,6 +1151,59 @@ object FormMain: TFormMain
       object TabSheetSearch: TTabSheet
         Caption = #1055#1086#1080#1089#1082
         ImageIndex = 4
+        object TableExSearch: TTableEx
+          Left = 0
+          Top = 0
+          Width = 749
+          Height = 281
+          Align = alClient
+          BevelInner = bvNone
+          BorderStyle = bsNone
+          DefaultRowHeight = 54
+          TabOrder = 0
+          OnDrawCellData = TableExSearchDrawCellData
+          ItemIndex = -1
+          OnItemClick = TableExSearchItemClick
+          ProcEmpty = True
+          Columns = <
+            item
+              Caption = 'Album'
+              Width = 54
+              MinWidth = 54
+            end
+            item
+              Caption = #1053#1072#1079#1074#1072#1085#1080#1077
+              Width = 668
+            end>
+          DefaultDataDrawing = False
+          ItemCount = 1
+          LineColor = clWhite
+          LineColorXor = clWhite
+          LineHotColor = 16250098
+          LineSelColor = 15855081
+          FontHotLine.Charset = DEFAULT_CHARSET
+          FontHotLine.Color = 2631720
+          FontHotLine.Height = -11
+          FontHotLine.Name = 'Tahoma'
+          FontHotLine.Style = []
+          FontLine.Charset = DEFAULT_CHARSET
+          FontLine.Color = 2631720
+          FontLine.Height = -11
+          FontLine.Name = 'Tahoma'
+          FontLine.Style = []
+          FontSelLine.Charset = DEFAULT_CHARSET
+          FontSelLine.Color = 4210752
+          FontSelLine.Height = -11
+          FontSelLine.Name = 'Tahoma'
+          FontSelLine.Style = []
+          ShowColumns = False
+          ColumnsFont.Charset = DEFAULT_CHARSET
+          ColumnsFont.Color = 2631720
+          ColumnsFont.Height = -11
+          ColumnsFont.Name = 'Tahoma'
+          ColumnsFont.Style = []
+          SetFocusOnEnter = True
+        end
       end
     end
   end
