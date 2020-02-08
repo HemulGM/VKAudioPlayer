@@ -114,7 +114,8 @@ begin
   if BASS_Init(-1, 44100, 0, Handle, nil) then
   begin
     BASS_PluginLoad(PChar(BASS_FOLDER + 'libbass.dll'), 0 or BASS_UNICODE);
-    BASS_SetConfig(BASS_CONFIG_NET_PREBUF, 0);
+    BASS_SetConfig(BASS_CONFIG_NET_PREBUF, 1000);
+    BASS_SetConfig(BASS_CONFIG_BUFFER, 5000);
     BASS_SetConfig(BASS_CONFIG_VERIFY, 1024 * 1024);
     Result := True;
   end
@@ -173,9 +174,11 @@ end;
 
 function TBASSPlayer.Resume: Boolean;
 begin
-  FIsPlay := True;
+  Result := False;
   if FActiveChannel <> 0 then
     Result := BASS_ChannelPlay(FActiveChannel, False);
+  if Result then
+    FIsPlay := True;
 end;
 
 procedure TBASSPlayer.SetPosition(const Value: Int64);

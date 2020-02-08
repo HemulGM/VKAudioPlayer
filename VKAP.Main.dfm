@@ -63,6 +63,8 @@ object FormMain: TFormMain
         A2ADC593B7DF05366BD004F5E5F97C4CA4696BF1CE8BAFCEDC798B2C02AC0D53
         9C95C8AB9A48B01892B86E3DFB0C6CEE0043585694C75245806C5B49B098EA60
         D4E2518B472D1EFA160300B5E2ED6C3B3604E00000000049454E44AE426082}
+      Proportional = True
+      Stretch = True
     end
     object ButtonFlatPlayPause: TButtonFlat
       Left = 0
@@ -246,18 +248,18 @@ object FormMain: TFormMain
       Align = alClient
       BevelOuter = bvNone
       TabOrder = 4
-      object DrawPanel1: TDrawPanel
+      object DrawPanelTrackBar: TDrawPanel
         Left = 0
         Top = 39
         Width = 515
         Height = 11
         DefaultPaint = False
-        OnMouseEnter = DrawPanel1MouseEnter
-        OnMouseLeave = DrawPanel1MouseLeave
-        OnMouseDown = DrawPanel1MouseDown
-        OnMouseMove = DrawPanel1MouseMove
-        OnMouseUp = DrawPanel1MouseUp
-        OnPaint = DrawPanel1Paint
+        OnMouseEnter = DrawPanelTrackBarMouseEnter
+        OnMouseLeave = DrawPanelTrackBarMouseLeave
+        OnMouseDown = DrawPanelTrackBarMouseDown
+        OnMouseMove = DrawPanelTrackBarMouseMove
+        OnMouseUp = DrawPanelTrackBarMouseUp
+        OnPaint = DrawPanelTrackBarPaint
         Align = alBottom
         Color = clSilver
         ParentBackground = False
@@ -802,9 +804,9 @@ object FormMain: TFormMain
           737
           65)
         object ButtonFlat1: TButtonFlat
-          Left = 0
+          Left = 4
           Top = 18
-          Width = 762
+          Width = 733
           Height = 36
           Anchors = [akLeft, akTop, akRight]
           Caption = ''
@@ -907,7 +909,7 @@ object FormMain: TFormMain
       Top = 111
       Width = 757
       Height = 316
-      ActivePage = TabSheetFriends
+      ActivePage = TabSheetCurrent
       Align = alClient
       Style = tsButtons
       TabOrder = 2
@@ -915,9 +917,9 @@ object FormMain: TFormMain
         Caption = #1058#1077#1082#1091#1097#1080#1081
         object TableExCurrent: TTableEx
           Left = 0
-          Top = 0
+          Top = 41
           Width = 749
-          Height = 281
+          Height = 240
           Align = alClient
           BevelInner = bvNone
           BorderStyle = bsNone
@@ -935,7 +937,7 @@ object FormMain: TFormMain
             end
             item
               Caption = #1053#1072#1079#1074#1072#1085#1080#1077
-              Width = 668
+              Width = 695
             end>
           DefaultDataDrawing = False
           ItemCount = 1
@@ -966,6 +968,118 @@ object FormMain: TFormMain
           ColumnsFont.Style = []
           SetFocusOnEnter = True
         end
+        object Panel1: TPanel
+          Left = 0
+          Top = 0
+          Width = 749
+          Height = 41
+          Align = alTop
+          BevelOuter = bvNone
+          TabOrder = 1
+          DesignSize = (
+            749
+            41)
+          object ButtonFlat2: TButtonFlat
+            Left = 0
+            Top = 1
+            Width = 733
+            Height = 36
+            Anchors = [akLeft, akTop, akRight]
+            Caption = ''
+            ColorNormal = clWhite
+            ColorOver = clWhite
+            ColorPressed = clWhite
+            Font.Charset = DEFAULT_CHARSET
+            Font.Color = clWindowText
+            Font.Height = -13
+            Font.Name = 'Tahoma'
+            Font.Style = []
+            Flat = False
+            BorderColor = 15460326
+            FontOver.Charset = DEFAULT_CHARSET
+            FontOver.Color = clWindowText
+            FontOver.Height = -13
+            FontOver.Name = 'Tahoma'
+            FontOver.Style = []
+            FontDown.Charset = DEFAULT_CHARSET
+            FontDown.Color = clWindowText
+            FontDown.Height = -13
+            FontDown.Name = 'Tahoma'
+            FontDown.Style = []
+            IgnorBounds = True
+            RoundRectParam = 3
+            Shape = stRoundRect
+            ShowFocusRect = False
+            TabOrder = 1
+            TabStop = True
+            TextFormat = [tfCenter, tfSingleLine, tfVerticalCenter]
+            SubTextFont.Charset = DEFAULT_CHARSET
+            SubTextFont.Color = clWhite
+            SubTextFont.Height = -13
+            SubTextFont.Name = 'Tahoma'
+            SubTextFont.Style = []
+          end
+          object EditSearchCur: TEdit
+            Left = 15
+            Top = 2
+            Width = 653
+            Height = 33
+            Anchors = [akLeft, akTop, akRight]
+            AutoSize = False
+            BevelInner = bvNone
+            BevelKind = bkFlat
+            BevelOuter = bvSpace
+            BevelWidth = 7
+            BorderStyle = bsNone
+            TabOrder = 0
+            TextHint = #1055#1086#1080#1089#1082' '#1084#1091#1079#1099#1082#1080' '#1074' '#1090#1077#1082#1091#1097#1077#1084' '#1087#1083#1077#1081#1083#1080#1089#1090#1077
+            OnChange = EditSearchCurChange
+          end
+          object ButtonFlatSerachCur: TButtonFlat
+            Left = 673
+            Top = 1
+            Width = 60
+            Height = 36
+            Anchors = [akTop, akRight]
+            Caption = ''
+            ColorNormal = 15987442
+            ColorOver = 15987442
+            ColorPressed = 15263462
+            Font.Charset = DEFAULT_CHARSET
+            Font.Color = clWindowText
+            Font.Height = -13
+            Font.Name = 'Tahoma'
+            Font.Style = []
+            Flat = False
+            BorderColor = 15460326
+            FontOver.Charset = DEFAULT_CHARSET
+            FontOver.Color = clWindowText
+            FontOver.Height = -13
+            FontOver.Name = 'Tahoma'
+            FontOver.Style = []
+            FontDown.Charset = DEFAULT_CHARSET
+            FontDown.Color = clWindowText
+            FontDown.Height = -13
+            FontDown.Name = 'Tahoma'
+            FontDown.Style = []
+            IgnorBounds = True
+            ImageIndentLeft = 15
+            ImageIndex = 5
+            Images = ImageList
+            OnClick = ButtonFlatSerachCurClick
+            RoundRectParam = 3
+            Shape = stRoundRect
+            ShowFocusRect = False
+            TabOrder = 2
+            TabStop = True
+            TextFormat = [tfCenter, tfSingleLine, tfVerticalCenter]
+            SubTextFont.Charset = DEFAULT_CHARSET
+            SubTextFont.Color = clWhite
+            SubTextFont.Height = -13
+            SubTextFont.Name = 'Tahoma'
+            SubTextFont.Style = []
+          end
+        end
       end
       object TabSheetMyMusic: TTabSheet
         Caption = #1052#1091#1079#1099#1082#1072
@@ -992,7 +1106,7 @@ object FormMain: TFormMain
             end
             item
               Caption = #1053#1072#1079#1074#1072#1085#1080#1077
-              Width = 668
+              Width = 695
             end>
           DefaultDataDrawing = False
           ItemCount = 1
@@ -1049,7 +1163,7 @@ object FormMain: TFormMain
             end
             item
               Caption = #1053#1072#1079#1074#1072#1085#1080#1077
-              Width = 668
+              Width = 695
             end>
           DefaultDataDrawing = False
           ItemCount = 1
@@ -1211,7 +1325,7 @@ object FormMain: TFormMain
     AppID = '6121396'
     AppKey = 'AlVXZFMUqyrnABp8ncuU'
     EndPoint = 'https://oauth.vk.com/authorize'
-    Permissions = 'groups,friends,wall,photos,video,docs,notes,market,audio'
+    Permissions = 'friends,audio'
     APIVersion = '5.103'
     BaseURL = 'https://api.vk.com/method'
     OnAuth = VKAuth

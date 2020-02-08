@@ -11,7 +11,8 @@ uses
   Vcl.Themes,
   Vcl.Styles,
   VK.API in '..\VK_API\VK.API.pas',
-  VCLFlickerReduce in '..\#Fork\VCLFlickerReduce\VCLFlickerReduce.pas';
+  VCLFlickerReduce in '..\#Fork\VCLFlickerReduce\VCLFlickerReduce.pas',
+  BassPlayer.LoadHandle in 'BassPlayer.LoadHandle.pas';
 
 {$R *.res}
 
