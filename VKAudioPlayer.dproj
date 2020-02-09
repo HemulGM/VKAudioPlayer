@@ -95,11 +95,15 @@
     <PropertyGroup Condition="'$(Cfg_2_Win32)'!=''">
         <AppEnableRuntimeThemes>true</AppEnableRuntimeThemes>
         <AppDPIAwarenessMode>PerMonitorV2</AppDPIAwarenessMode>
+        <VerInfo_IncludeVerInfo>true</VerInfo_IncludeVerInfo>
+        <VerInfo_Locale>1033</VerInfo_Locale>
+        <DCC_DcuOutput>.\$(Platform)\$(Config)_DCU</DCC_DcuOutput>
     </PropertyGroup>
     <ItemGroup>
         <DelphiCompile Include="$(MainSource)">
             <MainSource>MainSource</MainSource>
         </DelphiCompile>
+        <DCCReference Include="..\#Fork\VCLFlickerReduce\VCLFlickerReduce.pas"/>
         <DCCReference Include="VKAP.Main.pas">
             <Form>FormMain</Form>
             <FormType>dfm</FormType>
@@ -108,23 +112,38 @@
         <DCCReference Include="BassPlayer.pas"/>
         <DCCReference Include="BassPlayer.Types.pas"/>
         <DCCReference Include="..\VK_API\VK.API.pas"/>
-        <DCCReference Include="..\#Fork\VCLFlickerReduce\VCLFlickerReduce.pas"/>
         <DCCReference Include="BassPlayer.LoadHandle.pas"/>
-        <RcItem Include="D:\Temp\Iconion\VK1\album.jpg">
+        <DCCReference Include="VKAP.Player.pas">
+            <Form>FormPlayer</Form>
+            <FormType>dfm</FormType>
+        </DCCReference>
+        <RcItem Include="fullmask.png">
             <ResourceType>RCDATA</ResourceType>
-            <ResourceId>blank</ResourceId>
+            <ResourceId>mask</ResourceId>
         </RcItem>
-        <RcItem Include="D:\Temp\Iconion\VK1\Material Icons_e01e(0)_50.png">
+        <RcItem Include="def_avatar.png">
             <ResourceType>RCDATA</ResourceType>
-            <ResourceId>play</ResourceId>
+            <ResourceId>def_avatar</ResourceId>
         </RcItem>
-        <RcItem Include="D:\Temp\Iconion\VK1\Material Icons_e01e(0)_501.png">
+        <RcItem Include="avatarmask.png">
+            <ResourceType>RCDATA</ResourceType>
+            <ResourceId>avatarmask</ResourceId>
+        </RcItem>
+        <RcItem Include="audio_layer.png">
             <ResourceType>RCDATA</ResourceType>
             <ResourceId>active</ResourceId>
         </RcItem>
-        <RcItem Include="D:\Temp\Iconion\VK1\Material Icons_e01e(0)_5021.png">
+        <RcItem Include="pause.png">
             <ResourceType>RCDATA</ResourceType>
             <ResourceId>pause</ResourceId>
+        </RcItem>
+        <RcItem Include="play.png">
+            <ResourceType>RCDATA</ResourceType>
+            <ResourceId>play</ResourceId>
+        </RcItem>
+        <RcItem Include="album.png">
+            <ResourceType>RCDATA</ResourceType>
+            <ResourceId>blank</ResourceId>
         </RcItem>
         <BuildConfiguration Include="Release">
             <Key>Cfg_2</Key>
@@ -147,7 +166,6 @@
                     <Source Name="MainSource">VKAudioPlayer.dpr</Source>
                 </Source>
                 <Excluded_Packages>
-                    <Excluded_Packages Name="C:\Users\Public\Documents\Embarcadero\Studio\20.0\Bpl\acntDX10Rio.bpl">AlphaControls</Excluded_Packages>
                     <Excluded_Packages Name="$(BDSBIN)\DataExplorerDBXPluginEnt260.bpl">DBExpress Enterprise Data Explorer Integration</Excluded_Packages>
                     <Excluded_Packages Name="$(BDSBIN)\dcloffice2k260.bpl">Microsoft Office 2000 Sample Automation Server Wrapper Components</Excluded_Packages>
                     <Excluded_Packages Name="$(BDSBIN)\dclofficexp260.bpl">Microsoft Office XP Sample Automation Server Wrapper Components</Excluded_Packages>
@@ -156,13 +174,7 @@
                 </Excluded_Packages>
             </Delphi.Personality>
             <Deployment Version="3">
-                <DeployFile LocalName="D:\Temp\Iconion\VK1\album.jpg" Configuration="Debug" Class="ProjectFile">
-                    <Platform Name="Win32">
-                        <RemoteDir>.\</RemoteDir>
-                        <Overwrite>true</Overwrite>
-                    </Platform>
-                </DeployFile>
-                <DeployFile LocalName="D:\Temp\Iconion\VK1\Material Icons_e01e(0)_501.png" Configuration="Debug" Class="ProjectFile">
+                <DeployFile LocalName="fullmask.png" Configuration="Debug" Class="ProjectFile">
                     <Platform Name="Win32">
                         <RemoteDir>.\</RemoteDir>
                         <Overwrite>true</Overwrite>
@@ -174,7 +186,37 @@
                         <Overwrite>true</Overwrite>
                     </Platform>
                 </DeployFile>
-                <DeployFile LocalName="D:\Temp\Iconion\VK1\Material Icons_e01e(0)_50.png" Configuration="Debug" Class="ProjectFile">
+                <DeployFile LocalName="def_avatar.png" Configuration="Debug" Class="ProjectFile">
+                    <Platform Name="Win32">
+                        <RemoteDir>.\</RemoteDir>
+                        <Overwrite>true</Overwrite>
+                    </Platform>
+                </DeployFile>
+                <DeployFile LocalName="play.png" Configuration="Debug" Class="ProjectFile">
+                    <Platform Name="Win32">
+                        <RemoteDir>.\</RemoteDir>
+                        <Overwrite>true</Overwrite>
+                    </Platform>
+                </DeployFile>
+                <DeployFile LocalName="avatarmask.png" Configuration="Debug" Class="ProjectFile">
+                    <Platform Name="Win32">
+                        <RemoteDir>.\</RemoteDir>
+                        <Overwrite>true</Overwrite>
+                    </Platform>
+                </DeployFile>
+                <DeployFile LocalName="audio_layer.png" Configuration="Debug" Class="ProjectFile">
+                    <Platform Name="Win32">
+                        <RemoteDir>.\</RemoteDir>
+                        <Overwrite>true</Overwrite>
+                    </Platform>
+                </DeployFile>
+                <DeployFile LocalName="album.png" Configuration="Debug" Class="ProjectFile">
+                    <Platform Name="Win32">
+                        <RemoteDir>.\</RemoteDir>
+                        <Overwrite>true</Overwrite>
+                    </Platform>
+                </DeployFile>
+                <DeployFile LocalName="pause.png" Configuration="Debug" Class="ProjectFile">
                     <Platform Name="Win32">
                         <RemoteDir>.\</RemoteDir>
                         <Overwrite>true</Overwrite>
@@ -183,12 +225,6 @@
                 <DeployFile LocalName="Win32\Release\VKAudioPlayer.exe" Configuration="Release" Class="ProjectOutput">
                     <Platform Name="Win32">
                         <RemoteName>VKAudioPlayer.exe</RemoteName>
-                        <Overwrite>true</Overwrite>
-                    </Platform>
-                </DeployFile>
-                <DeployFile LocalName="D:\Temp\Iconion\VK1\Material Icons_e01e(0)_5021.png" Configuration="Debug" Class="ProjectFile">
-                    <Platform Name="Win32">
-                        <RemoteDir>.\</RemoteDir>
                         <Overwrite>true</Overwrite>
                     </Platform>
                 </DeployFile>

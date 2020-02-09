@@ -8,7 +8,7 @@ uses
   Vcl.Grids, HGM.Controls.VirtualTable, Vcl.ExtCtrls, BassPlayer, Vcl.StdCtrls, HGM.Button,
   Vcl.ComCtrls, HGM.Controls.PanelExt, System.ImageList, Vcl.ImgList, Vcl.Imaging.pngimage,
   System.Generics.Collections, Vcl.Imaging.jpeg, VK.Entity.Playlist, VK.Entity.User,
-  BassPlayer.LoadHandle;
+  BassPlayer.LoadHandle, VK.Entity.Audio, VKAP.Player, acPNG;
 
 type
   TAudio = record
@@ -20,7 +20,9 @@ type
     OwnerId: Integer;
     Url: string;
     Duration: string;
+    AccessKey: string;
     Restricted: Boolean;
+    procedure Fill(Audio: TVkAudio);
   end;
 
   TPlaylist = record
@@ -50,7 +52,7 @@ type
   end;
 
   TAlbumThumbs = class(TList<TAlbumThumb>)
-    function GetImage(Url: string; var UseDefault: Boolean): TPicture;
+    function GetImage(Url: string; var UseDefault: Boolean; Avatar: Boolean = False): TPicture;
     destructor Destroy; override;
   end;
 
@@ -126,6 +128,9 @@ type
     ButtonFlat2: TButtonFlat;
     EditSearchCur: TEdit;
     ButtonFlatSerachCur: TButtonFlat;
+    Panel2: TPanel;
+    ImageAvatar: TImage;
+    ButtonFlatMyMusic: TButtonFlat;
     procedure FormCreate(Sender: TObject);
     procedure TableExMyMusicItemClick(Sender: TObject; MouseButton: TMouseButton; const Index: Integer);
     procedure FormDestroy(Sender: TObject);
@@ -170,6 +175,8 @@ type
     procedure TableExSearchItemClick(Sender: TObject; MouseButton: TMouseButton; const Index: Integer);
     procedure ButtonFlatSerachCurClick(Sender: TObject);
     procedure EditSearchCurChange(Sender: TObject);
+    procedure FormShow(Sender: TObject);
+    procedure ButtonFlatMyMusicClick(Sender: TObject);
   private
     FMouseInScale: Boolean;
     FMouseInButton: Boolean;
@@ -195,6 +202,7 @@ type
     FNeedActLeft: Integer;
     FNeedActWidth: Integer;
     FVkId: Integer;
+    FVkIdCurrent: Integer;
     FActivePlaylist: Integer;
     FOpenning: Boolean;
     FPlayRepeat: TPlayRepeat;
@@ -208,14 +216,18 @@ type
     FLoadPicSearch: TLoadThread;
     FLoadPicMusic: TLoadThread;
     FAppLoading: Boolean;
+    FFailCount: Integer;
+    FAvatarMask: TPngImage;
+    FAvatarDef: TPngImage;
+    FAudioMask: TPngImage;
     procedure FOnAudioEnd(Sender: TObject);
-    function FindNext(CurrentId: Integer; Handle: Boolean): Integer;
-    function FindPrev(CurrentId: Integer; Handle: Boolean): Integer;
+    function FindNext(CurrentId: Integer; HandlePlay: Boolean): Integer;
+    function FindPrev(CurrentId: Integer; HandlePlay: Boolean): Integer;
     function Play(Index: Integer): Boolean;
     procedure ClearInfo;
     procedure SetInfo(Audio: TAudio);
-    procedure PlayNext(Handle: Boolean);
-    procedure PlayPrev(Handle: Boolean);
+    procedure PlayNext(HandlePlay: Boolean);
+    procedure PlayPrev(HandlePlay: Boolean);
     procedure Await;
     procedure RefillEqu;
     procedure ButtonFlatNavClick(Sender: TObject);
@@ -235,6 +247,13 @@ type
     procedure Search(Query: string);
     procedure FillCurrentFromSearch;
     procedure CreateLoaders;
+    procedure SetPlayerInfo(Audio: TAudio);
+    procedure SetPlayerState(IsPlay: Boolean);
+    procedure SetAvatar(Url: string);
+    procedure DrawAudioThumb(Target: TCanvas; List: TAudioList; Index: Integer; Rect: TRect; Hot: Boolean);
+    procedure DrawAlbumThumb(Target: TCanvas; List: TPlaylists; Index: Integer; Rect: TRect; Hot: Boolean);
+    procedure DrawAudioInfo(Target: TCanvas; List: TAudioList; Index: Integer; Rect: TRect);
+    procedure DrawAlbumInfo(Target: TCanvas; List: TPlaylists; Index: Integer; Rect: TRect);
   public
     procedure Quit;
   end;
@@ -242,17 +261,193 @@ type
 var
   FormMain: TFormMain;
 
+function CreateAvatar(Source: TGraphic; Mask: TPngImage): TPngImage;
+
 implementation
 
 uses
-  VK.Entity.Audio, VK.Audio, HGM.Common.Utils, Direct2D, D2D1, Math, VK.OAuth2;
+  VK.Audio, HGM.Common.Utils, Direct2D, D2D1, Math, VK.OAuth2, VK.Friends;
 
 {$R *.dfm}
+
+function CreateAvatar(Source: TGraphic; Mask: TPngImage): TPngImage;
+var
+  BMPSmooth: TBitmap;
+begin
+  BMPSmooth := SmoothStrechDraw(Source, TRect.Create(0, 0, Mask.Width - 1, Mask.Height - 1));
+  Result := TPngImage.CreateBlank(COLOR_RGB, 16, Mask.Width, Mask.Height);
+  Result.Canvas.Draw(0, 0, BMPSmooth);
+  Result.CreateAlpha;
+  BMPSmooth.Free;
+  ApplyMask(0, 0, Mask, Result);
+end;
 
 procedure TFormMain.LabelTimeClick(Sender: TObject);
 begin
   FShowLeftTime := not FShowLeftTime;
   TimerRefreshTimer(nil);
+end;
+
+procedure TFormMain.DrawAudioInfo(Target: TCanvas; List: TAudioList; Index: Integer; Rect: TRect);
+var
+  TxtRect: TRect;
+  S: string;
+begin
+  with Target do
+  begin
+    Font.Name := 'Roboto';
+    Font.Size := 9;
+    TxtRect := Rect;
+    TxtRect.Bottom := TxtRect.CenterPoint.Y;
+    TxtRect.Inflate(-1, -1);
+    TxtRect.Right := TxtRect.Right - 40;
+    S := List[Index].Title;
+    Font.Color := clBlack;
+    TextRect(TxtRect, S, [tfSingleLine, tfBottom, tfLeft, tfEndEllipsis]);
+
+    TxtRect := Rect;
+    TxtRect.Top := TxtRect.CenterPoint.Y;
+    TxtRect.Inflate(-1, -1);
+    TxtRect.Right := TxtRect.Right - 40;
+    S := List[Index].Artist;
+    Font.Color := $00939393;
+    TextRect(TxtRect, S, [tfSingleLine, tfTop, tfLeft, tfEndEllipsis]);
+
+    TxtRect := Rect;
+    TxtRect.Inflate(-4, -4);
+    TxtRect.Left := TxtRect.Right - 40;
+    S := List[Index].Duration;
+    TextRect(TxtRect, S, [tfSingleLine, tfVerticalCenter, tfCenter]);
+
+    if List[Index].Restricted then
+    begin
+      TxtRect := TRect.Create(TPoint.Zero, 100, 20);
+      TxtRect.SetLocation(Rect.Right - (TxtRect.Width + 60), Rect.CenterPoint.Y - TxtRect.Height div 2);
+      S := 'Не доступна';
+      Font.Color := clWhite;
+      Pen.Color := clMaroon;
+      Brush.Color := $005A5AAC;
+      RoundRect(TxtRect, 4, 4);
+      TextRect(TxtRect, S, [tfSingleLine, tfVerticalCenter, tfCenter]);
+    end;
+  end;
+end;
+
+procedure TFormMain.DrawAudioThumb(Target: TCanvas; List: TAudioList; Index: Integer; Rect: TRect; Hot: Boolean);
+begin
+  with Target do
+  begin
+    Rect.Inflate(-7, -7);
+    if Assigned(List[Index].Image) then
+      StretchDraw(Rect, List[Index].Image.Graphic)
+    else
+      StretchDraw(Rect, FAlbumThumbs[0].Image.Graphic);
+
+    if List[Index].Id = FPlayingId then
+    begin
+      if Hot then
+      begin
+        if FPlayer.IsPlay then
+          StretchDraw(Rect, FPauseImage)
+        else
+          StretchDraw(Rect, FPlayImage);
+      end
+      else
+      begin
+        StretchDraw(Rect, FActiveImage);
+        Pen.Width := 2;
+        Pen.Color := clWhite;
+        MoveTo(Rect.Left + 8 + 5, Rect.Bottom - 12);
+        LineTo(Rect.Left + 8 + 5, Round(Rect.Bottom - 12 - 1 - ((15 / 100) * FEqu[1])));
+
+        MoveTo(Rect.Left + 8 + 10, Rect.Bottom - 12);
+        LineTo(Rect.Left + 8 + 10, Round(Rect.Bottom - 12 - 1 - ((15 / 100) * FEqu[2])));
+
+        MoveTo(Rect.Left + 8 + 15, Rect.Bottom - 12);
+        LineTo(Rect.Left + 8 + 15, Round(Rect.Bottom - 12 - 1 - ((15 / 100) * FEqu[3])));
+
+        MoveTo(Rect.Left + 8 + 20, Rect.Bottom - 12);
+        LineTo(Rect.Left + 8 + 20, Round(Rect.Bottom - 12 - 1 - ((15 / 100) * FEqu[4])));
+      end;
+    end
+    else if Hot then
+      StretchDraw(Rect, FPlayImage);
+  end;
+end;
+
+procedure TFormMain.DrawAlbumThumb(Target: TCanvas; List: TPlaylists; Index: Integer; Rect: TRect; Hot: Boolean);
+begin
+  with Target do
+  begin
+    Rect.Inflate(-7, -7);
+    if Assigned(List[Index].Image) then
+      StretchDraw(Rect, List[Index].Image.Graphic)
+    else
+      StretchDraw(Rect, FAlbumThumbs[0].Image.Graphic);
+
+    if List[Index].Id = FPlayingId then
+    begin
+      if Hot then
+      begin
+        if FPlayer.IsPlay then
+          StretchDraw(Rect, FPauseImage)
+        else
+          StretchDraw(Rect, FPlayImage);
+      end
+      else
+      begin
+        StretchDraw(Rect, FActiveImage);
+        Pen.Width := 2;
+        Pen.Color := clWhite;
+        MoveTo(Rect.Left + 8 + 5, Rect.Bottom - 12);
+        LineTo(Rect.Left + 8 + 5, Round(Rect.Bottom - 12 - 1 - ((15 / 100) * FEqu[1])));
+
+        MoveTo(Rect.Left + 8 + 10, Rect.Bottom - 12);
+        LineTo(Rect.Left + 8 + 10, Round(Rect.Bottom - 12 - 1 - ((15 / 100) * FEqu[2])));
+
+        MoveTo(Rect.Left + 8 + 15, Rect.Bottom - 12);
+        LineTo(Rect.Left + 8 + 15, Round(Rect.Bottom - 12 - 1 - ((15 / 100) * FEqu[3])));
+
+        MoveTo(Rect.Left + 8 + 20, Rect.Bottom - 12);
+        LineTo(Rect.Left + 8 + 20, Round(Rect.Bottom - 12 - 1 - ((15 / 100) * FEqu[4])));
+      end;
+    end
+    else if Hot then
+      StretchDraw(Rect, FPlayImage);
+  end;
+end;
+
+procedure TFormMain.DrawAlbumInfo(Target: TCanvas; List: TPlaylists; Index: Integer; Rect: TRect);
+var
+  TxtRect: TRect;
+  S: string;
+begin
+  with Target do
+  begin
+    Font.Name := 'Roboto';
+    Font.Size := 9;
+    TxtRect := Rect;
+    TxtRect.Bottom := TxtRect.CenterPoint.Y;
+    TxtRect.Inflate(-1, -1);
+    TxtRect.Right := TxtRect.Right - 40;
+    S := List[Index].Title;
+    Font.Color := clBlack;
+    TextRect(TxtRect, S, [tfSingleLine, tfBottom, tfLeft, tfEndEllipsis]);
+
+    TxtRect := Rect;
+    TxtRect.Top := TxtRect.CenterPoint.Y;
+    TxtRect.Inflate(-1, -1);
+    TxtRect.Right := TxtRect.Right - 40;
+    S := List[Index].Description;
+    Font.Color := $00939393;
+    TextRect(TxtRect, S, [tfSingleLine, tfTop, tfLeft, tfEndEllipsis]);
+
+    TxtRect := Rect;
+    TxtRect.Inflate(-4, -4);
+    TxtRect.Left := TxtRect.Right - 40;
+    S := List[Index].Count.ToString;
+    TextRect(TxtRect, S, [tfSingleLine, tfVerticalCenter, tfCenter]);
+  end;
 end;
 
 procedure TFormMain.TableExCurrentDrawCellData(Sender: TObject; ACol, ARow: Integer; Rect: TRect;
@@ -278,78 +473,9 @@ begin
     end;
     case ACol of
       0:
-        begin
-          Rect.Inflate(-7, -7);
-          if Assigned(FCurrentList[ARow].Image) then
-            StretchDraw(Rect, FCurrentList[ARow].Image.Graphic)
-          else
-            StretchDraw(Rect, FAlbumThumbs[0].Image.Graphic);
-
-          if FCurrentList[ARow].Id = FPlayingId then
-          begin
-            if TableExCurrent.ItemUnderMouse = ARow then
-            begin
-              if FPlayer.IsPlay then
-                StretchDraw(Rect, FPauseImage)
-              else
-                StretchDraw(Rect, FPlayImage);
-            end
-            else
-            begin
-              StretchDraw(Rect, FActiveImage);
-              Pen.Width := 2;
-              Pen.Color := clWhite;
-              MoveTo(Rect.Left + 8 + 5, Rect.Bottom - 12);
-              LineTo(Rect.Left + 8 + 5, Round(Rect.Bottom - 12 - 1 - ((15 / 100) * FEqu[1])));
-
-              MoveTo(Rect.Left + 8 + 10, Rect.Bottom - 12);
-              LineTo(Rect.Left + 8 + 10, Round(Rect.Bottom - 12 - 1 - ((15 / 100) * FEqu[2])));
-
-              MoveTo(Rect.Left + 8 + 15, Rect.Bottom - 12);
-              LineTo(Rect.Left + 8 + 15, Round(Rect.Bottom - 12 - 1 - ((15 / 100) * FEqu[3])));
-
-              MoveTo(Rect.Left + 8 + 20, Rect.Bottom - 12);
-              LineTo(Rect.Left + 8 + 20, Round(Rect.Bottom - 12 - 1 - ((15 / 100) * FEqu[4])));
-            end;
-          end
-          else if TableExCurrent.ItemUnderMouse = ARow then
-            StretchDraw(Rect, FPlayImage);
-        end;
+        DrawAudioThumb(TableExCurrent.Canvas, FCurrentList, ARow, Rect, TableExCurrent.ItemUnderMouse = ARow);
       1:
-        begin
-          Font.Name := 'Roboto';
-          Font.Size := 9;
-          TxtRect := Rect;
-          TxtRect.Bottom := TxtRect.CenterPoint.Y;
-          TxtRect.Inflate(-1, -1);
-          TxtRect.Right := TxtRect.Right - 40;
-          S := FCurrentList[ARow].Title;
-          Font.Color := clBlack;
-          TextRect(TxtRect, S, [tfSingleLine, tfBottom, tfLeft, tfEndEllipsis]);
-
-          TxtRect := Rect;
-          TxtRect.Top := TxtRect.CenterPoint.Y;
-          TxtRect.Inflate(-1, -1);
-          TxtRect.Right := TxtRect.Right - 40;
-          S := FCurrentList[ARow].Artist;
-          Font.Color := $00939393;
-          TextRect(TxtRect, S, [tfSingleLine, tfTop, tfLeft, tfEndEllipsis]);
-
-          TxtRect := Rect;
-          TxtRect.Inflate(-4, -4);
-          TxtRect.Left := TxtRect.Right - 40;
-          S := FCurrentList[ARow].Duration;
-          TextRect(TxtRect, S, [tfSingleLine, tfVerticalCenter, tfCenter]);
-
-          if FCurrentList[ARow].Restricted then
-          begin
-            TxtRect := Rect;
-            TxtRect.Inflate(-4, -4);
-            TxtRect.Left := TxtRect.Right - 40 - 50;
-            S := 'x';
-            TextRect(TxtRect, S, [tfSingleLine, tfVerticalCenter, tfCenter]);
-          end;
-        end;
+        DrawAudioInfo(TableExCurrent.Canvas, FCurrentList, ARow, Rect);
     end;
   end;
 end;
@@ -388,7 +514,7 @@ begin
           if Assigned(FFriends[ARow].Image) then
             StretchDraw(Rect, FFriends[ARow].Image.Graphic)
           else
-            StretchDraw(Rect, FAlbumThumbs[0].Image.Graphic);
+            StretchDraw(Rect, FAvatarDef);
         end;
       1:
         begin
@@ -419,6 +545,38 @@ begin
   Caption := 'VK Audio Player [' + User.GetFullName + ']';
 end;
 
+procedure TFormMain.SetAvatar(Url: string);
+var
+  Mem: TMemoryStream;
+  Png: TPngImage;
+  Pic: TPicture;
+  UseDefault: Boolean;
+begin
+  UseDefault := True;
+  Mem := DownloadURL(Url);
+  Pic := TPicture.Create;
+  try
+    if Mem.Size > 0 then
+    begin
+      try
+        Pic.LoadFromStream(Mem);
+        Png := CreateAvatar(Pic.Graphic, FormMain.FAvatarMask);
+        UseDefault := False;
+      except
+      end;
+    end;
+    if UseDefault then
+    begin
+      Png := FAvatarDef;
+    end;
+    ImageAvatar.Picture.Assign(Png);
+    Png.Free;
+  finally
+    Pic.Free;
+    Mem.Free;
+  end;
+end;
+
 procedure TFormMain.TableExFriendsItemClick(Sender: TObject; MouseButton: TMouseButton; const Index: Integer);
 var
   Params: TVkAudioParams;
@@ -428,19 +586,20 @@ begin
   if not FFriends.IndexIn(Index) then
     Exit;
   FVkId := FFriends[Index].Id;
-  if VK.Users.Get(User, FVkId) then
-  begin
-    SetCurrentUser(User);
-    User.Free;
-  end;
   Params.OwnerId(FVkId);
   Params.Count(1);
   if VK.Audio.Get(Audios, Params) then
   begin
+    ButtonFlatMyMusic.Show;
     if Length(Audios.Items) <= 0 then
       ShowMessage('У выбранного пользователя нет музыки');
     Audios.Free;
     ReloadItems;
+    if VK.Users.Get(User, FVkId) then
+    begin
+      SetCurrentUser(User);
+      User.Free;
+    end;
   end
   else
     ShowMessage('Музыка закрыта');
@@ -472,66 +631,9 @@ begin
     end;
     case ACol of
       0:
-        begin
-          Rect.Inflate(-7, -7);
-          if Assigned(FMyMusic[ARow].Image) then
-            StretchDraw(Rect, FMyMusic[ARow].Image.Graphic)
-          else
-            StretchDraw(Rect, FAlbumThumbs[0].Image.Graphic);
-          if FMyMusic[ARow].Id = FPlayingId then
-          begin
-            if TableExMyMusic.ItemUnderMouse = ARow then
-              if FPlayer.IsPlay then
-                StretchDraw(Rect, FPauseImage)
-              else
-                StretchDraw(Rect, FPlayImage)
-            else
-            begin
-              StretchDraw(Rect, FActiveImage);
-              Pen.Width := 2;
-              Pen.Color := clWhite;
-              MoveTo(Rect.Left + 8 + 5, Rect.Bottom - 12);
-              LineTo(Rect.Left + 8 + 5, Round(Rect.Bottom - 12 - 1 - ((15 / 100) * FEqu[1])));
-
-              MoveTo(Rect.Left + 8 + 10, Rect.Bottom - 12);
-              LineTo(Rect.Left + 8 + 10, Round(Rect.Bottom - 12 - 1 - ((15 / 100) * FEqu[2])));
-
-              MoveTo(Rect.Left + 8 + 15, Rect.Bottom - 12);
-              LineTo(Rect.Left + 8 + 15, Round(Rect.Bottom - 12 - 1 - ((15 / 100) * FEqu[3])));
-
-              MoveTo(Rect.Left + 8 + 20, Rect.Bottom - 12);
-              LineTo(Rect.Left + 8 + 20, Round(Rect.Bottom - 12 - 1 - ((15 / 100) * FEqu[4])));
-            end;
-          end
-          else if TableExMyMusic.ItemUnderMouse = ARow then
-            StretchDraw(Rect, FPlayImage);
-        end;
+        DrawAudioThumb(TableExMyMusic.Canvas, FMyMusic, ARow, Rect, TableExMyMusic.ItemUnderMouse = ARow);
       1:
-        begin
-          Font.Name := 'Roboto';
-          Font.Size := 9;
-          TxtRect := Rect;
-          TxtRect.Bottom := TxtRect.CenterPoint.Y;
-          TxtRect.Inflate(-1, -1);
-          TxtRect.Right := TxtRect.Right - 40;
-          S := FMyMusic[ARow].Title;
-          Font.Color := clBlack;
-          TextRect(TxtRect, S, [tfSingleLine, tfBottom, tfLeft, tfEndEllipsis]);
-
-          TxtRect := Rect;
-          TxtRect.Top := TxtRect.CenterPoint.Y;
-          TxtRect.Inflate(-1, -1);
-          TxtRect.Right := TxtRect.Right - 40;
-          S := FMyMusic[ARow].Artist;
-          Font.Color := $00939393;
-          TextRect(TxtRect, S, [tfSingleLine, tfTop, tfLeft, tfEndEllipsis]);
-
-          TxtRect := Rect;
-          TxtRect.Inflate(-4, -4);
-          TxtRect.Left := TxtRect.Right - 40;
-          S := FMyMusic[ARow].Duration;
-          TextRect(TxtRect, S, [tfSingleLine, tfVerticalCenter, tfCenter]);
-        end;
+        DrawAudioInfo(TableExMyMusic.Canvas, FMyMusic, ARow, Rect);
     end;
   end;
 end;
@@ -562,7 +664,7 @@ begin
   FLoadPlaylist.Execute(FPlaylists[Index].OwnerId, FPlaylists[Index].Id);
 end;
 
-function TFormMain.FindNext(CurrentId: Integer; Handle: Boolean): Integer;
+function TFormMain.FindNext(CurrentId: Integer; HandlePlay: Boolean): Integer;
 var
   i: Integer;
 begin
@@ -571,7 +673,7 @@ begin
   begin
     if FCurrentList[i].Id = CurrentId then
     begin
-      if Handle or (FPlayRepeat = prAll) then
+      if HandlePlay or (FPlayRepeat = prAll) then
       begin
         if i < (FCurrentList.Count - 1) then
           Result := i + 1
@@ -595,7 +697,7 @@ begin
   end;
 end;
 
-function TFormMain.FindPrev(CurrentId: Integer; Handle: Boolean): Integer;
+function TFormMain.FindPrev(CurrentId: Integer; HandlePlay: Boolean): Integer;
 var
   i: Integer;
 begin
@@ -604,7 +706,7 @@ begin
   begin
     if FCurrentList[i].Id = CurrentId then
     begin
-      if Handle or (FPlayRepeat = prAll) then
+      if HandlePlay or (FPlayRepeat = prAll) then
       begin
         if i > 0 then
           Result := i - 1
@@ -635,9 +737,25 @@ begin
   if Assigned(Audio.Image) then
   begin
     ImageAlbum.Picture.Assign(Audio.Image);
+    ImageAlbum.Hint := Audio.AlbumPhoto;
   end
   else
+  begin
     ImageAlbum.Picture.Assign(FAlbumThumbs.Items[0].Image);
+    ImageAlbum.Hint := '';
+  end;
+  SetPlayerInfo(Audio);
+end;
+
+procedure TFormMain.SetPlayerState(IsPlay: Boolean);
+begin
+  FormPlayer.IsPlay := IsPlay;
+end;
+
+procedure TFormMain.SetPlayerInfo(Audio: TAudio);
+begin
+  FormPlayer.LabelTitle.Caption := Audio.Artist + ' - ' + Audio.Title;
+  FormPlayer.ImageAlbum.Picture.Assign(ImageAlbum.Picture);
 end;
 
 function TFormMain.Play(Index: Integer): Boolean;
@@ -668,7 +786,7 @@ begin
     FPlayingId := Audio.Id;
     if Audio.Url.IsEmpty then
     begin
-      if VK.Audio.GetById(Item, Audio.OwnerId, Audio.Id) then
+      if VK.Audio.GetById(Item, Audio.OwnerId, Audio.Id, Audio.AccessKey) then
       begin
         Audio.Url := Item.Url;
         FCurrentList[Index] := Audio;
@@ -677,11 +795,13 @@ begin
       else
       begin
         FOpenning := False;
+        Inc(FFailCount);
         Exit;
       end;
     end;
     if not Audio.Url.IsEmpty then
     begin
+      FFailCount := 0;
       FPlayer.SetStreamURL(Audio.Url);
       IsDone := False;
       FRes := False;
@@ -694,7 +814,9 @@ begin
       while not IsDone do
         Application.ProcessMessages;
       Result := FRes;
-    end;
+    end
+    else
+      Inc(FFailCount);
   end;
   FOpenning := False;
 end;
@@ -890,6 +1012,28 @@ begin
   ShapeHotButton.Hide;
 end;
 
+procedure TFormMain.ButtonFlatMyMusicClick(Sender: TObject);
+var
+  Params: TVkAudioParams;
+  Audios: TVkAudios;
+  User: TVkUser;
+begin
+  ButtonFlatMyMusic.Hide;
+  FVkId := FVkIdCurrent;
+  Params.OwnerId(FVkId);
+  Params.Count(1);
+  if VK.Audio.Get(Audios, Params) then
+  begin
+    Audios.Free;
+    ReloadItems;
+    if VK.Users.Get(User, FVkId) then
+    begin
+      SetCurrentUser(User);
+      User.Free;
+    end;
+  end;
+end;
+
 procedure TFormMain.ClearInfo;
 begin
   LabelArtist.Caption := 'Артист';
@@ -930,67 +1074,9 @@ begin
     end;
     case ACol of
       0:
-        begin
-          Rect.Inflate(-7, -7);
-          if Assigned(FPlaylists[ARow].Image) then
-            StretchDraw(Rect, FPlaylists[ARow].Image.Graphic)
-          else
-            StretchDraw(Rect, FAlbumThumbs[0].Image.Graphic);
-          if FPlaylists[ARow].Id = FActivePlaylist then
-          begin
-
-            if TableExPlaylists.ItemUnderMouse = ARow then
-              if FPlayer.IsPlay then
-                StretchDraw(Rect, FPauseImage)
-              else
-                StretchDraw(Rect, FPlayImage)
-            else
-            begin
-              StretchDraw(Rect, FActiveImage);
-              Pen.Width := 2;
-              Pen.Color := clWhite;
-              MoveTo(Rect.Left + 8 + 5, Rect.Bottom - 12);
-              LineTo(Rect.Left + 8 + 5, Round(Rect.Bottom - 12 - 1 - ((15 / 100) * FEqu[1])));
-
-              MoveTo(Rect.Left + 8 + 10, Rect.Bottom - 12);
-              LineTo(Rect.Left + 8 + 10, Round(Rect.Bottom - 12 - 1 - ((15 / 100) * FEqu[2])));
-
-              MoveTo(Rect.Left + 8 + 15, Rect.Bottom - 12);
-              LineTo(Rect.Left + 8 + 15, Round(Rect.Bottom - 12 - 1 - ((15 / 100) * FEqu[3])));
-
-              MoveTo(Rect.Left + 8 + 20, Rect.Bottom - 12);
-              LineTo(Rect.Left + 8 + 20, Round(Rect.Bottom - 12 - 1 - ((15 / 100) * FEqu[4])));
-            end;
-          end
-          else if TableExPlaylists.ItemUnderMouse = ARow then
-            StretchDraw(Rect, FPlayImage);
-        end;
+        DrawAlbumThumb(TableExPlaylists.Canvas, FPlaylists, ARow, Rect, TableExPlaylists.ItemUnderMouse = ARow);
       1:
-        begin
-          Font.Name := 'Roboto';
-          Font.Size := 9;
-          TxtRect := Rect;
-          TxtRect.Bottom := TxtRect.CenterPoint.Y;
-          TxtRect.Inflate(-1, -1);
-          TxtRect.Right := TxtRect.Right - 40;
-          S := FPlaylists[ARow].Title;
-          Font.Color := clBlack;
-          TextRect(TxtRect, S, [tfSingleLine, tfBottom, tfLeft, tfEndEllipsis]);
-
-          TxtRect := Rect;
-          TxtRect.Top := TxtRect.CenterPoint.Y;
-          TxtRect.Inflate(-1, -1);
-          TxtRect.Right := TxtRect.Right - 40;
-          S := FPlaylists[ARow].Description;
-          Font.Color := $00939393;
-          TextRect(TxtRect, S, [tfSingleLine, tfTop, tfLeft, tfEndEllipsis]);
-
-          TxtRect := Rect;
-          TxtRect.Inflate(-4, -4);
-          TxtRect.Left := TxtRect.Right - 40;
-          S := FPlaylists[ARow].Count.ToString;
-          TextRect(TxtRect, S, [tfSingleLine, tfVerticalCenter, tfCenter]);
-        end;
+        DrawAlbumInfo(TableExPlaylists.Canvas, FPlaylists, ARow, Rect);
     end;
   end;
 end;
@@ -1028,66 +1114,9 @@ begin
     end;
     case ACol of
       0:
-        begin
-          Rect.Inflate(-7, -7);
-          if Assigned(FSearchList[ARow].Image) then
-            StretchDraw(Rect, FSearchList[ARow].Image.Graphic)
-          else
-            StretchDraw(Rect, FAlbumThumbs[0].Image.Graphic);
-          if FSearchList[ARow].Id = FPlayingId then
-          begin
-            if TableExSearch.ItemUnderMouse = ARow then
-              if FPlayer.IsPlay then
-                StretchDraw(Rect, FPauseImage)
-              else
-                StretchDraw(Rect, FPlayImage)
-            else
-            begin
-              StretchDraw(Rect, FActiveImage);
-              Pen.Width := 2;
-              Pen.Color := clWhite;
-              MoveTo(Rect.Left + 8 + 5, Rect.Bottom - 12);
-              LineTo(Rect.Left + 8 + 5, Round(Rect.Bottom - 12 - 1 - ((15 / 100) * FEqu[1])));
-
-              MoveTo(Rect.Left + 8 + 10, Rect.Bottom - 12);
-              LineTo(Rect.Left + 8 + 10, Round(Rect.Bottom - 12 - 1 - ((15 / 100) * FEqu[2])));
-
-              MoveTo(Rect.Left + 8 + 15, Rect.Bottom - 12);
-              LineTo(Rect.Left + 8 + 15, Round(Rect.Bottom - 12 - 1 - ((15 / 100) * FEqu[3])));
-
-              MoveTo(Rect.Left + 8 + 20, Rect.Bottom - 12);
-              LineTo(Rect.Left + 8 + 20, Round(Rect.Bottom - 12 - 1 - ((15 / 100) * FEqu[4])));
-            end;
-          end
-          else if TableExSearch.ItemUnderMouse = ARow then
-            StretchDraw(Rect, FPlayImage);
-        end;
+        DrawAudioThumb(TableExSearch.Canvas, FSearchList, ARow, Rect, TableExSearch.ItemUnderMouse = ARow);
       1:
-        begin
-          Font.Name := 'Roboto';
-          Font.Size := 9;
-          TxtRect := Rect;
-          TxtRect.Bottom := TxtRect.CenterPoint.Y;
-          TxtRect.Inflate(-1, -1);
-          TxtRect.Right := TxtRect.Right - 40;
-          S := FSearchList[ARow].Title;
-          Font.Color := clBlack;
-          TextRect(TxtRect, S, [tfSingleLine, tfBottom, tfLeft, tfEndEllipsis]);
-
-          TxtRect := Rect;
-          TxtRect.Top := TxtRect.CenterPoint.Y;
-          TxtRect.Inflate(-1, -1);
-          TxtRect.Right := TxtRect.Right - 40;
-          S := FSearchList[ARow].Artist;
-          Font.Color := $00939393;
-          TextRect(TxtRect, S, [tfSingleLine, tfTop, tfLeft, tfEndEllipsis]);
-
-          TxtRect := Rect;
-          TxtRect.Inflate(-4, -4);
-          TxtRect.Left := TxtRect.Right - 40;
-          S := FSearchList[ARow].Duration;
-          TextRect(TxtRect, S, [tfSingleLine, tfVerticalCenter, tfCenter]);
-        end;
+        DrawAudioInfo(TableExSearch.Canvas, FSearchList, ARow, Rect);
     end;
   end;
 end;
@@ -1210,6 +1239,7 @@ begin
   end
   else
     ButtonFlatPlayPause.ImageIndex := 0;
+  SetPlayerState(FPlayer.IsPlay);
 end;
 
 procedure TFormMain.DrawPanelTrackBarMouseDown(Sender: TObject; Button: TMouseButton; Shift:
@@ -1240,10 +1270,7 @@ end;
 procedure TFormMain.DrawPanelTrackBarMouseMove(Sender: TObject; Shift: TShiftState; X, Y: Integer);
 begin
   FMousePos := Point(X, Y);
-  if FScaleRect.Contains(FMousePos) then
-    DrawPanelTrackBar.Cursor := crHandPoint
-  else
-    DrawPanelTrackBar.Cursor := crDefault;
+  DrawPanelTrackBar.Cursor := crHandPoint;
   DrawPanelTrackBarPaint(nil);
 end;
 
@@ -1346,12 +1373,20 @@ procedure TFormMain.PlayNext;
 var
   Nxt: Integer;
 begin
+  if not HandlePlay then
+  begin
+    if FFailCount > 5 then
+    begin
+      FFailCount := 0;
+      Exit;
+    end;
+  end;
   if FOpenning then
     Exit;
-  Nxt := FindNext(FPlayingId, Handle);
+  Nxt := FindNext(FPlayingId, HandlePlay);
   if FCurrentList.IndexIn(Nxt) then
     if not Play(Nxt) then
-      PlayNext(Handle);
+      PlayNext(HandlePlay);
 end;
 
 procedure TFormMain.PlayPrev;
@@ -1360,10 +1395,10 @@ var
 begin
   if FOpenning then
     Exit;
-  Nxt := FindPrev(FPlayingId, Handle);
+  Nxt := FindPrev(FPlayingId, HandlePlay);
   if FCurrentList.IndexIn(Nxt) then
     if not Play(Nxt) then
-      PlayPrev(Handle);
+      PlayPrev(HandlePlay);
 end;
 
 procedure TFormMain.Quit;
@@ -1421,7 +1456,7 @@ begin
       FFriends.Clear;
       Result := False;
       try
-        if VK.Friends.Get(Users, 'nickname, sex, photo_50') then
+        if VK.Friends.Get(Users, 'nickname, sex, photo_50', fsName) then
         begin
           for i := Low(Users.Items) to High(Users.Items) do
           begin
@@ -1435,7 +1470,7 @@ begin
             FFriends.Add(Friend);
           end;
           Users.Free;
-          Result := True;
+          Result := not LT.NeedStop;
         end;
       finally
         FFriends.EndUpdate;
@@ -1457,10 +1492,10 @@ begin
     end,
     function(LT: TLoadThread; OwnerId, Id: Integer): Boolean
     var
+      i: Integer;
       Audios: TVkAudios;
       Params: TVkAudioParams;
       Audio: TAudio;
-      i, M, S: Integer;
     begin
       FCurrentList.BeginUpdate;
       FCurrentList.Clear;
@@ -1474,21 +1509,12 @@ begin
           begin
             if not LT.NeedStop then
             begin
-              Audio.Artist := Audios.Items[i].Artist;
-              Audio.Title := Audios.Items[i].Title;
-              Audio.AlbumPhoto := Audios.Items[i].Album.Thumb.Photo68;
-              Audio.Id := Audios.Items[i].Id;
-              Audio.OwnerId := Audios.Items[i].OwnerId;
-              Audio.Restricted := Audios.Items[i].ContentRestricted > 0;
-              S := Trunc(Audios.Items[i].duration);
-              M := S div 60;
-              S := S mod 60;
-              Audio.Duration := Format('%d:%.2d', [M, S]);
+              Audio.Fill(Audios.Items[i]);
               FCurrentList.Add(Audio);
             end;
           end;
           Audios.Free;
-          Result := True;
+          Result := not LT.NeedStop;
         end;
       finally
         FCurrentList.EndUpdate;
@@ -1528,7 +1554,10 @@ begin
             begin
               if LT.NeedStop then
                 Break;
-              Playlist.Description := Playlists.Items[i].Description;
+              if Length(Playlists.Items[i].MainArtists) > 0 then
+                Playlist.Description := Playlists.Items[i].MainArtists[0].Name
+              else
+                Playlist.Description := Playlists.Items[i].Description;
               Playlist.Title := Playlists.Items[i].Title;
               if Assigned(Playlists.Items[i].Photo) then
                 Playlist.AlbumPhoto := Playlists.Items[i].Photo.Photo68
@@ -1543,7 +1572,7 @@ begin
           finally
             Playlists.Free;
           end;
-          Result := True;
+          Result := not LT.NeedStop;
         end;
       finally
         FPlaylists.EndUpdate;
@@ -1563,9 +1592,9 @@ begin
     end,
     function(LT: TLoadThread): Boolean
     var
+      i: Integer;
       Audios: TVkAudios;
       Audio: TAudio;
-      i, M, S: Integer;
     begin
       //
       FLoadPicMusic.Stop;
@@ -1581,20 +1610,11 @@ begin
           begin
             if LT.NeedStop then
               Break;
-            Audio.Artist := Audios.Items[i].artist;
-            Audio.Title := Audios.Items[i].title;
-            Audio.AlbumPhoto := Audios.Items[i].Album.Thumb.Photo68;
-            Audio.Id := Audios.Items[i].Id;
-            Audio.OwnerId := Audios.Items[i].OwnerId;
-            Audio.Restricted := Audios.Items[i].ContentRestricted > 0;
-            S := Trunc(Audios.Items[i].duration);
-            M := S div 60;
-            S := S mod 60;
-            Audio.Duration := Format('%d:%.2d', [M, S]);
+            Audio.Fill(Audios.Items[i]);
             FMyMusic.Add(Audio);
           end;
           Audios.Free;
-          Result := True;
+          Result := not LT.NeedStop;
         end;
       finally
         FMyMusic.EndUpdate;
@@ -1616,9 +1636,9 @@ begin
     end,
     function(LT: TLoadThread; Query: string): Boolean
     var
+      i: Integer;
       Audios: TVkAudios;
       Audio: TAudio;
-      i, M, S: Integer;
     begin
       FLoadPicSearch.Stop;
       FLoadPicSearch.Await(False);
@@ -1634,17 +1654,7 @@ begin
             begin
               if LT.NeedStop then
                 Break;
-
-              Audio.Artist := Audios.Items[i].artist;
-              Audio.Title := Audios.Items[i].title;
-              Audio.AlbumPhoto := Audios.Items[i].Album.Thumb.Photo68;
-              Audio.Id := Audios.Items[i].Id;
-              Audio.OwnerId := Audios.Items[i].OwnerId;
-              Audio.Restricted := Audios.Items[i].ContentRestricted > 0;
-              S := Trunc(Audios.Items[i].duration);
-              M := S div 60;
-              S := S mod 60;
-              Audio.Duration := Format('%d:%.2d', [M, S]);
+              Audio.Fill(Audios.Items[i]);
               FSearchList.Add(Audio);
             end;
           finally
@@ -1681,6 +1691,13 @@ begin
           if not Item.AlbumPhoto.IsEmpty then
           begin
             Item.Image := FAlbumThumbs.GetImage(Item.AlbumPhoto, DefImg);
+            if not DefImg then
+            begin
+              if ImageAlbum.Hint = Item.AlbumPhoto then
+              begin
+                ImageAlbum.Picture.Assign(Item.Image);
+              end;
+            end;
             if LT.NeedStop then
               Break;
             TThread.Synchronize(TThread.CurrentThread,
@@ -1711,7 +1728,7 @@ begin
         begin
           if not Item.AlbumPhoto.IsEmpty then
           begin
-            Item.Image := FAlbumThumbs.GetImage(Item.AlbumPhoto, DefImg);
+            Item.Image := FAlbumThumbs.GetImage(Item.AlbumPhoto, DefImg, True);
             if not DefImg then
               UpdateImages(Item.AlbumPhoto, Item.Image);
             if LT.NeedStop then
@@ -1799,11 +1816,26 @@ var
   i: Integer;
   Stream: TResourceStream;
 begin
+  FPlayer := TBASSPlayer.Create(Self);
+  FPlayer.OnEnd := FOnAudioEnd;
+  if not FPlayer.Init(Handle) then
+  begin
+    ShowMessage('Не хватает библиотек BASS');
+    Halt;
+  end;
+
   FPlayingId := -1;
   FAppLoading := True;
   FOpenning := False;
   FShowLeftTime := False;
   CreateLoaders;
+
+  FAvatarMask := TPngImage.Create;
+  FAvatarMask.LoadFromResourceName(HInstance, 'mask');
+  FAvatarDef := TPngImage.Create;
+  FAvatarDef.LoadFromResourceName(HInstance, 'def_avatar');
+  FAudioMask := TPngImage.Create;
+  FAudioMask.LoadFromResourceName(HInstance, 'avatarmask');
 
   FAlbumThumbs := TAlbumThumbs.Create;
   FPlayImage := TPngImage.Create;
@@ -1823,7 +1855,6 @@ begin
   FFriends := TFriends.Create(TableExFriends);
   FPlaylists := TPlaylists.Create(TableExPlaylists);
   FSearchList := TAudioList.Create(TableExSearch);
-  FPlayer := TBASSPlayer.Create(Self);
   FToken := FSettings.GetStr('General', 'Token', '');
   if FToken.IsEmpty then
   begin
@@ -1832,8 +1863,6 @@ begin
     //ShowMessage('Укажи токен в config.ini. Ссылка внутри');
     //Halt;
   end;
-  FPlayer.OnEnd := FOnAudioEnd;
-  FPlayer.Init(Handle);
   for i := 0 to PageControl.PageCount - 1 do
     PageControl.Pages[i].TabVisible := False;
 
@@ -1892,6 +1921,14 @@ begin
   FLoadPicFriends.Free;
   FLoadPicSearch.Free;
   FLoadPicMusic.Free;
+  FAvatarMask.Free;
+  FAvatarDef.Free;
+  FAudioMask.Free;
+end;
+
+procedure TFormMain.FormShow(Sender: TObject);
+begin
+  ShowWindow(Application.Handle, SW_HIDE);
 end;
 
 procedure TFormMain.VKAuth(Sender: TObject; var Token: string; var TokenExpiry: Int64; var ChangePasswordHash: string);
@@ -1941,13 +1978,16 @@ procedure TFormMain.VKLogin(Sender: TObject);
 var
   User: TVkUser;
 begin
+  FFailCount := 0;
   FToken := VK.Token;
   FSettings.SetStr('General', 'Token', FToken);
 
-  if VK.Users.Get(User) then
+  if VK.Users.Get(User, 0, 'photo_50') then
   begin
     FVkId := User.id;
+    FVkIdCurrent := FVkId;
     SetCurrentUser(User);
+    SetAvatar(User.Photo50);
     User.Free;
     ReloadItems;
     FLoadUsers.Execute;
@@ -1979,11 +2019,12 @@ begin
   inherited;
 end;
 
-function TAlbumThumbs.GetImage(Url: string; var UseDefault: Boolean): TPicture;
+function TAlbumThumbs.GetImage(Url: string; var UseDefault: Boolean; Avatar: Boolean): TPicture;
 var
   i: Integer;
   Mem: TMemoryStream;
   Item: TAlbumThumb;
+  Png: TPngImage;
 begin
   UseDefault := True;
   for i := 0 to Count - 1 do
@@ -2004,6 +2045,18 @@ begin
       Item.Image := TPicture.Create;
       try
         Item.Image.LoadFromStream(Mem);
+        if Avatar then
+        begin
+          Png := CreateAvatar(Item.Image.Graphic, FormMain.FAvatarMask);
+          Item.Image.Assign(Png);
+          Png.Free;
+        end
+        else
+        begin
+          Png := CreateAvatar(Item.Image.Graphic, FormMain.FAudioMask);
+          Item.Image.Assign(Png);
+          Png.Free;
+        end;
         UseDefault := False;
       except
         Item.Image.Free;
@@ -2046,6 +2099,25 @@ begin
       (Pos(Query, AnsiLowerCase(Items[i].Artist)) <> 0)
       then
       Exit(i);
+end;
+
+{ TAudio }
+
+procedure TAudio.Fill(Audio: TVkAudio);
+var
+  M, S: Integer;
+begin
+  Artist := Audio.Artist;
+  Title := Audio.Title;
+  AlbumPhoto := Audio.Album.Thumb.Photo68;
+  Id := Audio.Id;
+  OwnerId := Audio.OwnerId;
+  Restricted := Audio.ContentRestricted > 0;
+  S := Trunc(Audio.Duration);
+  M := S div 60;
+  S := S mod 60;
+  Duration := Format('%d:%.2d', [M, S]);
+  AccessKey := Audio.AccessKey;
 end;
 
 end.

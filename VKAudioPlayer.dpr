@@ -3,6 +3,7 @@ program VKAudioPlayer;
 {$R *.dres}
 
 uses
+  VCLFlickerReduce in '..\#Fork\VCLFlickerReduce\VCLFlickerReduce.pas',
   Vcl.Forms,
   VKAP.Main in 'VKAP.Main.pas' {FormMain},
   BassPlayer.Lib in 'BassPlayer.Lib.pas',
@@ -11,18 +12,20 @@ uses
   Vcl.Themes,
   Vcl.Styles,
   VK.API in '..\VK_API\VK.API.pas',
-  VCLFlickerReduce in '..\#Fork\VCLFlickerReduce\VCLFlickerReduce.pas',
-  BassPlayer.LoadHandle in 'BassPlayer.LoadHandle.pas';
+  BassPlayer.LoadHandle in 'BassPlayer.LoadHandle.pas',
+  VKAP.Player in 'VKAP.Player.pas' {FormPlayer};
 
 {$R *.res}
 
 begin
   Application.Initialize;
-  Application.MainFormOnTaskbar := True;
+  Application.MainFormOnTaskbar := False;
+  Application.ShowMainForm := False;
   {$IFDEF DEBUG}
   ReportMemoryLeaksOnShutdown := True;
   {$ENDIF}
   Application.CreateForm(TFormMain, FormMain);
+  Application.CreateForm(TFormPlayer, FormPlayer);
   Application.ProcessMessages;
   FormMain.Show;
   FormMain.Invalidate;

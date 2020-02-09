@@ -111,13 +111,18 @@ end;
 
 function TBASSPlayer.Init(Handle: THandle): Boolean;
 begin
-  if BASS_Init(-1, 44100, 0, Handle, nil) then
+  if BASS_Available then
   begin
-    BASS_PluginLoad(PChar(BASS_FOLDER + 'libbass.dll'), 0 or BASS_UNICODE);
-    BASS_SetConfig(BASS_CONFIG_NET_PREBUF, 1000);
-    BASS_SetConfig(BASS_CONFIG_BUFFER, 5000);
-    BASS_SetConfig(BASS_CONFIG_VERIFY, 1024 * 1024);
-    Result := True;
+    if BASS_Init(-1, 44100, 0, Handle, nil) then
+    begin
+      BASS_PluginLoad(PChar(BASS_FOLDER + 'bass_acc.dll'), 0 or BASS_UNICODE);
+      BASS_SetConfig(BASS_CONFIG_NET_PREBUF, 1000);
+      BASS_SetConfig(BASS_CONFIG_BUFFER, 5000);
+      BASS_SetConfig(BASS_CONFIG_VERIFY, 1024 * 1024);
+      Result := True;
+    end
+    else
+      Result := False;
   end
   else
     Result := False;
