@@ -131,7 +131,9 @@ end;
 procedure TBASSPlayer.UnloadChannel;
 begin
   if FActiveChannel <> 0 then
+  begin
     BASS_StreamFree(FActiveChannel);
+  end;
 end;
 
 function TBASSPlayer.Play: Boolean;
@@ -144,28 +146,30 @@ begin
   FIsPlay := False;
 
   UnloadChannel;
+  try
+    FActiveChannel := BASS_StreamCreateURL(PChar(FStreamURL), 0, BASS_STREAM_STATUS or
+      BASS_STREAM_AUTOFREE or BASS_UNICODE or BASS_MP3_SETPOS, nil, nil);
 
-  FActiveChannel := BASS_StreamCreateURL(PChar(FStreamURL), 0, BASS_STREAM_STATUS or
-    BASS_STREAM_AUTOFREE or BASS_UNICODE or BASS_MP3_SETPOS, nil, nil);
-
-  if FActiveChannel <> 0 then
-  begin
-    if BASS_ChannelPlay(FActiveChannel, False) then
+    if FActiveChannel <> 0 then
     begin
-      BASS_ChannelRemoveSync(FActiveChannel, FPlaySync);
-      FPlaySync := BASS_ChannelSetSync(FActiveChannel, BASS_SYNC_END, 1, @FSync, nil);
-      if Assigned(FStatusProc) then
-        FStatusProc(strCompleted, 100);
+      if BASS_ChannelPlay(FActiveChannel, False) then
+      begin
+        BASS_ChannelRemoveSync(FActiveChannel, FPlaySync);
+        FPlaySync := BASS_ChannelSetSync(FActiveChannel, BASS_SYNC_END, 1, @FSync, nil);
+        if Assigned(FStatusProc) then
+          FStatusProc(strCompleted, 100);
 
-      Result := True;
-      FIsPlay := True;
+        Result := True;
+        FIsPlay := True;
+      end;
+    end
+    else
+    begin
+      FLastErrorCode := Bass_ErrorGetCode;
     end;
-  end
-  else
-  begin
-    FLastErrorCode := Bass_ErrorGetCode;
+  finally
+    FOpenning := False;
   end;
-  FOpenning := False;
 end;
 
 procedure TBASSPlayer.Pause;

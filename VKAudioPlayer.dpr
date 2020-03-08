@@ -13,7 +13,10 @@ uses
   Vcl.Styles,
   VK.API in '..\VK_API\VK.API.pas',
   BassPlayer.LoadHandle in 'BassPlayer.LoadHandle.pas',
-  VKAP.Player in 'VKAP.Player.pas' {FormPlayer};
+  VKAP.Player in 'VKAP.Player.pas' {FormPlayer},
+  SQLite3 in '..\SQLite\SQLite3.pas',
+  SQLiteTable3 in '..\SQLite\SQLiteTable3.pas',
+  SQLLang in '..\SQLite\SQLLang.pas';
 
 {$R *.res}
 
@@ -24,6 +27,7 @@ begin
   {$IFDEF DEBUG}
   ReportMemoryLeaksOnShutdown := True;
   {$ENDIF}
+  Application.Title := 'VK Audio Player by HGM';
   Application.CreateForm(TFormMain, FormMain);
   Application.CreateForm(TFormPlayer, FormPlayer);
   Application.ProcessMessages;

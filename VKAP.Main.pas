@@ -8,7 +8,7 @@ uses
   Vcl.Grids, HGM.Controls.VirtualTable, Vcl.ExtCtrls, BassPlayer, Vcl.StdCtrls, HGM.Button,
   Vcl.ComCtrls, HGM.Controls.PanelExt, System.ImageList, Vcl.ImgList, Vcl.Imaging.pngimage,
   System.Generics.Collections, Vcl.Imaging.jpeg, VK.Entity.Playlist, VK.Entity.User,
-  BassPlayer.LoadHandle, VK.Entity.Audio, VKAP.Player, acPNG;
+  BassPlayer.LoadHandle, VK.Entity.Audio, VKAP.Player, SQLiteTable3, SQLLang;
 
 type
   TAudio = record
@@ -42,18 +42,31 @@ type
     AlbumPhoto: string;
     Image: TPicture;
     Id: Integer;
-    IsClosed: Boolean;
+    CanSeeAudio: Boolean;
   end;
 
   TAlbumThumb = record
     Image: TPicture;
+    Stored: Boolean;
     URL: string;
     class function CreateItem(AImage: TPicture; AUrl: string): TAlbumThumb; static;
   end;
 
   TAlbumThumbs = class(TList<TAlbumThumb>)
+    const
+      TableName = 'ImageCache';
+      fnID = 'icID';
+      fnURL = 'icURL';
+      fnImage = 'icImage';
+  private
+    FDB: TSQLiteDatabase;
+  public
+    procedure LoadImages;
+    procedure SaveImages;
+    function FindPicture(Url: string; var Index: Integer): Boolean;
     function GetImage(Url: string; var UseDefault: Boolean; Avatar: Boolean = False): TPicture;
     destructor Destroy; override;
+    constructor Create(ADB: TSQLiteDatabase);
   end;
 
   TPlayRepeat = (prNone, prAll, prOne);
@@ -177,6 +190,7 @@ type
     procedure EditSearchCurChange(Sender: TObject);
     procedure FormShow(Sender: TObject);
     procedure ButtonFlatMyMusicClick(Sender: TObject);
+    procedure ImageAvatarClick(Sender: TObject);
   private
     FMouseInScale: Boolean;
     FMouseInButton: Boolean;
@@ -220,6 +234,9 @@ type
     FAvatarMask: TPngImage;
     FAvatarDef: TPngImage;
     FAudioMask: TPngImage;
+    FTerminating: Boolean;
+    FChangingUser: Boolean;
+    FDB: TSQLiteDatabase;
     procedure FOnAudioEnd(Sender: TObject);
     function FindNext(CurrentId: Integer; HandlePlay: Boolean): Integer;
     function FindPrev(CurrentId: Integer; HandlePlay: Boolean): Integer;
@@ -256,10 +273,13 @@ type
     procedure DrawAlbumInfo(Target: TCanvas; List: TPlaylists; Index: Integer; Rect: TRect);
   public
     procedure Quit;
+    procedure Mini;
+    procedure Full;
   end;
 
 var
   FormMain: TFormMain;
+  AppFolder: string;
 
 function CreateAvatar(Source: TGraphic; Mask: TPngImage): TPngImage;
 
@@ -274,9 +294,9 @@ function CreateAvatar(Source: TGraphic; Mask: TPngImage): TPngImage;
 var
   BMPSmooth: TBitmap;
 begin
-  BMPSmooth := SmoothStrechDraw(Source, TRect.Create(0, 0, Mask.Width - 1, Mask.Height - 1));
+  BMPSmooth := SmoothStrechDraw(Source, TRect.Create(0, 0, Mask.Width, Mask.Height));
   Result := TPngImage.CreateBlank(COLOR_RGB, 16, Mask.Width, Mask.Height);
-  Result.Canvas.Draw(0, 0, BMPSmooth);
+  Result.Assign(BMPSmooth);
   Result.CreateAlpha;
   BMPSmooth.Free;
   ApplyMask(0, 0, Mask, Result);
@@ -323,7 +343,7 @@ begin
     begin
       TxtRect := TRect.Create(TPoint.Zero, 100, 20);
       TxtRect.SetLocation(Rect.Right - (TxtRect.Width + 60), Rect.CenterPoint.Y - TxtRect.Height div 2);
-      S := 'Не доступна';
+      S := 'Недоступна';
       Font.Color := clWhite;
       Pen.Color := clMaroon;
       Brush.Color := $005A5AAC;
@@ -535,6 +555,18 @@ begin
           S := FFriends[ARow].Status;
           Font.Color := $00939393;
           TextRect(TxtRect, S, [tfSingleLine, tfTop, tfLeft, tfEndEllipsis]);
+
+          if not FFriends[ARow].CanSeeAudio then
+          begin
+            TxtRect := TRect.Create(TPoint.Zero, 100, 20);
+            TxtRect.SetLocation(Rect.Right - (TxtRect.Width + 60), Rect.CenterPoint.Y - TxtRect.Height div 2);
+            S := 'Недоступна';
+            Font.Color := clWhite;
+            Pen.Color := clMaroon;
+            Brush.Color := $005A5AAC;
+            RoundRect(TxtRect, 4, 4);
+            TextRect(TxtRect, S, [tfSingleLine, tfVerticalCenter, tfCenter]);
+          end;
         end;
     end;
   end;
@@ -561,16 +593,16 @@ begin
       try
         Pic.LoadFromStream(Mem);
         Png := CreateAvatar(Pic.Graphic, FormMain.FAvatarMask);
+        ImageAvatar.Picture.Assign(Png);
+        Png.Free;
         UseDefault := False;
       except
       end;
     end;
     if UseDefault then
     begin
-      Png := FAvatarDef;
+      ImageAvatar.Picture.Assign(FAvatarDef);
     end;
-    ImageAvatar.Picture.Assign(Png);
-    Png.Free;
   finally
     Pic.Free;
     Mem.Free;
@@ -585,24 +617,34 @@ var
 begin
   if not FFriends.IndexIn(Index) then
     Exit;
-  FVkId := FFriends[Index].Id;
-  Params.OwnerId(FVkId);
-  Params.Count(1);
-  if VK.Audio.Get(Audios, Params) then
-  begin
-    ButtonFlatMyMusic.Show;
-    if Length(Audios.Items) <= 0 then
-      ShowMessage('У выбранного пользователя нет музыки');
-    Audios.Free;
-    ReloadItems;
-    if VK.Users.Get(User, FVkId) then
+  if FChangingUser then
+    Exit;
+  FChangingUser := True;
+  try
+    Params.OwnerId(FFriends[Index].Id);
+    Params.Count(1);
+    if VK.Audio.Get(Audios, Params) then
     begin
-      SetCurrentUser(User);
-      User.Free;
-    end;
-  end
-  else
-    ShowMessage('Музыка закрыта');
+      try
+        FVkId := FFriends[Index].Id;
+        ButtonFlatMyMusic.Show;
+        if Length(Audios.Items) <= 0 then
+          ShowMessage('У выбранного пользователя нет музыки');
+      finally
+        Audios.Free;
+      end;
+      ReloadItems;
+      if VK.Users.Get(User, FVkId) then
+      begin
+        SetCurrentUser(User);
+        User.Free;
+      end;
+    end
+    else
+      ShowMessage('Музыка закрыта');
+  finally
+    FChangingUser := False;
+  end;
 end;
 
 procedure TFormMain.TableExMyMusicDrawCellData(Sender: TObject; ACol, ARow: Integer; Rect: TRect;
@@ -780,7 +822,6 @@ begin
       Exit(True);
     end;
     TableExCurrent.ItemIndex := Index;
-    FPlayer.Stop;
     Audio := FCurrentList[Index];
     SetInfo(Audio);
     FPlayingId := Audio.Id;
@@ -796,6 +837,7 @@ begin
       begin
         FOpenning := False;
         Inc(FFailCount);
+        FPlayer.Stop;
         Exit;
       end;
     end;
@@ -816,7 +858,10 @@ begin
       Result := FRes;
     end
     else
+    begin
+      FPlayer.Stop;
       Inc(FFailCount);
+    end;
   end;
   FOpenning := False;
 end;
@@ -832,6 +877,11 @@ begin
     FPlayer.Pause
   else if FPlayingId >= 0 then
     FPlayer.Resume
+  else if FCurrentList.Count <= 0 then
+  begin
+    FillCurrentFromMyMusic;
+    Play(0);
+  end
   else
     Play(0);
 end;
@@ -1403,6 +1453,7 @@ end;
 
 procedure TFormMain.Quit;
 begin
+  FTerminating := True;
   TimerEqu.Enabled := False;
   TimerRefresh.Enabled := False;
   VK.Await;
@@ -1428,6 +1479,8 @@ end;
 
 procedure TFormMain.FOnAudioEnd(Sender: TObject);
 begin
+  if FTerminating then
+    Exit;
   PlayNext(False);
 end;
 
@@ -1456,20 +1509,25 @@ begin
       FFriends.Clear;
       Result := False;
       try
-        if VK.Friends.Get(Users, 'nickname, sex, photo_50', fsName) then
+        if VK.Friends.Get(Users, 'nickname, sex, photo_50, status, can_see_audio', fsName) then
         begin
-          for i := Low(Users.Items) to High(Users.Items) do
-          begin
-            if LT.NeedStop then
-              Break;
-            Friend.Id := Users.Items[i].Id;
-            Friend.FirstName := Users.Items[i].FirstName;
-            Friend.LastName := Users.Items[i].LastName;
-            Friend.AlbumPhoto := Users.Items[i].Photo50;
-            Friend.IsClosed := Users.Items[i].CanSeeAudio <> 1;
-            FFriends.Add(Friend);
+          try
+            for i := Low(Users.Items) to High(Users.Items) do
+            begin
+              if LT.NeedStop then
+                Break;
+              Friend.Id := Users.Items[i].Id;
+              Friend.FirstName := Users.Items[i].FirstName;
+              Friend.LastName := Users.Items[i].LastName;
+              Friend.AlbumPhoto := Users.Items[i].Photo50;
+              Friend.CanSeeAudio := Users.Items[i].CanSeeAudio = 1;
+              Friend.Image := nil;
+              Friend.Status := Users.Items[i].Status;
+              FFriends.Add(Friend);
+            end;
+          finally
+            Users.Free;
           end;
-          Users.Free;
           Result := not LT.NeedStop;
         end;
       finally
@@ -1505,15 +1563,18 @@ begin
         Params.AlbumId(Id);
         if VK.Audio.Get(Audios, Params) then
         begin
-          for i := Low(Audios.Items) to High(Audios.Items) do
-          begin
-            if not LT.NeedStop then
+          try
+            for i := Low(Audios.Items) to High(Audios.Items) do
             begin
-              Audio.Fill(Audios.Items[i]);
-              FCurrentList.Add(Audio);
+              if not LT.NeedStop then
+              begin
+                Audio.Fill(Audios.Items[i]);
+                FCurrentList.Add(Audio);
+              end;
             end;
+          finally
+            Audios.Free;
           end;
-          Audios.Free;
           Result := not LT.NeedStop;
         end;
       finally
@@ -1596,24 +1657,26 @@ begin
       Audios: TVkAudios;
       Audio: TAudio;
     begin
-      //
+      Result := False;
       FLoadPicMusic.Stop;
       FLoadPicMusic.Await(False);
 
       FMyMusic.BeginUpdate;
-      FMyMusic.Clear;
-      Result := False;
       try
+        FMyMusic.Clear;
         if VK.Audio.Get(Audios, FVkId) then
         begin
-          for i := Low(Audios.Items) to High(Audios.Items) do
-          begin
-            if LT.NeedStop then
-              Break;
-            Audio.Fill(Audios.Items[i]);
-            FMyMusic.Add(Audio);
+          try
+            for i := Low(Audios.Items) to High(Audios.Items) do
+            begin
+              if LT.NeedStop then
+                Break;
+              Audio.Fill(Audios.Items[i]);
+              FMyMusic.Add(Audio);
+            end;
+          finally
+            Audios.Free;
           end;
-          Audios.Free;
           Result := not LT.NeedStop;
         end;
       finally
@@ -1640,13 +1703,13 @@ begin
       Audios: TVkAudios;
       Audio: TAudio;
     begin
+      Result := False;
       FLoadPicSearch.Stop;
       FLoadPicSearch.Await(False);
 
       FSearchList.BeginUpdate;
-      FSearchList.Clear;
-      Result := False;
       try
+        FSearchList.Clear;
         if VK.Audio.Search(Audios, Query) then
         begin
           try
@@ -1826,6 +1889,8 @@ begin
 
   FPlayingId := -1;
   FAppLoading := True;
+  FTerminating := False;
+  FChangingUser := False;
   FOpenning := False;
   FShowLeftTime := False;
   CreateLoaders;
@@ -1837,17 +1902,19 @@ begin
   FAudioMask := TPngImage.Create;
   FAudioMask.LoadFromResourceName(HInstance, 'avatarmask');
 
-  FAlbumThumbs := TAlbumThumbs.Create;
+  FDB := TSQLiteDatabase.Create(AppFolder + 'cache.db');
+  FAlbumThumbs := TAlbumThumbs.Create(FDB);
+  Stream := TResourceStream.Create(HInstance, 'blank', RT_RCDATA);
+  i := FAlbumThumbs.Add(TAlbumThumb.CreateItem(TPicture.Create, ''));
+  FAlbumThumbs[i].Image.LoadFromStream(Stream);
+  Stream.Free;
+  //FAlbumThumbs.LoadImages;
   FPlayImage := TPngImage.Create;
   FPlayImage.LoadFromResourceName(HInstance, 'play');
   FPauseImage := TPngImage.Create;
   FPauseImage.LoadFromResourceName(HInstance, 'pause');
   FActiveImage := TPngImage.Create;
   FActiveImage.LoadFromResourceName(HInstance, 'active');
-  Stream := TResourceStream.Create(HInstance, 'blank', RT_RCDATA);
-  i := FAlbumThumbs.Add(TAlbumThumb.CreateItem(TPicture.Create, ''));
-  FAlbumThumbs[i].Image.LoadFromStream(Stream);
-  Stream.Free;
 
   FSettings := TSettingsIni.Create(ExtractFilePath(ParamStr(0)) + '\config.ini');
   FMyMusic := TAudioList.Create(TableExMyMusic);
@@ -1911,6 +1978,7 @@ begin
   FPlayImage.Free;
   FPauseImage.Free;
   FActiveImage.Free;
+  FAlbumThumbs.SaveImages;
   FAlbumThumbs.Free;
   FLoadUsers.Free;
   FLoadPlaylist.Free;
@@ -1924,11 +1992,34 @@ begin
   FAvatarMask.Free;
   FAvatarDef.Free;
   FAudioMask.Free;
+  FDB.Free;
 end;
 
 procedure TFormMain.FormShow(Sender: TObject);
 begin
+  //ShowWindow(Application.Handle, SW_HIDE);
+end;
+
+procedure TFormMain.Full;
+begin
+  ShowWindow(Application.Handle, SW_SHOW);
+  FormStyle := fsNormal;
+  Show;
+  FormPlayer.Hide;
+  BringToFront;
+end;
+
+procedure TFormMain.Mini;
+begin
   ShowWindow(Application.Handle, SW_HIDE);
+  Hide;
+  FormPlayer.Show;
+  FormPlayer.BringToFront;
+end;
+
+procedure TFormMain.ImageAvatarClick(Sender: TObject);
+begin
+  Mini;
 end;
 
 procedure TFormMain.VKAuth(Sender: TObject; var Token: string; var TokenExpiry: Int64; var ChangePasswordHash: string);
@@ -2001,11 +2092,18 @@ end;
 
 class function TAlbumThumb.CreateItem(AImage: TPicture; AUrl: string): TAlbumThumb;
 begin
+  Result.Stored := False;
   Result.Image := AImage;
   Result.URL := AUrl;
 end;
 
 { TAlbumThumbs }
+
+constructor TAlbumThumbs.Create(ADB: TSQLiteDatabase);
+begin
+  inherited Create;
+  FDB := ADB;
+end;
 
 destructor TAlbumThumbs.Destroy;
 var
@@ -2017,6 +2115,127 @@ begin
   except
   end;
   inherited;
+end;
+
+procedure TAlbumThumbs.SaveImages;
+var
+  i, ID: Integer;
+  Mem: TMemoryStream;
+begin
+  if not FDB.TableExists(TableName) then
+  begin
+    with SQL.CreateTable(TableName) do
+    begin
+      AddField(fnID, ftInteger, True, True);
+      AddField(fnURL, ftString);
+      AddField(fnImage, ftBlob);
+      FDB.ExecSQL(GetSQL);
+      EndCreate;
+    end;
+  end;
+  for i := 0 to Count - 1 do
+  begin
+    if Items[i].Url.IsEmpty or Items[i].Stored then
+      Continue;
+    with SQL.Select(TableName, [fnID]) do
+    begin
+      WhereFieldEqual(fnURL, Items[i].Url);
+      ID := FDB.GetTableValue(GetSQL);
+      EndCreate;
+    end;
+    if ID < 0 then
+      with SQL.InsertInto(TableName) do
+      begin
+        AddValue(fnURL, Items[i].Url);
+        FDB.ExecSQL(GetSQL);
+        ID := FDB.GetLastInsertRowID;
+        EndCreate;
+      end;
+    with SQL.UpdateBlob(TableName, fnImage) do
+    begin
+      WhereFieldEqual(fnID, ID);
+      Mem := TMemoryStream.Create;
+      Items[i].Image.SaveToStream(Mem);
+      if Mem.Size > 0 then
+        FDB.UpdateBlob(GetSQL, Mem);
+      Mem.Free;
+      EndCreate;
+    end;
+  end;
+end;
+
+procedure TAlbumThumbs.LoadImages;
+var
+  Table: TSQLiteTable;
+  Mem: TMemoryStream;
+  Item: TAlbumThumb;
+begin
+  if not FDB.TableExists(TableName) then
+    Exit;
+  with SQL.Select(TableName, [fnURL, fnImage]) do
+  begin
+    Table := FDB.GetTable(GetSQL);
+    Table.MoveFirst;
+    while not Table.EOF do
+    begin
+      Mem := Table.FieldAsBlob(1);
+      if Assigned(Mem) then
+      begin
+        try
+          Item.Image := TPicture.Create;
+          Mem.Position := 0;
+          Item.Image.LoadFromStream(Mem);
+          Item.URL := Table.FieldAsString(0);
+          Item.Stored := True;
+          Add(Item);
+        except
+        end;
+      end;
+      Table.Next;
+    end;
+    Table.Free;
+    EndCreate;
+  end;
+end;
+
+function TAlbumThumbs.FindPicture(Url: string; var Index: Integer): Boolean;
+var
+  Table: TSQLiteTable;
+  Mem: TMemoryStream;
+  Item: TAlbumThumb;
+begin
+  Index := -1;
+  Result := False;
+  if not FDB.TableExists(TableName) then
+    Exit;
+  with SQL.Select(TableName, [fnURL, fnImage]) do
+  begin
+    WhereFieldEqual(fnURL, Url);
+    Table := FDB.GetTable(GetSQL);
+    try
+      Table.MoveFirst;
+      if Table.RowCount > 0 then
+      begin
+        Mem := Table.FieldAsBlob(fnImage);
+        if Assigned(Mem) then
+        begin
+          try
+            Item.Image := TPicture.Create;
+            Mem.Position := 0;
+            Item.Image.LoadFromStream(Mem);
+            Item.URL := Table.FieldAsString(fnURL);
+            Item.Stored := True;
+            Index := Add(Item);
+            Result := True;
+          except
+          end;
+        end;
+      end;
+    finally
+      Table.Free;
+      EndCreate;
+    end;
+  end;
 end;
 
 function TAlbumThumbs.GetImage(Url: string; var UseDefault: Boolean; Avatar: Boolean): TPicture;
@@ -2037,6 +2256,10 @@ begin
       else
         Exit(Items[0].Image);
     end;
+  end;
+  if FindPicture(Url, i) then
+  begin
+    Exit(Items[i].Image);
   end;
   Mem := DownloadURL(Url);
   try
@@ -2107,9 +2330,13 @@ procedure TAudio.Fill(Audio: TVkAudio);
 var
   M, S: Integer;
 begin
+  Image := nil;
   Artist := Audio.Artist;
   Title := Audio.Title;
-  AlbumPhoto := Audio.Album.Thumb.Photo68;
+  if Assigned(Audio.Album) and Assigned(Audio.Album.Thumb) then
+    AlbumPhoto := Audio.Album.Thumb.Photo68
+  else
+    AlbumPhoto := '';
   Id := Audio.Id;
   OwnerId := Audio.OwnerId;
   Restricted := Audio.ContentRestricted > 0;
@@ -2119,6 +2346,12 @@ begin
   Duration := Format('%d:%.2d', [M, S]);
   AccessKey := Audio.AccessKey;
 end;
+
+initialization
+  AppFolder := GetAppData + 'VKAudioPlayer\';
+  if not DirectoryExists(AppFolder) then
+    if not CreateDir(AppFolder) then
+      AppFolder := ExtractFilePath(Application.ExeName);
 
 end.
 

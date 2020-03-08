@@ -74,8 +74,6 @@ end;
 
 procedure TLoadThread.FProc;
 begin
-  if Assigned(FBefore) then
-    FBefore;
   TThread.CreateAnonymousThread(
     procedure
     var
@@ -86,15 +84,28 @@ begin
         Sleep(100);
       FDoStopThread := False;
       FWorking := True;
-      try
-        DoAfter := FAsync(Self);
-        if Assigned(FAfter) then
+      TThread.Synchronize(TThread.Current,
+        procedure
         begin
-          FAfter(DoAfter and (not FDoStopThread));
+          if Assigned(FBefore) then
+            FBefore;
+        end);
+      try
+        try
+          DoAfter := FAsync(Self);
+          TThread.Synchronize(TThread.Current,
+            procedure
+            begin
+              if Assigned(FAfter) then
+              begin
+                FAfter(DoAfter and (not FDoStopThread));
+              end;
+            end);
+        finally
+          FWorking := False;
         end;
       except
       end;
-      FWorking := False;
     end).Start;
 end;
 
@@ -122,8 +133,6 @@ end;
 
 procedure TLoadPlaylist.FProc(OwnerId, Id: Integer);
 begin
-  if Assigned(FBefore) then
-    FBefore;
   TThread.CreateAnonymousThread(
     procedure
     var
@@ -134,15 +143,28 @@ begin
         Sleep(100);
       FDoStopThread := False;
       FWorking := True;
-      try
-        DoAfter := FAsync(Self, OwnerId, Id);
-        if Assigned(FAfter) then
+      TThread.Synchronize(TThread.Current,
+        procedure
         begin
-          FAfter((not FDoStopThread) and DoAfter);
+          if Assigned(FBefore) then
+            FBefore;
+        end);
+      try
+        try
+          DoAfter := FAsync(Self, OwnerId, Id);
+          TThread.Synchronize(TThread.Current,
+            procedure
+            begin
+              if Assigned(FAfter) then
+              begin
+                FAfter(DoAfter and (not FDoStopThread));
+              end;
+            end);
+        finally
+          FWorking := False;
         end;
       except
       end;
-      FWorking := False;
     end).Start;
 end;
 
@@ -200,8 +222,6 @@ end;
 
 procedure TLoadSearch.FProc(Query: string);
 begin
-  if Assigned(FBefore) then
-    FBefore;
   TThread.CreateAnonymousThread(
     procedure
     var
@@ -212,15 +232,28 @@ begin
         Sleep(100);
       FDoStopThread := False;
       FWorking := True;
-      try
-        DoAfter := FAsync(Self, Query);
-        if Assigned(FAfter) then
+      TThread.Synchronize(TThread.Current,
+        procedure
         begin
-          FAfter((not FDoStopThread) and DoAfter);
+          if Assigned(FBefore) then
+            FBefore;
+        end);
+      try
+        try
+          DoAfter := FAsync(Self, Query);
+          TThread.Synchronize(TThread.Current,
+            procedure
+            begin
+              if Assigned(FAfter) then
+              begin
+                FAfter(DoAfter and (not FDoStopThread));
+              end;
+            end);
+        finally
+          FWorking := False;
         end;
       except
       end;
-      FWorking := False;
     end).Start;
 end;
 
