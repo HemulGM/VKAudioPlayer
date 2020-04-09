@@ -15,9 +15,12 @@ type
     FOnEnd: TAudioEnd;
     FIsPlay: Boolean;
     FOpenning: BOOL;
+    FOnChangeState: TNotifyEvent;
+    FVolumeChannel: Single;
     function GetLastErrorCode: Integer;
     function GetSize: Int64;
     procedure UnloadChannel;
+    procedure DoChangeState;
     procedure SetPosition(const Value: Int64);
     function GetPosition: Int64;
     procedure DoOnEnd(handle: HSYNC; channel, data: Cardinal; user: Pointer);
@@ -32,6 +35,11 @@ type
     function GetPositionByte: Int64;
     procedure SetPositionByte(const Value: Int64);
     function GetSizeByte: Int64;
+    procedure SetOnChangeState(const Value: TNotifyEvent);
+    procedure SetVolumeChannel(const Value: Single);
+    procedure SetVolume(const AValue: Single);
+    function GetVolume: Single;
+    procedure UpdateChannelVolume;
   public
     FStreamURL: string;
     FActiveChannel: HSTREAM;
@@ -43,8 +51,6 @@ type
     FPauseOnIncomingCalls: Boolean;
     constructor Create(AOwner: TComponent); override;
     destructor Destroy; override;
-    procedure SetVolume(const AValue: Single);
-    function GetVolume: Single;
     function Play: Boolean;
     procedure Stop;
     procedure Pause;
@@ -69,6 +75,9 @@ type
     property SizeAsBuffer: Int64 read GetSizeAsBuffer;
     property IsPlay: Boolean read FIsPlay;
     property OnEnd: TAudioEnd read FOnEnd write SetOnEnd;
+    property Volume: Single read GetVolume write SetVolume;
+    property VolumeChannel: Single read FVolumeChannel write SetVolumeChannel;
+    property OnChangeState: TNotifyEvent read FOnChangeState write SetOnChangeState;
   end;
 
 var
@@ -97,16 +106,31 @@ begin
   FBroadcastMetaProc := nil;
   FIsPlay := False;
   Player := Self;
+  FVolumeChannel := 100;
 end;
 
 function TBASSPlayer.GetVolume: Single;
 begin
-  Result := BASS_GetVolume;
+  Result := BASS_GetVolume * 100;
 end;
 
 procedure TBASSPlayer.SetVolume(const AValue: Single);
 begin
-  BASS_SetVolume(AValue);
+  BASS_SetVolume(AValue / 100);
+end;
+
+procedure TBASSPlayer.UpdateChannelVolume;
+begin
+  if FActiveChannel <> 0 then
+  begin
+    BASS_ChannelSetAttribute(FActiveChannel, BASS_ATTRIB_VOL, FVolumeChannel / 100);
+  end;
+end;
+
+procedure TBASSPlayer.SetVolumeChannel(const Value: Single);
+begin
+  FVolumeChannel := Value;
+  UpdateChannelVolume;
 end;
 
 function TBASSPlayer.Init(Handle: THandle): Boolean;
@@ -152,6 +176,7 @@ begin
 
     if FActiveChannel <> 0 then
     begin
+      UpdateChannelVolume;
       if BASS_ChannelPlay(FActiveChannel, False) then
       begin
         BASS_ChannelRemoveSync(FActiveChannel, FPlaySync);
@@ -170,13 +195,17 @@ begin
   finally
     FOpenning := False;
   end;
+  DoChangeState;
 end;
 
 procedure TBASSPlayer.Pause;
 begin
   FIsPlay := False;
   if FActiveChannel <> 0 then
-    BASS_ChannelPause(FActiveChannel)
+  begin
+    BASS_ChannelPause(FActiveChannel);
+    DoChangeState;
+  end
   else
     Play;
 end;
@@ -188,6 +217,7 @@ begin
     Result := BASS_ChannelPlay(FActiveChannel, False);
   if Result then
     FIsPlay := True;
+  DoChangeState;
 end;
 
 procedure TBASSPlayer.SetPosition(const Value: Int64);
@@ -216,7 +246,16 @@ procedure TBASSPlayer.Stop;
 begin
   FIsPlay := False;
   if FActiveChannel <> 0 then
+  begin
     BASS_ChannelStop(FActiveChannel);
+    DoChangeState;
+  end;
+end;
+
+procedure TBASSPlayer.DoChangeState;
+begin
+  if Assigned(FOnChangeState) then
+    FOnChangeState(Self);
 end;
 
 procedure TBASSPlayer.DoOnEnd(handle: HSYNC; channel, data: Cardinal; user: Pointer);
@@ -296,6 +335,8 @@ end;
 
 function TBASSPlayer.GetBufferringPercent: Extended;
 begin
+  if (SizeAsBuffer < 0) or (Bufferring < 0) then
+    Exit(0);
   Result := Min(Max(0, (100 / SizeAsBuffer) * Bufferring), 100);
 end;
 
@@ -321,6 +362,11 @@ end;
 procedure TBASSPlayer.SetBroadcastMetaProc(AProc: TBroadcastMetaProc);
 begin
   FBroadcastMetaProc := AProc;
+end;
+
+procedure TBASSPlayer.SetOnChangeState(const Value: TNotifyEvent);
+begin
+  FOnChangeState := Value;
 end;
 
 procedure TBASSPlayer.SetOnEnd(const Value: TAudioEnd);

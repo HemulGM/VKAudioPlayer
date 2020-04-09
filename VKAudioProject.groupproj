@@ -1,0 +1,72 @@
+﻿<Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+    <PropertyGroup>
+        <ProjectGuid>{A5A2D2A1-CB69-4051-8233-379BD413B7E1}</ProjectGuid>
+    </PropertyGroup>
+    <ItemGroup>
+        <Projects Include="VKAudioPlayer.dproj">
+            <Dependencies/>
+        </Projects>
+        <Projects Include="..\#Little\Audio\Audio.dproj">
+            <Dependencies/>
+        </Projects>
+        <Projects Include="..\VK_API\VKComponents.dproj">
+            <Dependencies/>
+        </Projects>
+        <Projects Include="..\Components\HGMComponents.dproj">
+            <Dependencies/>
+        </Projects>
+    </ItemGroup>
+    <ProjectExtensions>
+        <Borland.Personality>Default.Personality.12</Borland.Personality>
+        <Borland.ProjectType/>
+        <BorlandProject>
+            <Default.Personality/>
+        </BorlandProject>
+    </ProjectExtensions>
+    <Target Name="VKAudioPlayer">
+        <MSBuild Projects="VKAudioPlayer.dproj"/>
+    </Target>
+    <Target Name="VKAudioPlayer:Clean">
+        <MSBuild Projects="VKAudioPlayer.dproj" Targets="Clean"/>
+    </Target>
+    <Target Name="VKAudioPlayer:Make">
+        <MSBuild Projects="VKAudioPlayer.dproj" Targets="Make"/>
+    </Target>
+    <Target Name="Audio">
+        <MSBuild Projects="..\#Little\Audio\Audio.dproj"/>
+    </Target>
+    <Target Name="Audio:Clean">
+        <MSBuild Projects="..\#Little\Audio\Audio.dproj" Targets="Clean"/>
+    </Target>
+    <Target Name="Audio:Make">
+        <MSBuild Projects="..\#Little\Audio\Audio.dproj" Targets="Make"/>
+    </Target>
+    <Target Name="VKComponents">
+        <MSBuild Projects="..\VK_API\VKComponents.dproj"/>
+    </Target>
+    <Target Name="VKComponents:Clean">
+        <MSBuild Projects="..\VK_API\VKComponents.dproj" Targets="Clean"/>
+    </Target>
+    <Target Name="VKComponents:Make">
+        <MSBuild Projects="..\VK_API\VKComponents.dproj" Targets="Make"/>
+    </Target>
+    <Target Name="HGMComponents">
+        <MSBuild Projects="..\Components\HGMComponents.dproj"/>
+    </Target>
+    <Target Name="HGMComponents:Clean">
+        <MSBuild Projects="..\Components\HGMComponents.dproj" Targets="Clean"/>
+    </Target>
+    <Target Name="HGMComponents:Make">
+        <MSBuild Projects="..\Components\HGMComponents.dproj" Targets="Make"/>
+    </Target>
+    <Target Name="Build">
+        <CallTarget Targets="VKAudioPlayer;Audio;VKComponents;HGMComponents"/>
+    </Target>
+    <Target Name="Clean">
+        <CallTarget Targets="VKAudioPlayer:Clean;Audio:Clean;VKComponents:Clean;HGMComponents:Clean"/>
+    </Target>
+    <Target Name="Make">
+        <CallTarget Targets="VKAudioPlayer:Make;Audio:Make;VKComponents:Make;HGMComponents:Make"/>
+    </Target>
+    <Import Project="$(BDS)\Bin\CodeGear.Group.Targets" Condition="Exists('$(BDS)\Bin\CodeGear.Group.Targets')"/>
+</Project>

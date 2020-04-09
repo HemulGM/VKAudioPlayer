@@ -3,12 +3,12 @@ unit VKAP.Main;
 interface
 
 uses
-  Winapi.Windows, Winapi.Messages, System.SysUtils, System.Variants, System.Classes, Vcl.Graphics,
-  Vcl.Controls, Vcl.Forms, Vcl.Dialogs, System.Types, VK.API, VK.Components, HGM.Common.Settings,
-  Vcl.Grids, HGM.Controls.VirtualTable, Vcl.ExtCtrls, BassPlayer, Vcl.StdCtrls, HGM.Button,
-  Vcl.ComCtrls, HGM.Controls.PanelExt, System.ImageList, Vcl.ImgList, Vcl.Imaging.pngimage,
-  System.Generics.Collections, Vcl.Imaging.jpeg, VK.Entity.Playlist, VK.Entity.User,
-  BassPlayer.LoadHandle, VK.Entity.Audio, VKAP.Player, SQLiteTable3, SQLLang;
+  Winapi.Windows, Winapi.Messages, System.SysUtils, System.Variants, System.Classes, Vcl.Graphics, Vcl.Controls,
+  Vcl.Forms, Vcl.Dialogs, System.Types, VK.API, VK.Components, HGM.Common.Settings, Vcl.Grids, HGM.Controls.VirtualTable,
+  Vcl.ExtCtrls, BassPlayer, Vcl.StdCtrls, HGM.Button, Vcl.ComCtrls, HGM.Controls.PanelExt, System.ImageList, Vcl.ImgList,
+  Vcl.Imaging.pngimage, System.Generics.Collections, Vcl.Imaging.jpeg, VK.Entity.Playlist, VK.Entity.User,
+  BassPlayer.LoadHandle, VK.Entity.Audio, VKAP.Player, SQLiteTable3, SQLLang, Vcl.Menus, Vcl.WinXCtrls,
+  HGM.Controls.TrackBar, System.Win.TaskbarCore, Vcl.Taskbar;
 
 type
   TAudio = record
@@ -71,14 +71,40 @@ type
 
   TPlayRepeat = (prNone, prAll, prOne);
 
-  TAudioList = class(TTableData<TAudio>)
-    function Find(AudioId: Integer): Integer; overload;
-    function Find(Query: string): Integer; overload;
+  IListFind = interface
+    function Find(Query: string; StartFrom: Integer = 0): Integer;
+    function IndexIn(Index: Integer): Boolean;
+    procedure SelectInTable(Index: Integer; Table: TTableEx = nil);
+    function GetFirstTableSelectedIndex: Integer;
   end;
 
-  TFriends = TTableData<TFriend>;
+  TAudioList = class(TTableData<TAudio>, IListFind)
+  protected
+    function _AddRef: Integer; stdcall;
+    function _Release: Integer; stdcall;
+    function QueryInterface(const IID: TGUID; out Obj): HResult; stdcall;
+  public
+    function Find(AudioId: Integer): Integer; overload;
+    function Find(Query: string; StartFrom: Integer = 0): Integer; overload;
+  end;
 
-  TPlaylists = TTableData<TPlaylist>;
+  TFriends = class(TTableData<TFriend>, IListFind)
+  protected
+    function _AddRef: Integer; stdcall;
+    function _Release: Integer; stdcall;
+    function QueryInterface(const IID: TGUID; out Obj): HResult; stdcall;
+  public
+    function Find(Query: string; StartFrom: Integer = 0): Integer; overload;
+  end;
+
+  TPlaylists = class(TTableData<TPlaylist>, IListFind)
+  protected
+    function _AddRef: Integer; stdcall;
+    function _Release: Integer; stdcall;
+    function QueryInterface(const IID: TGUID; out Obj): HResult; stdcall;
+  public
+    function Find(Query: string; StartFrom: Integer = 0): Integer; overload;
+  end;
 
   TEquItems = array[1..4] of Double;
 
@@ -94,7 +120,6 @@ type
     ImageList: TImageList;
     PanelTrackInfo: TPanel;
     ImageListL: TImageList;
-    DrawPanelTrackBar: TDrawPanel;
     ImageAlbum: TImage;
     PanelTrackSinger: TPanel;
     LabelArtist: TLabel;
@@ -112,7 +137,7 @@ type
     PanelPageControl: TPanel;
     PanelSearch: TPanel;
     EditSearch: TEdit;
-    ButtonFlat1: TButtonFlat;
+    ButtonFlatSearchBG: TButtonFlat;
     ButtonFlatSearch: TButtonFlat;
     PanelPageInd: TPanel;
     ShapeActivePage: TShape;
@@ -137,23 +162,26 @@ type
     ButtonFlatShuffle: TButtonFlat;
     ButtonFlatRepeat: TButtonFlat;
     TableExSearch: TTableEx;
-    Panel1: TPanel;
-    ButtonFlat2: TButtonFlat;
-    EditSearchCur: TEdit;
-    ButtonFlatSerachCur: TButtonFlat;
-    Panel2: TPanel;
+    PanelUser: TPanel;
     ImageAvatar: TImage;
     ButtonFlatMyMusic: TButtonFlat;
+    PopupMenuAudio: TPopupMenu;
+    MenuItemAudioDownload: TMenuItem;
+    MenuItemAudioAlbum: TMenuItem;
+    MenuItemAudioArtist: TMenuItem;
+    MenuItemAudioDelete: TMenuItem;
+    MenuItemAudioAdd: TMenuItem;
+    PanelLoading: TPanel;
+    ActivityIndicatorLoading: TActivityIndicator;
+    TrackbarPosition: ThTrackbar;
+    PanelVolume: TPanel;
+    TrackbarVolume: ThTrackbar;
+    Taskbar: TTaskbar;
+    CheckBoxFlatSerachType: TCheckBoxFlat;
     procedure FormCreate(Sender: TObject);
     procedure TableExMyMusicItemClick(Sender: TObject; MouseButton: TMouseButton; const Index: Integer);
     procedure FormDestroy(Sender: TObject);
     procedure TimerRefreshTimer(Sender: TObject);
-    procedure DrawPanelTrackBarPaint(Sender: TObject);
-    procedure DrawPanelTrackBarMouseEnter(Sender: TObject);
-    procedure DrawPanelTrackBarMouseDown(Sender: TObject; Button: TMouseButton; Shift: TShiftState; X, Y: Integer);
-    procedure DrawPanelTrackBarMouseUp(Sender: TObject; Button: TMouseButton; Shift: TShiftState; X, Y: Integer);
-    procedure DrawPanelTrackBarMouseLeave(Sender: TObject);
-    procedure DrawPanelTrackBarMouseMove(Sender: TObject; Shift: TShiftState; X, Y: Integer);
     procedure ButtonFlatDownloadClick(Sender: TObject);
     procedure TableExMyMusicDrawCellData(Sender: TObject; ACol, ARow: Integer; Rect: TRect; State: TGridDrawState);
     procedure ButtonFlatPrevClick(Sender: TObject);
@@ -161,7 +189,6 @@ type
     procedure ButtonFlatPlayPauseClick(Sender: TObject);
     procedure VKLogin(Sender: TObject);
     procedure VKErrorLogin(Sender: TObject; E: Exception; Code: Integer; Text: string);
-    procedure VKAuth(Sender: TObject; var Token: string; var TokenExpiry: Int64; var ChangePasswordHash: string);
     procedure FormCloseQuery(Sender: TObject; var CanClose: Boolean);
     procedure LabelTimeClick(Sender: TObject);
     procedure TimerEquTimer(Sender: TObject);
@@ -186,19 +213,16 @@ type
     procedure ButtonFlatSearchTabClick(Sender: TObject);
     procedure TableExSearchDrawCellData(Sender: TObject; ACol, ARow: Integer; Rect: TRect; State: TGridDrawState);
     procedure TableExSearchItemClick(Sender: TObject; MouseButton: TMouseButton; const Index: Integer);
-    procedure ButtonFlatSerachCurClick(Sender: TObject);
-    procedure EditSearchCurChange(Sender: TObject);
     procedure FormShow(Sender: TObject);
     procedure ButtonFlatMyMusicClick(Sender: TObject);
+    procedure VKAuth(Sender: TObject; Url: string; var Token: string; var TokenExpiry: Int64; var ChangePasswordHash: string);
+    procedure FormResize(Sender: TObject);
     procedure ImageAvatarClick(Sender: TObject);
+    procedure TrackbarPositionChange(Sender: TObject; Position: Extended);
+    procedure TrackbarVolumeChange(Sender: TObject; Position: Extended);
+    procedure TaskbarThumbButtonClick(Sender: TObject; AButtonID: Integer);
+    procedure EditSearchKeyPress(Sender: TObject; var Key: Char);
   private
-    FMouseInScale: Boolean;
-    FMouseInButton: Boolean;
-    FMouseIsDown: Boolean;
-    FMouseDownPos: TPoint;
-    FMousePos: TPoint;
-    FScalePercent: Extended;
-    FScaleRect: TRect;
     FToken: string;
     FMyMusic: TAudioList;
     FCurrentList: TAudioList;
@@ -237,7 +261,14 @@ type
     FTerminating: Boolean;
     FChangingUser: Boolean;
     FDB: TSQLiteDatabase;
+    FLoading: TDecoratePanel;
+    FFontColor: TColor;
+    FStyleColor: TColor;
+    FIsDark: Boolean;
+    FPlayIco: TIcon;
+    FPauseIco: TIcon;
     procedure FOnAudioEnd(Sender: TObject);
+    procedure FOnAudioChangeState(Sender: TObject);
     function FindNext(CurrentId: Integer; HandlePlay: Boolean): Integer;
     function FindPrev(CurrentId: Integer; HandlePlay: Boolean): Integer;
     function Play(Index: Integer): Boolean;
@@ -271,6 +302,9 @@ type
     procedure DrawAlbumThumb(Target: TCanvas; List: TPlaylists; Index: Integer; Rect: TRect; Hot: Boolean);
     procedure DrawAudioInfo(Target: TCanvas; List: TAudioList; Index: Integer; Rect: TRect);
     procedure DrawAlbumInfo(Target: TCanvas; List: TPlaylists; Index: Integer; Rect: TRect);
+    procedure SetColors(IsDark: Boolean);
+    procedure SearchInList(List: IListFind; Query: string);
+    function GetActiveList: IListFind;
   public
     procedure Quit;
     procedure Mini;
@@ -286,7 +320,7 @@ function CreateAvatar(Source: TGraphic; Mask: TPngImage): TPngImage;
 implementation
 
 uses
-  VK.Audio, HGM.Common.Utils, Direct2D, D2D1, Math, VK.OAuth2, VK.Friends;
+  VK.Audio, HGM.Common.Utils, Direct2D, D2D1, Math, VK.Vcl.OAuth2, VK.Friends, Vcl.Themes, Vcl.Styles;
 
 {$R *.dfm}
 
@@ -322,7 +356,7 @@ begin
     TxtRect.Inflate(-1, -1);
     TxtRect.Right := TxtRect.Right - 40;
     S := List[Index].Title;
-    Font.Color := clBlack;
+    Font.Color := FFontColor;
     TextRect(TxtRect, S, [tfSingleLine, tfBottom, tfLeft, tfEndEllipsis]);
 
     TxtRect := Rect;
@@ -395,6 +429,15 @@ begin
   end;
 end;
 
+procedure TFormMain.EditSearchKeyPress(Sender: TObject; var Key: Char);
+begin
+  if Key = #13 then
+  begin
+    Key := #0;
+    ButtonFlatSearchClick(nil);
+  end;
+end;
+
 procedure TFormMain.DrawAlbumThumb(Target: TCanvas; List: TPlaylists; Index: Integer; Rect: TRect; Hot: Boolean);
 begin
   with Target do
@@ -451,7 +494,7 @@ begin
     TxtRect.Inflate(-1, -1);
     TxtRect.Right := TxtRect.Right - 40;
     S := List[Index].Title;
-    Font.Color := clBlack;
+    Font.Color := FFontColor;
     TextRect(TxtRect, S, [tfSingleLine, tfBottom, tfLeft, tfEndEllipsis]);
 
     TxtRect := Rect;
@@ -470,8 +513,7 @@ begin
   end;
 end;
 
-procedure TFormMain.TableExCurrentDrawCellData(Sender: TObject; ACol, ARow: Integer; Rect: TRect;
-  State: TGridDrawState);
+procedure TFormMain.TableExCurrentDrawCellData(Sender: TObject; ACol, ARow: Integer; Rect: TRect; State: TGridDrawState);
 var
   TxtRect: TRect;
   S: string;
@@ -506,15 +548,14 @@ begin
     PlayNext(True);
 end;
 
-procedure TFormMain.TableExFriendsDrawCellData(Sender: TObject; ACol, ARow: Integer; Rect: TRect;
-  State: TGridDrawState);
+procedure TFormMain.TableExFriendsDrawCellData(Sender: TObject; ACol, ARow: Integer; Rect: TRect; State: TGridDrawState);
 var
   TxtRect: TRect;
   S: string;
 begin
   with TableExFriends.Canvas do
   begin
-    if (not FFriends.IndexIn(ARow)) or (FFriends.IsUpdate) then
+    if (not FFriends.IndexIn(ARow)) or (FFriends.IsUpdate) or (TableExFriends.ItemCount <= 0) then
     begin
       if ACol = 1 then
       begin
@@ -545,7 +586,7 @@ begin
           TxtRect.Inflate(-1, -1);
           TxtRect.Right := TxtRect.Right - 40;
           S := FFriends[ARow].FirstName + ' ' + FFriends[ARow].LastName;
-          Font.Color := clBlack;
+          Font.Color := FFontColor;
           TextRect(TxtRect, S, [tfSingleLine, tfBottom, tfLeft, tfEndEllipsis]);
 
           TxtRect := Rect;
@@ -629,7 +670,9 @@ begin
         FVkId := FFriends[Index].Id;
         ButtonFlatMyMusic.Show;
         if Length(Audios.Items) <= 0 then
-          ShowMessage('У выбранного пользователя нет музыки');
+          ShowMessage('У выбранного пользователя нет музыки')
+        else
+          OpenMyMusic;
       finally
         Audios.Free;
       end;
@@ -647,15 +690,14 @@ begin
   end;
 end;
 
-procedure TFormMain.TableExMyMusicDrawCellData(Sender: TObject; ACol, ARow: Integer; Rect: TRect;
-  State: TGridDrawState);
+procedure TFormMain.TableExMyMusicDrawCellData(Sender: TObject; ACol, ARow: Integer; Rect: TRect; State: TGridDrawState);
 var
   TxtRect: TRect;
   S: string;
 begin
   with TableExMyMusic.Canvas do
   begin
-    if (not FMyMusic.IndexIn(ARow)) or (FMyMusic.IsUpdate) then
+    if (not FMyMusic.IndexIn(ARow)) or (FMyMusic.IsUpdate) or (TableExMyMusic.ItemCount <= 0) then
     begin
       if ACol = 1 then
       begin
@@ -940,27 +982,46 @@ begin
   TableExCurrent.ItemIndex := FCurrentList.Find(FPlayingId);
 end;
 
+procedure TFormMain.SearchInList(List: IListFind; Query: string);
+var
+  Id: Integer;
+begin
+  if Query.IsEmpty then
+    Exit;
+  if not Assigned(List) then
+    Exit;
+  Id := List.Find(EditSearch.Text, List.GetFirstTableSelectedIndex + 1);
+  if List.IndexIn(Id) then
+    List.SelectInTable(Id);
+end;
+
+function TFormMain.GetActiveList: IListFind;
+begin
+  if PageControl.ActivePage = TabSheetCurrent then
+    Exit(FCurrentList);
+  if PageControl.ActivePage = TabSheetMyMusic then
+    Exit(FMyMusic);
+  if PageControl.ActivePage = TabSheetPlaylists then
+    Exit(FPlaylists);
+  if PageControl.ActivePage = TabSheetSearch then
+    Exit(FSearchList);
+end;
+
 procedure TFormMain.ButtonFlatSearchClick(Sender: TObject);
 begin
-  Search(EditSearch.Text);
+  if CheckBoxFlatSerachType.Checked then
+  begin
+    SearchInList(GetActiveList, EditSearch.Text);
+  end
+  else
+  begin
+    Search(EditSearch.Text);
+  end;
 end;
 
 procedure TFormMain.ButtonFlatSearchTabClick(Sender: TObject);
 begin
-  ButtonFlatNavClick(Sender);
   OpenSearch;
-end;
-
-procedure TFormMain.ButtonFlatSerachCurClick(Sender: TObject);
-var
-  Id: Integer;
-begin
-  if Length(EditSearchCur.Text) > 0 then
-  begin
-    Id := FCurrentList.Find(EditSearchCur.Text);
-    if FCurrentList.IndexIn(Id) then
-      TableExCurrent.ItemIndex := Id;
-  end;
 end;
 
 procedure TFormMain.Search(Query: string);
@@ -974,41 +1035,47 @@ end;
 
 procedure TFormMain.ButtonFlatCurrentClick(Sender: TObject);
 begin
-  ButtonFlatNavClick(Sender);
   OpenCurrentPlaylist;
 end;
 
 procedure TFormMain.OpenPlaylists;
 begin
   //
+  ButtonFlatNavClick(ButtonFlatPlaylists);
   PageControl.ActivePage := TabSheetPlaylists;
 end;
 
 procedure TFormMain.OpenSearch;
 begin
   //
+  ButtonFlatNavClick(ButtonFlatSearchTab);
   PageControl.ActivePage := TabSheetSearch;
 end;
 
 procedure TFormMain.OpenCurrentPlaylist;
 begin
   //
+  ButtonFlatNavClick(ButtonFlatCurrent);
   PageControl.ActivePage := TabSheetCurrent;
 end;
 
 procedure TFormMain.OpenFriends;
 begin
   //
+  ButtonFlatNavClick(ButtonFlatFriends);
   PageControl.ActivePage := TabSheetFriends;
 end;
 
 procedure TFormMain.OpenMyMusic;
 begin
   //
+  ButtonFlatNavClick(ButtonFlatMy);
   PageControl.ActivePage := TabSheetMyMusic;
 end;
 
 procedure TFormMain.ButtonFlatDownloadClick(Sender: TObject);
+var
+  Url, FileName: string;
 begin
   if FCurrentList.IndexIn(TableExCurrent.ItemIndex) then
   begin
@@ -1016,20 +1083,25 @@ begin
       + '.mp3';
     if SaveDialogMp3.Execute(Handle) then
     begin
-      DownloadURL(FCurrentList[TableExCurrent.ItemIndex].Url, SaveDialogMp3.FileName);
+      Url := FCurrentList[TableExCurrent.ItemIndex].Url;
+      FileName := SaveDialogMp3.FileName;
+      TThread.CreateAnonymousThread(
+        procedure
+        begin
+          DownloadURL(Url, FileName + '.download');
+          RenameFile(FileName + '.download', FileName);
+        end).Start;
     end;
   end;
 end;
 
 procedure TFormMain.ButtonFlatFriendsClick(Sender: TObject);
 begin
-  ButtonFlatNavClick(Sender);
   OpenFriends;
 end;
 
 procedure TFormMain.ButtonFlatMyClick(Sender: TObject);
 begin
-  ButtonFlatNavClick(Sender);
   OpenMyMusic;
 end;
 
@@ -1053,7 +1125,6 @@ end;
 
 procedure TFormMain.ButtonFlatPlaylistsClick(Sender: TObject);
 begin
-  ButtonFlatNavClick(Sender);
   OpenPlaylists;
 end;
 
@@ -1098,15 +1169,14 @@ begin
     PlayNext(True);
 end;
 
-procedure TFormMain.TableExPlaylistsDrawCellData(Sender: TObject; ACol, ARow: Integer; Rect: TRect;
-  State: TGridDrawState);
+procedure TFormMain.TableExPlaylistsDrawCellData(Sender: TObject; ACol, ARow: Integer; Rect: TRect; State: TGridDrawState);
 var
   TxtRect: TRect;
   S: string;
 begin
   with TableExPlaylists.Canvas do
   begin
-    if (not FPlaylists.IndexIn(ARow)) or (FPlaylists.IsUpdate) then
+    if (not FPlaylists.IndexIn(ARow)) or (FPlaylists.IsUpdate) or (TableExPlaylists.ItemCount <= 0) then
     begin
       if ACol = 1 then
       begin
@@ -1146,7 +1216,7 @@ var
 begin
   with TableExSearch.Canvas do
   begin
-    if (not FSearchList.IndexIn(ARow)) or (FSearchList.IsUpdate) then
+    if (not FSearchList.IndexIn(ARow)) or (FSearchList.IsUpdate) or (TableExSearch.ItemCount <= 0) then
     begin
       if ACol = 1 then
       begin
@@ -1176,6 +1246,18 @@ begin
   FillCurrentFromSearch;
   if not Play(Index) then
     PlayNext(True);
+end;
+
+procedure TFormMain.TaskbarThumbButtonClick(Sender: TObject; AButtonID: Integer);
+begin
+  case AButtonID of
+    0:
+      PlayPrev(True);
+    1:
+      ButtonFlatPlayPauseClick(nil);
+    2:
+      PlayNext(True);
+  end;
 end;
 
 procedure TFormMain.FillCurrentFromSearch;
@@ -1284,139 +1366,14 @@ begin
       LabelTime.Caption := FPlayer.PositionTimeLeft
     else
       LabelTime.Caption := FPlayer.PositionTime;
-    DrawPanelTrackBar.Repaint;
     ButtonFlatPlayPause.ImageIndex := 4;
   end
   else
     ButtonFlatPlayPause.ImageIndex := 0;
+  TrackbarPosition.SecondPosition := FPlayer.BufferringPercent;
+  TrackbarPosition.Position := FPlayer.PositionPercent;
+  TrackbarVolume.Position := FPlayer.VolumeChannel;
   SetPlayerState(FPlayer.IsPlay);
-end;
-
-procedure TFormMain.DrawPanelTrackBarMouseDown(Sender: TObject; Button: TMouseButton; Shift:
-  TShiftState; X, Y: Integer);
-begin
-  FMouseDownPos := Point(X, Y);
-  case Button of
-    TMouseButton.mbLeft:
-      begin
-        FMouseIsDown := True; //FScaleRect.Contains(FMousePos);
-      end;
-  end;
-  DrawPanelTrackBarPaint(nil);
-end;
-
-procedure TFormMain.DrawPanelTrackBarMouseEnter(Sender: TObject);
-begin
-  FMouseInScale := True;
-  DrawPanelTrackBarPaint(nil);
-end;
-
-procedure TFormMain.DrawPanelTrackBarMouseLeave(Sender: TObject);
-begin
-  FMouseInScale := False;
-  DrawPanelTrackBarPaint(nil);
-end;
-
-procedure TFormMain.DrawPanelTrackBarMouseMove(Sender: TObject; Shift: TShiftState; X, Y: Integer);
-begin
-  FMousePos := Point(X, Y);
-  DrawPanelTrackBar.Cursor := crHandPoint;
-  DrawPanelTrackBarPaint(nil);
-end;
-
-procedure TFormMain.DrawPanelTrackBarMouseUp(Sender: TObject; Button: TMouseButton; Shift: TShiftState; X, Y: Integer);
-begin
-  case Button of
-    TMouseButton.mbLeft:
-      begin
-        if FMouseIsDown then
-        begin
-          FPlayer.PositionPercent := FScalePercent;
-          FMouseIsDown := False;
-          FMouseDownPos := Point(-1, -1);
-        end;
-      end;
-  end;
-  DrawPanelTrackBarPaint(nil);
-end;
-
-procedure TFormMain.DrawPanelTrackBarPaint(Sender: TObject);
-const
-  ColorScale = $00ECE8E7;
-  ColorPos = $00B88151;
-  ColorBuf = $00DED6D1;
-  PosMargin = 2;
-  ScaleMarginSide = 10;
-  ScaleMarginUpdown = 4;
-var
-  MRect, PosRect, PosScale: TRect;
-  ScalePos, VisPos, BufPos: Integer;
-begin
-  MRect := DrawPanelTrackBar.ClientRect;
-  with TDirect2DCanvas.Create(DrawPanelTrackBar.Canvas, MRect) do
-  begin
-    BeginDraw;
-    Brush.Color := PanelPlayer.Color;
-    FillRect(MRect);
-
-    //Scale
-    Pen.Color := ColorScale;
-    Brush.Color := ColorScale;
-    FScaleRect := MRect;
-    FScaleRect.Inflate(-ScaleMarginSide, -ScaleMarginUpdown);
-    RoundRect(FScaleRect, FScaleRect.Height, FScaleRect.Height);
-    ScalePos := Max(FScaleRect.Left, Min(FMousePos.X, FScaleRect.Right));
-    ScalePos := ScalePos - FScaleRect.Left;
-
-    //Position
-    if FMouseIsDown then
-    begin
-      VisPos := ScalePos;
-      FScalePercent := (100 / FScaleRect.Width) * ScalePos;
-    end
-    else
-    begin
-      VisPos := Round((FScaleRect.Width / 100) * FPlayer.PositionPercent);
-    end;
-
-    //Buffering
-    BufPos := Round((FScaleRect.Width / 100) * FPlayer.BufferringPercent);
-    Pen.Color := ColorBuf;
-    Brush.Color := ColorBuf;
-
-    PosScale := FScaleRect;
-    PosScale.Right := (FScaleRect.Left + BufPos);
-    RoundRect(PosScale, PosScale.Height, PosScale.Height);
-
-    //Playing
-    Pen.Color := ColorPos;
-    Brush.Color := ColorPos;
-
-    PosScale := FScaleRect;
-    PosScale.Right := (FScaleRect.Left + VisPos);
-    RoundRect(PosScale, PosScale.Height, PosScale.Height);
-
-    //Ellipse
-    if FMouseInScale then
-    begin
-      PosRect := TRect.Create(TPoint.Create(0, 0), MRect.Height - PosMargin, MRect.Height - PosMargin);
-      PosRect.SetLocation(PosScale.Right - PosRect.Width div 2, (PosScale.Top + PosScale.Height div 2)
-        - PosRect.Height div 2);
-      Ellipse(PosRect);
-      if PosRect.Contains(FMousePos) then
-      begin
-        FMouseInButton := True;
-      end;
-    end;
-
-    EndDraw;
-    Free;
-  end;
-end;
-
-procedure TFormMain.EditSearchCurChange(Sender: TObject);
-begin
-  ButtonFlatSerachCurClick(nil);
 end;
 
 procedure TFormMain.PlayNext;
@@ -1456,7 +1413,6 @@ begin
   FTerminating := True;
   TimerEqu.Enabled := False;
   TimerRefresh.Enabled := False;
-  VK.Await;
   Await;
   Application.Terminate;
 end;
@@ -1474,6 +1430,20 @@ begin
       Item.Image := Image;
       FCurrentList[i] := Item;
     end;
+  end;
+end;
+
+procedure TFormMain.FOnAudioChangeState(Sender: TObject);
+begin
+  if FPlayer.IsPlay then
+  begin
+    Taskbar.TaskBarButtons.Items[1].Icon.Assign(FPauseIco);
+    Taskbar.TaskBarButtons.Items[1].Hint := 'Приостановить';
+  end
+  else
+  begin
+    Taskbar.TaskBarButtons.Items[1].Icon.Assign(FPlayIco);
+    Taskbar.TaskBarButtons.Items[1].Hint := 'Воспроизвести';
   end;
 end;
 
@@ -1647,9 +1617,9 @@ begin
   FLoadMusic := TLoadThread.Create(
     procedure
     begin
-      TableExMyMusic.Enabled := False;
       TableExMyMusic.ItemCount := 0;
       TableExMyMusic.Repaint;
+      TableExMyMusic.Enabled := False;
     end,
     function(LT: TLoadThread): Boolean
     var
@@ -1874,13 +1844,199 @@ begin
     end, nil);
 end;
 
-procedure TFormMain.FormCreate(Sender: TObject);
+procedure TFormMain.SetColors(IsDark: Boolean);
 var
   i: Integer;
   Stream: TResourceStream;
+  AColor: TColor;
+  AFont: TColor;
+  ButtonColorHot: TColor;
+  ButtonColorNormal: TColor;
+  ColorTableHot: TColor;
+  ColorTableSel: TColor;
+
+  procedure SetTabsColor(Button: TButtonFlat);
+  begin
+    Button.ColorNormal := AColor;
+    Button.ColorOver := AColor;
+    Button.ColorPressed := AColor;
+    Button.Font.Color := AFont;
+    Button.FontOver.Color := AFont;
+    Button.FontDown.Color := AFont;
+  end;
+
+  procedure SetTableColor(Table: TTableEx);
+  begin
+    Table.Color := AColor;
+    Table.LineColor := AColor;
+    Table.LineColorXor := AColor;
+    Table.LineHotColor := ColorTableHot;
+    Table.LineSelColor := ColorTableSel;
+
+    Table.FontLine.Color := AFont;
+    Table.FontHotLine.Color := AFont;
+    Table.FontSelLine.Color := AFont;
+  end;
+
+  procedure SetTrackbarColor(TrackBar: ThTrackbar);
+  begin
+    if IsDark then
+    begin
+      TrackBar.Color := PanelPlayer.Color;
+      TrackBar.ColorScale := $00262525;
+      TrackBar.ColorPos := $00838383;
+      TrackBar.ColorBuf := $003D3C3A;
+      TrackBar.ColorPosBtn := $00838383;
+    end
+    else
+    begin
+      TrackBar.Color := PanelPlayer.Color;
+      TrackBar.ColorScale := $00ECE8E7;
+      TrackBar.ColorPos := $00B88151;
+      TrackBar.ColorBuf := $00DED6D1;
+      TrackBar.ColorPosBtn := $00B88151;
+    end;
+  end;
+
 begin
+  if IsDark then
+  begin
+    AColor := clBlack;
+    AFont := clWhite;
+
+    ColorTableHot := ColorLighterOr(AColor, 20);
+    ColorTableSel := ColorLighterOr(AColor, 40);
+
+    Stream := TResourceStream.Create(HInstance, 'blank_dark', RT_RCDATA);
+    FAlbumThumbs[0].Image.LoadFromStream(Stream);
+    Stream.Free;
+    FAvatarDef.LoadFromResourceName(HInstance, 'def_avatar_dark');
+    ButtonColorHot := $00757575;
+    ButtonColorNormal := $00A2A2A2;
+    PanelPlayer.Color := $00151515;
+
+    ButtonFlatSearchBG.ColorNormal := AColor;
+    ButtonFlatSearchBG.ColorPressed := AColor;
+    ButtonFlatSearchBG.ColorOver := AColor;
+    ButtonFlatSearchBG.BorderColor := ColorLighterOr(AColor, 15);
+
+    ShapeActivePage.Brush.Color := ColorLighterOr(AColor, 30);
+    ShapeActivePage.Pen.Color := ColorLighterOr(AColor, 30);
+
+    ShapeHotButton.Brush.Color := ColorLighterOr(AColor, 15);
+    ShapeHotButton.Pen.Color := ColorLighterOr(AColor, 15);
+  end
+  else
+  begin
+    AFont := $00242424;
+    AColor := clWhite;
+
+    ColorTableHot := $00F7F4F2;
+    ColorTableSel := $00F1EDE9;
+
+    Stream := TResourceStream.Create(HInstance, 'blank', RT_RCDATA);
+    FAlbumThumbs[0].Image.LoadFromStream(Stream);
+    Stream.Free;
+    FAvatarDef.LoadFromResourceName(HInstance, 'def_avatar');
+    ButtonColorHot := $00ACA09A;
+    ButtonColorNormal := $00B58251;
+
+    PanelPlayer.Color := $00FCFBFA;
+
+    ButtonFlatSearchBG.ColorNormal := AColor;
+    ButtonFlatSearchBG.ColorPressed := AColor;
+    ButtonFlatSearchBG.ColorOver := AColor;
+    ButtonFlatSearchBG.BorderColor := ColorLighterOr(AColor, 15);
+
+    ShapeActivePage.Brush.Color := $00B88151;
+    ShapeActivePage.Pen.Color := $00B88151;
+
+    ShapeHotButton.Brush.Color := $00DBD2CA;
+    ShapeHotButton.Pen.Color := $00DBD2CA;
+  end;
+
+  FStyleColor := AColor;
+  FFontColor := AFont;
+  FIsDark := IsDark;
+
+  ImageAlbum.Picture.Assign(FAlbumThumbs[0].Image);
+
+  for i := 0 to ImageList.Count - 1 do
+    ColorImages(ImageList, i, ButtonColorNormal);
+
+  ColorImages(ImageList, 6, ButtonColorHot);
+  ColorImages(ImageList, 7, ButtonColorHot);
+  ColorImages(ImageList, 8, ButtonColorHot);
+
+  for i := 0 to ImageListL.Count - 1 do
+    ColorImages(ImageListL, i, ColorLighter(ButtonColorNormal, 20));
+
+  ColorImages(ImageListL, 6, ColorLighter(ButtonColorHot, 20));
+  ColorImages(ImageListL, 7, ColorLighter(ButtonColorHot, 20));
+  ColorImages(ImageListL, 8, ColorLighter(ButtonColorHot, 20));
+
+  Color := AColor;
+  PanelPageControl.Color := AColor;
+  LabelAudioCount.Font.Color := AFont;
+  LabelTitle.Font.Color := AFont;
+  Shape3.Brush.Color := ColorDarkerOr(AColor, 10);
+  Shape3.Pen.Color := ColorDarkerOr(AColor, 10);
+  Shape1.Brush.Color := ColorDarkerOr(AColor, 10);
+  Shape1.Pen.Color := ColorDarkerOr(AColor, 10);
+  Shape2.Brush.Color := ColorDarkerOr(AColor, 10);
+  Shape2.Pen.Color := ColorDarkerOr(AColor, 10);
+
+  ButtonFlatSearch.ColorNormal := ColorLighterOr(AColor, 3);
+  ButtonFlatSearch.ColorPressed := ColorLighterOr(AColor, 8);
+  ButtonFlatSearch.ColorOver := ColorLighterOr(AColor, 10);
+  ButtonFlatSearch.BorderColor := ColorLighterOr(AColor, 15);
+
+  CheckBoxFlatSerachType.ColorNormal := ColorLighterOr(AColor, 3);
+  CheckBoxFlatSerachType.ColorPressed := ColorLighterOr(AColor, 8);
+  CheckBoxFlatSerachType.ColorOver := ColorLighterOr(AColor, 10);
+  CheckBoxFlatSerachType.BorderColor := ColorLighterOr(AColor, 15);
+  CheckBoxFlatSerachType.Font.Color := AFont;
+  CheckBoxFlatSerachType.FontOver.Color := AFont;
+  CheckBoxFlatSerachType.FontDown.Color := AFont;
+
+  EditSearch.Color := AColor;
+  EditSearch.Font.Color := AFont;
+
+  SetTabsColor(ButtonFlatCurrent);
+  SetTabsColor(ButtonFlatMy);
+  SetTabsColor(ButtonFlatPlaylists);
+  SetTabsColor(ButtonFlatFriends);
+  SetTabsColor(ButtonFlatSearchTab);
+  SetTabsColor(ButtonFlatMyMusic);
+
+  SetTableColor(TableExMyMusic);
+  SetTableColor(TableExPlaylists);
+  SetTableColor(TableExCurrent);
+  SetTableColor(TableExFriends);
+  SetTableColor(TableExSearch);
+
+  SetTrackbarColor(TrackbarPosition);
+  SetTrackbarColor(TrackbarVolume);
+
+  if IsDark then
+    TStyleManager.TrySetStyle('Windows10 Dark')
+    //TStyleManager.TrySetStyle('Windows')
+  else
+    TStyleManager.TrySetStyle('Windows');
+  FormShow(nil);
+end;
+
+procedure TFormMain.FormCreate(Sender: TObject);
+var
+  i: Integer;
+begin
+  FLoading := TDecoratePanel.Create(Self, PanelLoading, False);
+  ActivityIndicatorLoading.Animate := True;
+  FLoading.Open(False);
+
   FPlayer := TBASSPlayer.Create(Self);
   FPlayer.OnEnd := FOnAudioEnd;
+  FPlayer.OnChangeState := FOnAudioChangeState;
   if not FPlayer.Init(Handle) then
   begin
     ShowMessage('Не хватает библиотек BASS');
@@ -1898,16 +2054,12 @@ begin
   FAvatarMask := TPngImage.Create;
   FAvatarMask.LoadFromResourceName(HInstance, 'mask');
   FAvatarDef := TPngImage.Create;
-  FAvatarDef.LoadFromResourceName(HInstance, 'def_avatar');
   FAudioMask := TPngImage.Create;
   FAudioMask.LoadFromResourceName(HInstance, 'avatarmask');
 
   FDB := TSQLiteDatabase.Create(AppFolder + 'cache.db');
   FAlbumThumbs := TAlbumThumbs.Create(FDB);
-  Stream := TResourceStream.Create(HInstance, 'blank', RT_RCDATA);
-  i := FAlbumThumbs.Add(TAlbumThumb.CreateItem(TPicture.Create, ''));
-  FAlbumThumbs[i].Image.LoadFromStream(Stream);
-  Stream.Free;
+  FAlbumThumbs.Add(TAlbumThumb.CreateItem(TPicture.Create, ''));
   //FAlbumThumbs.LoadImages;
   FPlayImage := TPngImage.Create;
   FPlayImage.LoadFromResourceName(HInstance, 'play');
@@ -1915,6 +2067,11 @@ begin
   FPauseImage.LoadFromResourceName(HInstance, 'pause');
   FActiveImage := TPngImage.Create;
   FActiveImage.LoadFromResourceName(HInstance, 'active');
+
+  FPlayIco := TIcon.Create;
+  FPlayIco.LoadFromResourceName(HInstance, 'PlayIco');
+  FPauseIco := TIcon.Create;
+  FPauseIco.LoadFromResourceName(HInstance, 'PauseIco');
 
   FSettings := TSettingsIni.Create(ExtractFilePath(ParamStr(0)) + '\config.ini');
   FMyMusic := TAudioList.Create(TableExMyMusic);
@@ -1934,17 +2091,12 @@ begin
     PageControl.Pages[i].TabVisible := False;
 
   ImageListL.AddImages(ImageList);
-  ColorImages(ImageList, 6, $00ACA09A);
-  ColorImages(ImageList, 7, $00ACA09A);
-  ColorImages(ImageList, 8, $00ACA09A);
-  for i := 0 to ImageListL.Count - 1 do
-    ColorImages(ImageListL, i, ColorLighter($00B58251, 20));
 
-  ColorImages(ImageListL, 6, ColorLighter($00ACA09A, 20));
-  ColorImages(ImageListL, 7, ColorLighter($00ACA09A, 20));
-  ColorImages(ImageListL, 8, ColorLighter($00ACA09A, 20));
+  SetColors(True);
+
   ClearInfo;
   ButtonFlatMyClick(ButtonFlatMy);
+  FOnAudioChangeState(nil);
   SetRepeat(prNone);
   TimerEqu.Enabled := True;
 end;
@@ -1960,9 +2112,9 @@ begin
   FLoadPicFriends.Stop;
   FLoadPicSearch.Stop;
   FLoadPicMusic.Stop;
-  while FLoadPicMusic.IsWorking or FLoadPicSearch.IsWorking or FLoadSearch.IsWorking or
-    FLoadPlaylist.IsWorking or FLoadMusic.IsWorking or FLoadPlaylists.IsWorking or FLoadPicCurrent.IsWorking
-    or FLoadUsers.IsWorking or FLoadPicFriends.IsWorking do
+  while FLoadPicMusic.IsWorking or FLoadPicSearch.IsWorking or FLoadSearch.IsWorking or FLoadPlaylist.IsWorking or
+    FLoadMusic.IsWorking or FLoadPlaylists.IsWorking or FLoadPicCurrent.IsWorking or FLoadUsers.IsWorking or
+    FLoadPicFriends.IsWorking do
     Application.ProcessMessages;
 end;
 
@@ -1992,12 +2144,26 @@ begin
   FAvatarMask.Free;
   FAvatarDef.Free;
   FAudioMask.Free;
+  FPlayIco.Free;
+  FPauseIco.Free;
   FDB.Free;
+  FLoading.Free;
+end;
+
+procedure TFormMain.FormResize(Sender: TObject);
+begin
+  FLoading.UpdateSize;
 end;
 
 procedure TFormMain.FormShow(Sender: TObject);
 begin
   //ShowWindow(Application.Handle, SW_HIDE);
+ // if FAppLoading then
+  FLoading.CloseDelay(2000,
+    procedure
+    begin
+      ActivityIndicatorLoading.Animate := False;
+    end);
 end;
 
 procedure TFormMain.Full;
@@ -2009,6 +2175,27 @@ begin
   BringToFront;
 end;
 
+procedure TFormMain.TrackbarPositionChange(Sender: TObject; Position: Extended);
+begin
+  FPlayer.PositionPercent := Position;
+end;
+
+procedure TFormMain.TrackbarVolumeChange(Sender: TObject; Position: Extended);
+begin
+  FPlayer.VolumeChannel := Position;
+end;
+
+procedure TFormMain.ImageAvatarClick(Sender: TObject);
+begin
+  ActivityIndicatorLoading.Animate := True;
+  FLoading.Open(True);
+  SetColors(ImageAvatar.Tag = 1);
+  if ImageAvatar.Tag = 0 then
+    ImageAvatar.Tag := 1
+  else
+    ImageAvatar.Tag := 0;
+end;
+
 procedure TFormMain.Mini;
 begin
   ShowWindow(Application.Handle, SW_HIDE);
@@ -2017,13 +2204,17 @@ begin
   FormPlayer.BringToFront;
 end;
 
-procedure TFormMain.ImageAvatarClick(Sender: TObject);
+procedure TFormMain.VKAuth(Sender: TObject; Url: string; var Token: string; var TokenExpiry: Int64; var
+  ChangePasswordHash: string);
 begin
-  Mini;
-end;
-
-procedure TFormMain.VKAuth(Sender: TObject; var Token: string; var TokenExpiry: Int64; var ChangePasswordHash: string);
-begin
+  if FToken.IsEmpty then
+  begin
+    TFormOAuth2.Execute(Url,
+      procedure(Form: TFormOAuth2)
+      begin
+        FToken := Form.Token;
+      end, True);
+  end;
   Token := FToken;
 end;
 
@@ -2049,7 +2240,7 @@ end;
 
 procedure TFormMain.VKErrorLogin(Sender: TObject; E: Exception; Code: Integer; Text: string);
 begin
-  ShowMessage(Text);
+  //ShowMessage(Text);
 end;
 
 procedure TFormMain.VKLog(Sender: TObject; const Value: string);
@@ -2311,17 +2502,38 @@ begin
       Exit(i);
 end;
 
-function TAudioList.Find(Query: string): Integer;
+function TAudioList.Find(Query: string; StartFrom: Integer): Integer;
 var
-  i: Integer;
+  i, Start: Integer;
 begin
   Result := -1;
   Query := AnsiLowerCase(Query);
-  for i := 0 to Count - 1 do
-    if (Pos(Query, AnsiLowerCase(Items[i].Title)) <> 0) or
-      (Pos(Query, AnsiLowerCase(Items[i].Artist)) <> 0)
-      then
+  Start := StartFrom;
+  if Start >= Count - 1 then
+    Start := 0;
+  for i := Start to Count - 1 do
+    if (Pos(Query, AnsiLowerCase(Items[i].Title)) <> 0) or (Pos(Query, AnsiLowerCase(Items[i].Artist)) <> 0) then
       Exit(i);
+  if StartFrom > 0 then
+    Result := Find(Query, 0);
+end;
+
+function TAudioList.QueryInterface(const IID: TGUID; out Obj): HResult;
+begin
+  if GetInterface(IID, Obj) then
+    Result := 0
+  else
+    Result := E_NOINTERFACE;
+end;
+
+function TAudioList._AddRef: Integer;
+begin
+  Result := -1;
+end;
+
+function TAudioList._Release: Integer;
+begin
+  Result := -1;
 end;
 
 { TAudio }
@@ -2345,6 +2557,78 @@ begin
   S := S mod 60;
   Duration := Format('%d:%.2d', [M, S]);
   AccessKey := Audio.AccessKey;
+end;
+
+{ TFriends }
+
+function TFriends.Find(Query: string; StartFrom: Integer): Integer;
+var
+  i, Start: Integer;
+begin
+  Result := -1;
+  Query := AnsiLowerCase(Query);
+  Start := StartFrom;
+  if Start >= Count - 1 then
+    Start := 0;
+  for i := Start to Count - 1 do
+    if (Pos(Query, AnsiLowerCase(Items[i].FirstName)) <> 0) or (Pos(Query, AnsiLowerCase(Items[i].LastName)) <> 0) then
+      Exit(i);
+  if StartFrom > 0 then
+    Result := Find(Query, 0);
+end;
+
+function TFriends.QueryInterface(const IID: TGUID; out Obj): HResult;
+begin
+  if GetInterface(IID, Obj) then
+    Result := 0
+  else
+    Result := E_NOINTERFACE;
+end;
+
+function TFriends._AddRef: Integer;
+begin
+  Result := -1;
+end;
+
+function TFriends._Release: Integer;
+begin
+  Result := -1;
+end;
+
+{ TPlaylists }
+
+function TPlaylists.Find(Query: string; StartFrom: Integer): Integer;
+var
+  i, Start: Integer;
+begin
+  Result := -1;
+  Query := AnsiLowerCase(Query);
+  Start := StartFrom;
+  if Start >= Count - 1 then
+    Start := 0;
+  for i := Start to Count - 1 do
+    if (Pos(Query, AnsiLowerCase(Items[i].Title)) <> 0) or (Pos(Query, AnsiLowerCase(Items[i].Description)) <> 0) then
+      Exit(i);
+  if StartFrom > 0 then
+    Result := Find(Query, 0);
+end;
+
+function TPlaylists.QueryInterface(const IID: TGUID; out Obj): HResult;
+begin
+  if GetInterface(IID, Obj) then
+    Result := 0
+  else
+    Result := E_NOINTERFACE;
+end;
+
+function TPlaylists._AddRef: Integer;
+begin
+  Result := -1;
+end;
+
+function TPlaylists._Release: Integer;
+begin
+  Result := -1;
 end;
 
 initialization
