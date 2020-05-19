@@ -15,6 +15,15 @@
         <Projects Include="..\Components\HGMComponents.dproj">
             <Dependencies/>
         </Projects>
+        <Projects Include="FMX\VKPlayer.dproj">
+            <Dependencies/>
+        </Projects>
+        <Projects Include="..\KnigaVuhe\Knigavuhe.dproj">
+            <Dependencies/>
+        </Projects>
+        <Projects Include="..\FMXAudio\FMXAudioHGM.dproj">
+            <Dependencies/>
+        </Projects>
     </ItemGroup>
     <ProjectExtensions>
         <Borland.Personality>Default.Personality.12</Borland.Personality>
@@ -59,14 +68,41 @@
     <Target Name="HGMComponents:Make">
         <MSBuild Projects="..\Components\HGMComponents.dproj" Targets="Make"/>
     </Target>
+    <Target Name="VKPlayer">
+        <MSBuild Projects="FMX\VKPlayer.dproj"/>
+    </Target>
+    <Target Name="VKPlayer:Clean">
+        <MSBuild Projects="FMX\VKPlayer.dproj" Targets="Clean"/>
+    </Target>
+    <Target Name="VKPlayer:Make">
+        <MSBuild Projects="FMX\VKPlayer.dproj" Targets="Make"/>
+    </Target>
+    <Target Name="Knigavuhe">
+        <MSBuild Projects="..\KnigaVuhe\Knigavuhe.dproj"/>
+    </Target>
+    <Target Name="Knigavuhe:Clean">
+        <MSBuild Projects="..\KnigaVuhe\Knigavuhe.dproj" Targets="Clean"/>
+    </Target>
+    <Target Name="Knigavuhe:Make">
+        <MSBuild Projects="..\KnigaVuhe\Knigavuhe.dproj" Targets="Make"/>
+    </Target>
+    <Target Name="FMXAudioHGM">
+        <MSBuild Projects="..\FMXAudio\FMXAudioHGM.dproj"/>
+    </Target>
+    <Target Name="FMXAudioHGM:Clean">
+        <MSBuild Projects="..\FMXAudio\FMXAudioHGM.dproj" Targets="Clean"/>
+    </Target>
+    <Target Name="FMXAudioHGM:Make">
+        <MSBuild Projects="..\FMXAudio\FMXAudioHGM.dproj" Targets="Make"/>
+    </Target>
     <Target Name="Build">
-        <CallTarget Targets="VKAudioPlayer;Audio;VKComponents;HGMComponents"/>
+        <CallTarget Targets="VKAudioPlayer;Audio;VKComponents;HGMComponents;VKPlayer;Knigavuhe;FMXAudioHGM"/>
     </Target>
     <Target Name="Clean">
-        <CallTarget Targets="VKAudioPlayer:Clean;Audio:Clean;VKComponents:Clean;HGMComponents:Clean"/>
+        <CallTarget Targets="VKAudioPlayer:Clean;Audio:Clean;VKComponents:Clean;HGMComponents:Clean;VKPlayer:Clean;Knigavuhe:Clean;FMXAudioHGM:Clean"/>
     </Target>
     <Target Name="Make">
-        <CallTarget Targets="VKAudioPlayer:Make;Audio:Make;VKComponents:Make;HGMComponents:Make"/>
+        <CallTarget Targets="VKAudioPlayer:Make;Audio:Make;VKComponents:Make;HGMComponents:Make;VKPlayer:Make;Knigavuhe:Make;FMXAudioHGM:Make"/>
     </Target>
     <Import Project="$(BDS)\Bin\CodeGear.Group.Targets" Condition="Exists('$(BDS)\Bin\CodeGear.Group.Targets')"/>
 </Project>

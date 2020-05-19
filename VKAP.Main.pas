@@ -8,7 +8,7 @@ uses
   Vcl.ExtCtrls, BassPlayer, Vcl.StdCtrls, HGM.Button, Vcl.ComCtrls, HGM.Controls.PanelExt, System.ImageList, Vcl.ImgList,
   Vcl.Imaging.pngimage, System.Generics.Collections, Vcl.Imaging.jpeg, VK.Entity.Playlist, VK.Entity.User,
   BassPlayer.LoadHandle, VK.Entity.Audio, VKAP.Player, SQLiteTable3, SQLLang, Vcl.Menus, Vcl.WinXCtrls,
-  HGM.Controls.TrackBar, System.Win.TaskbarCore, Vcl.Taskbar;
+  HGM.Controls.TrackBar, System.Win.TaskbarCore, Vcl.Taskbar, HGM.Tools.Hint, Vcl.Styles.Utils.SysStyleHook;
 
 type
   TAudio = record
@@ -69,8 +69,6 @@ type
     constructor Create(ADB: TSQLiteDatabase);
   end;
 
-  TPlayRepeat = (prNone, prAll, prOne);
-
   IListFind = interface
     function Find(Query: string; StartFrom: Integer = 0): Integer;
     function IndexIn(Index: Integer): Boolean;
@@ -106,12 +104,13 @@ type
     function Find(Query: string; StartFrom: Integer = 0): Integer; overload;
   end;
 
+  TPlayRepeat = (prNone, prAll, prOne);
+
   TEquItems = array[1..4] of Double;
 
   TFormMain = class(TForm)
     VK: TVK;
     PanelPlayer: TPanel;
-    SaveDialogMp3: TSaveDialog;
     ButtonFlatPlayPause: TButtonFlat;
     TimerRefresh: TTimer;
     ButtonFlatNext: TButtonFlat;
@@ -178,6 +177,8 @@ type
     TrackbarVolume: ThTrackbar;
     Taskbar: TTaskbar;
     CheckBoxFlatSerachType: TCheckBoxFlat;
+    HintPanel: TlkHint;
+    SaveDialogMp3: TFileSaveDialog;
     procedure FormCreate(Sender: TObject);
     procedure TableExMyMusicItemClick(Sender: TObject; MouseButton: TMouseButton; const Index: Integer);
     procedure FormDestroy(Sender: TObject);
@@ -222,6 +223,10 @@ type
     procedure TrackbarVolumeChange(Sender: TObject; Position: Extended);
     procedure TaskbarThumbButtonClick(Sender: TObject; AButtonID: Integer);
     procedure EditSearchKeyPress(Sender: TObject; var Key: Char);
+    procedure TrackbarVolumeAdvHint(Sender: TObject; HintPosition: Extended; var Text: string);
+    procedure TrackbarVolumeMouseLeave(Sender: TObject);
+    procedure TrackbarPositionAdvHint(Sender: TObject; HintPosition: Extended; var Text: string);
+    procedure TrackbarPositionMouseLeave(Sender: TObject);
   private
     FToken: string;
     FMyMusic: TAudioList;
@@ -279,11 +284,6 @@ type
     procedure Await;
     procedure RefillEqu;
     procedure ButtonFlatNavClick(Sender: TObject);
-    procedure OpenPlaylists;
-    procedure OpenCurrentPlaylist;
-    procedure OpenFriends;
-    procedure OpenSearch;
-    procedure OpenMyMusic;
     procedure FillCurrentFromMyMusic;
     procedure UpdateImages(Url: string; Image: TPicture);
     procedure FillCurrentFromPlaylist(Index: Integer);
@@ -309,6 +309,11 @@ type
     procedure Quit;
     procedure Mini;
     procedure Full;
+    procedure OpenPlaylists;
+    procedure OpenCurrentPlaylist;
+    procedure OpenFriends;
+    procedure OpenSearch;
+    procedure OpenMyMusic;
   end;
 
 var
@@ -1005,6 +1010,8 @@ begin
     Exit(FPlaylists);
   if PageControl.ActivePage = TabSheetSearch then
     Exit(FSearchList);
+  if PageControl.ActivePage = TabSheetFriends then
+    Exit(FFriends);
 end;
 
 procedure TFormMain.ButtonFlatSearchClick(Sender: TObject);
@@ -1462,6 +1469,7 @@ end;
 
 procedure TFormMain.CreateLoaders;
 begin
+  {$REGION 'FLoadUsers'}
   FLoadUsers := TLoadThread.Create(
     procedure
     begin
@@ -1510,7 +1518,8 @@ begin
       if Complete then
         FLoadPicFriends.Execute;
     end);
-
+  {$ENDREGION}
+  {$REGION 'FLoadPlaylist'}
   FLoadPlaylist := TLoadPlaylist.Create(
     procedure
     begin
@@ -1559,7 +1568,8 @@ begin
       if Complete then
         FLoadPicCurrent.Execute;
     end);
-
+  {$ENDREGION}
+  {$REGION 'FLoadPlaylists'}
   FLoadPlaylists := TLoadThread.Create(
     procedure
     begin
@@ -1613,7 +1623,8 @@ begin
     begin
       TableExPlaylists.Enabled := True;
     end);
-
+  {$ENDREGION}
+  {$REGION 'FLoadMusic'}
   FLoadMusic := TLoadThread.Create(
     procedure
     begin
@@ -1659,7 +1670,8 @@ begin
       if Complete then
         FLoadPicMusic.Execute;
     end);
-
+  {$ENDREGION}
+  {$REGION 'FLoadSearch'}
   FLoadSearch := TLoadSearch.Create(
     procedure
     begin
@@ -1705,7 +1717,8 @@ begin
       if Complete then
         FLoadPicSearch.Execute;
     end);
-
+  {$ENDREGION}
+  {$REGION 'FLoadPicCurrent'}
   FLoadPicCurrent := TLoadThread.Create(nil,
     function(LT: TLoadThread): Boolean
     var
@@ -1743,7 +1756,8 @@ begin
         end;
       end;
     end, nil);
-
+  {$ENDREGION}
+  {$REGION 'FLoadPicFriends'}
   FLoadPicFriends := TLoadThread.Create(nil,
     function(LT: TLoadThread): Boolean
     var
@@ -1776,7 +1790,8 @@ begin
         end;
       end;
     end, nil);
-
+  {$ENDREGION}
+  {$REGION 'FLoadPicSearch'}
   FLoadPicSearch := TLoadThread.Create(nil,
     function(LT: TLoadThread): Boolean
     var
@@ -1809,7 +1824,8 @@ begin
         end;
       end;
     end, nil);
-
+  {$ENDREGION}
+  {$REGION 'FLoadPicMusic'}
   FLoadPicMusic := TLoadThread.Create(nil,
     function(LT: TLoadThread): Boolean
     var
@@ -1842,6 +1858,7 @@ begin
         end;
       end;
     end, nil);
+  {$ENDREGION}
 end;
 
 procedure TFormMain.SetColors(IsDark: Boolean);
@@ -1904,11 +1921,16 @@ begin
     AColor := clBlack;
     AFont := clWhite;
 
+    HintPanel.Color := ColorLighterOr(AColor, 20);
+    HintPanel.BorderColor := AColor;
+    HintPanel.Font.Color := AFont;
+
     ColorTableHot := ColorLighterOr(AColor, 20);
     ColorTableSel := ColorLighterOr(AColor, 40);
 
     Stream := TResourceStream.Create(HInstance, 'blank_dark', RT_RCDATA);
     FAlbumThumbs[0].Image.LoadFromStream(Stream);
+
     Stream.Free;
     FAvatarDef.LoadFromResourceName(HInstance, 'def_avatar_dark');
     ButtonColorHot := $00757575;
@@ -1930,6 +1952,10 @@ begin
   begin
     AFont := $00242424;
     AColor := clWhite;
+
+    HintPanel.Color := ColorLighterOr(AColor, 10);
+    HintPanel.BorderColor := AColor;
+    HintPanel.Font.Color := AFont;
 
     ColorTableHot := $00F7F4F2;
     ColorTableSel := $00F1EDE9;
@@ -2042,7 +2068,6 @@ begin
     ShowMessage('Не хватает библиотек BASS');
     Halt;
   end;
-
   FPlayingId := -1;
   FAppLoading := True;
   FTerminating := False;
@@ -2079,6 +2104,7 @@ begin
   FFriends := TFriends.Create(TableExFriends);
   FPlaylists := TPlaylists.Create(TableExPlaylists);
   FSearchList := TAudioList.Create(TableExSearch);
+
   FToken := FSettings.GetStr('General', 'Token', '');
   if FToken.IsEmpty then
   begin
@@ -2175,14 +2201,44 @@ begin
   BringToFront;
 end;
 
+procedure TFormMain.TrackbarPositionAdvHint(Sender: TObject; HintPosition: Extended; var Text: string);
+var
+  Ps: Tpoint;
+begin
+  HintPanel.Text := FPlayer.GetTimeFromPercent(HintPosition);
+  Ps := Mouse.CursorPos;
+  Ps.Y := TrackbarPosition.ClientToScreen(Point(0, 0)).Y;
+  HintPanel.Show(Ps);
+end;
+
 procedure TFormMain.TrackbarPositionChange(Sender: TObject; Position: Extended);
 begin
   FPlayer.PositionPercent := Position;
 end;
 
+procedure TFormMain.TrackbarPositionMouseLeave(Sender: TObject);
+begin
+  HintPanel.Hide;
+end;
+
+procedure TFormMain.TrackbarVolumeAdvHint(Sender: TObject; HintPosition: Extended; var Text: string);
+var
+  Ps: Tpoint;
+begin
+  HintPanel.Text := Trunc(HintPosition).ToString;
+  Ps := Mouse.CursorPos;
+  Ps.Y := TrackbarVolume.ClientToScreen(Point(0, 0)).Y;
+  HintPanel.Show(Ps);
+end;
+
 procedure TFormMain.TrackbarVolumeChange(Sender: TObject; Position: Extended);
 begin
   FPlayer.VolumeChannel := Position;
+end;
+
+procedure TFormMain.TrackbarVolumeMouseLeave(Sender: TObject);
+begin
+  HintPanel.Hide;
 end;
 
 procedure TFormMain.ImageAvatarClick(Sender: TObject);
@@ -2458,7 +2514,11 @@ begin
     begin
       Item.Image := TPicture.Create;
       try
-        Item.Image.LoadFromStream(Mem);
+        TThread.Synchronize(TThread.Current,
+          procedure
+          begin
+            Item.Image.LoadFromStream(Mem);
+          end);
         if Avatar then
         begin
           Png := CreateAvatar(Item.Image.Graphic, FormMain.FAvatarMask);

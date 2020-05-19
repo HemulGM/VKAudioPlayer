@@ -3,8 +3,7 @@ unit BassPlayer.LoadHandle;
 interface
 
 uses
-  Winapi.Windows, Winapi.Messages, System.SysUtils, Vcl.Forms, System.Variants, System.Classes,
-  System.Generics.Collections;
+  System.SysUtils, System.Variants, System.Classes, System.Generics.Collections;
 
 type
   TLoadThread = class
@@ -52,10 +51,10 @@ type
 implementation
 
 procedure TLoadThread.Await;
-begin
+begin          {
   while FWorking do
     if AppProc then
-      Application.ProcessMessages;
+      Application.ProcessMessages;   }
 end;
 
 constructor TLoadThread.Create(Before: TProc; Async: TFunc<TLoadThread, Boolean>; After: TProc<Boolean>);
@@ -116,8 +115,7 @@ end;
 
 { TLoadPlaylist }
 
-constructor TLoadPlaylist.Create(Before: TProc; Async: TFunc<TLoadThread, Integer, Integer, Boolean>;
-  After: TProc<Boolean>);
+constructor TLoadPlaylist.Create(Before: TProc; Async: TFunc<TLoadThread, Integer, Integer, Boolean>; After: TProc<Boolean>);
 begin
   FBefore := Before;
   FAsync := Async;
@@ -181,9 +179,9 @@ begin
     begin
       if Items[i].IsWorking then
         FComplete := False;
-    end;
+    end;     {
     if not FComplete then
-      Application.ProcessMessages;
+      Application.ProcessMessages;   }
   until FComplete;
 end;
 

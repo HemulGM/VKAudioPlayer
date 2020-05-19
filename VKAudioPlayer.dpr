@@ -16,7 +16,9 @@ uses
   VKAP.Player in 'VKAP.Player.pas' {FormPlayer},
   SQLite3 in '..\SQLite\SQLite3.pas',
   SQLiteTable3 in '..\SQLite\SQLiteTable3.pas',
-  SQLLang in '..\SQLite\SQLLang.pas';
+  SQLLang in '..\SQLite\SQLLang.pas',
+  Vcl.Styles.Utils.SysStyleHook in '..\#Fork\vcl-styles-utils\Common\Vcl.Styles.Utils.SysStyleHook.pas',
+  Vcl.Styles.Hooks in '..\#Fork\vcl-styles-utils\Common\Vcl.Styles.Hooks.pas';
 
 {$R *.res}
 

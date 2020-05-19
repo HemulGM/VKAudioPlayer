@@ -15,6 +15,7 @@ object FormMain: TFormMain
   Font.Style = []
   OldCreateOrder = False
   Position = poScreenCenter
+  ShowHint = True
   OnCloseQuery = FormCloseQuery
   OnCreate = FormCreate
   OnDestroy = FormDestroy
@@ -356,6 +357,8 @@ object FormMain: TFormMain
         Height = 14
         Align = alBottom
         OnChange = TrackbarPositionChange
+        OnAdvHint = TrackbarPositionAdvHint
+        OnMouseLeave = TrackbarPositionMouseLeave
         Color = 16579578
         ParentColor = False
         MarginScaleSide = 4
@@ -622,6 +625,8 @@ object FormMain: TFormMain
         Margins.Bottom = 21
         Align = alClient
         OnChange = TrackbarVolumeChange
+        OnAdvHint = TrackbarVolumeAdvHint
+        OnMouseLeave = TrackbarVolumeMouseLeave
         Color = 16579578
         ParentColor = False
         HotScroll = True
@@ -1199,13 +1204,17 @@ object FormMain: TFormMain
       Top = 111
       Width = 594
       Height = 288
-      ActivePage = TabSheetCurrent
+      ActivePage = TabSheetPlaylists
       Align = alClient
       Style = tsButtons
       TabOrder = 2
       StyleElements = []
       object TabSheetCurrent: TTabSheet
         Caption = #1058#1077#1082#1091#1097#1080#1081
+        ExplicitLeft = 0
+        ExplicitTop = 0
+        ExplicitWidth = 0
+        ExplicitHeight = 0
         object TableExCurrent: TTableEx
           Left = 0
           Top = 0
@@ -1229,7 +1238,7 @@ object FormMain: TFormMain
             end
             item
               Caption = #1053#1072#1079#1074#1072#1085#1080#1077
-              Width = 532
+              Width = 505
             end>
           DefaultDataDrawing = False
           ItemCount = 1
@@ -1266,7 +1275,7 @@ object FormMain: TFormMain
         ImageIndex = 1
         ExplicitLeft = 0
         ExplicitTop = 0
-        ExplicitWidth = 591
+        ExplicitWidth = 0
         ExplicitHeight = 0
         object TableExMyMusic: TTableEx
           Left = 0
@@ -1326,10 +1335,6 @@ object FormMain: TFormMain
       object TabSheetPlaylists: TTabSheet
         Caption = #1055#1083#1077#1081#1083#1080#1089#1090#1099
         ImageIndex = 2
-        ExplicitLeft = 0
-        ExplicitTop = 0
-        ExplicitWidth = 591
-        ExplicitHeight = 0
         object TableExPlaylists: TTableEx
           Left = 0
           Top = 0
@@ -1390,7 +1395,7 @@ object FormMain: TFormMain
         ImageIndex = 3
         ExplicitLeft = 0
         ExplicitTop = 0
-        ExplicitWidth = 591
+        ExplicitWidth = 0
         ExplicitHeight = 0
         object MemoLog: TMemo
           Left = 0
@@ -1401,7 +1406,6 @@ object FormMain: TFormMain
           BorderStyle = bsNone
           ScrollBars = ssBoth
           TabOrder = 0
-          ExplicitWidth = 591
         end
         object TableExFriends: TTableEx
           Left = 0
@@ -1426,7 +1430,7 @@ object FormMain: TFormMain
             end
             item
               Caption = #1053#1072#1079#1074#1072#1085#1080#1077
-              Width = 532
+              Width = 505
             end>
           DefaultDataDrawing = False
           ItemCount = 1
@@ -1463,7 +1467,7 @@ object FormMain: TFormMain
         ImageIndex = 4
         ExplicitLeft = 0
         ExplicitTop = 0
-        ExplicitWidth = 591
+        ExplicitWidth = 0
         ExplicitHeight = 0
         object TableExSearch: TTableEx
           Left = 0
@@ -1488,7 +1492,7 @@ object FormMain: TFormMain
             end
             item
               Caption = #1053#1072#1079#1074#1072#1085#1080#1077
-              Width = 532
+              Width = 505
             end>
           DefaultDataDrawing = False
           ItemCount = 1
@@ -1567,10 +1571,6 @@ object FormMain: TFormMain
     Logging = False
     Left = 64
     Top = 256
-  end
-  object SaveDialogMp3: TSaveDialog
-    Left = 64
-    Top = 320
   end
   object TimerRefresh: TTimer
     Enabled = False
@@ -3994,5 +3994,21 @@ object FormMain: TFormMain
     OnThumbButtonClick = TaskbarThumbButtonClick
     Left = 432
     Top = 255
+  end
+  object HintPanel: TlkHint
+    Font.Charset = DEFAULT_CHARSET
+    Font.Color = clBlack
+    Font.Height = -13
+    Font.Name = 'Segoe UI'
+    Font.Style = []
+    Left = 429
+    Top = 322
+  end
+  object SaveDialogMp3: TFileSaveDialog
+    FavoriteLinks = <>
+    FileTypes = <>
+    Options = []
+    Left = 64
+    Top = 319
   end
 end

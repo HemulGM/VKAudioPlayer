@@ -3,7 +3,7 @@ unit BassPlayer.Types;
 interface
 
 uses
-  BassPlayer.Lib, System.Types, Vcl.Dialogs;
+  BassPlayer.Lib, System.Types;
 
 const
   strLoading: string = 'Loading...';
@@ -29,7 +29,6 @@ uses
   Sysutils;
 
 { TBASSCustomPlayer }
-
 
 end.
 

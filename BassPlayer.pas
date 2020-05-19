@@ -55,6 +55,7 @@ type
     procedure Stop;
     procedure Pause;
     function Resume: Boolean;
+    function GetTimeFromPercent(Value: Extended): string;
     procedure SetStreamURL(AUrl: string);
     procedure SetStatusProc(AProc: TStatusProc);
     procedure SetBroadcastInfoProc(AProc: TBroadcastInfoProc);
@@ -88,7 +89,7 @@ procedure FSync(handle: HSYNC; channel, data: Cardinal; user: Pointer);
 implementation
 
 uses
-  Math, SysUtils;
+  System.Math, System.SysUtils;
 
 procedure FSync(handle: HSYNC; channel, data: Cardinal; user: Pointer);
 begin
@@ -291,6 +292,16 @@ var
   M, S: Integer;
 begin
   S := Position;
+  M := S div 60;
+  S := S mod 60;
+  Result := Format('%d:%.2d', [M, S]);
+end;
+
+function TBASSPlayer.GetTimeFromPercent(Value: Extended): string;
+var
+  M, S: Integer;
+begin
+  S := Round(Size * (Value / 100));
   M := S div 60;
   S := S mod 60;
   Result := Format('%d:%.2d', [M, S]);
