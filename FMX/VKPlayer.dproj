@@ -248,6 +248,13 @@
                         <Overwrite>true</Overwrite>
                     </Platform>
                 </DeployFile>
+                <DeployFile LocalName="Lib\x86\libbassenc.so" Configuration="Release" Class="File">
+                    <Platform Name="Android">
+                        <RemoteDir>library\lib\x86</RemoteDir>
+                        <RemoteName>libbassenc.so</RemoteName>
+                        <Overwrite>true</Overwrite>
+                    </Platform>
+                </DeployFile>
                 <DeployFile LocalName="Lib\x86\libbassenc_ogg.so" Configuration="Release" Class="File">
                     <Platform Name="Android">
                         <RemoteDir>library\lib\x86</RemoteDir>
@@ -258,13 +265,6 @@
                 <DeployFile LocalName="Win32\Debug\VKPlayer.exe" Configuration="Debug" Class="ProjectOutput">
                     <Platform Name="Win32">
                         <RemoteName>VKPlayer.exe</RemoteName>
-                        <Overwrite>true</Overwrite>
-                    </Platform>
-                </DeployFile>
-                <DeployFile LocalName="Lib\x86\libbassenc.so" Configuration="Release" Class="File">
-                    <Platform Name="Android">
-                        <RemoteDir>library\lib\x86</RemoteDir>
-                        <RemoteName>libbassenc.so</RemoteName>
                         <Overwrite>true</Overwrite>
                     </Platform>
                 </DeployFile>

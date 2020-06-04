@@ -5,9 +5,10 @@ interface
 uses
   System.SysUtils, System.Types, System.UITypes, System.Classes, System.Variants, FMX.Types, FMX.Controls, FMX.Forms,
   FMX.Graphics, FMX.Dialogs, FMX.TabControl, FMX.StdCtrls, FMX.Controls.Presentation, FMX.Gestures, System.Actions,
-  FMX.ActnList, FMX.Player, VK.API, VK.Components, VK.Entity.User, FMX.Layouts, FMX.Objects, FMX.ListView.Types,
+  FMX.ActnList, VK.API, VK.Components, VK.Entity.User, FMX.Layouts, FMX.Objects, FMX.ListView.Types,
   FMX.ListView.Appearances, FMX.ListView.Adapters.Base, VK.Entity.Audio, VK.Audio, FMX.ListView, BassPlayer.LoadHandle,
-  System.Generics.Collections, System.ImageList, FMX.ImgList, FMX.Effects, FMX.Player.Shared, FMX.Player.Windows;
+  System.Generics.Collections, System.ImageList, FMX.ImgList, FMX.Effects, FMX.Player, FMX.Player.Shared,
+  FMX.Player.Windows;
 
 type
   TBitmapCacheItem = record
@@ -379,13 +380,10 @@ begin
     //FLoadPicMusic.IsWorking or
     //FLoadPicSearch.IsWorking or
     //FLoadSearch.IsWorking or
-    FLoadPlaylist.IsWorking or
-    FLoadMusic.IsWorking or
-    FLoadPlaylists.IsWorking or
-    //FLoadPicCurrent.IsWorking or
+    FLoadPlaylist.IsWorking or FLoadMusic.IsWorking or FLoadPlaylists.IsWorking or    //FLoadPicCurrent.IsWorking or
     FLoadUsers.IsWorking// or
     //FLoadPicFriends.IsWorking
-  do
+    do
     Application.ProcessMessages;
 end;
 
