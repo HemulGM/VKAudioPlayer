@@ -1,0 +1,48 @@
+﻿<Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+    <PropertyGroup>
+        <ProjectGuid>{75EBF570-E754-4B39-9F91-2BF866AC735B}</ProjectGuid>
+    </PropertyGroup>
+    <ItemGroup>
+        <Projects Include="VKPlayer.dproj">
+            <Dependencies/>
+        </Projects>
+        <Projects Include="..\..\FMXAudio\FMXAudioHGM.dproj">
+            <Dependencies/>
+        </Projects>
+    </ItemGroup>
+    <ProjectExtensions>
+        <Borland.Personality>Default.Personality.12</Borland.Personality>
+        <Borland.ProjectType/>
+        <BorlandProject>
+            <Default.Personality/>
+        </BorlandProject>
+    </ProjectExtensions>
+    <Target Name="VKPlayer">
+        <MSBuild Projects="VKPlayer.dproj"/>
+    </Target>
+    <Target Name="VKPlayer:Clean">
+        <MSBuild Projects="VKPlayer.dproj" Targets="Clean"/>
+    </Target>
+    <Target Name="VKPlayer:Make">
+        <MSBuild Projects="VKPlayer.dproj" Targets="Make"/>
+    </Target>
+    <Target Name="FMXAudioHGM">
+        <MSBuild Projects="..\..\FMXAudio\FMXAudioHGM.dproj"/>
+    </Target>
+    <Target Name="FMXAudioHGM:Clean">
+        <MSBuild Projects="..\..\FMXAudio\FMXAudioHGM.dproj" Targets="Clean"/>
+    </Target>
+    <Target Name="FMXAudioHGM:Make">
+        <MSBuild Projects="..\..\FMXAudio\FMXAudioHGM.dproj" Targets="Make"/>
+    </Target>
+    <Target Name="Build">
+        <CallTarget Targets="VKPlayer;FMXAudioHGM"/>
+    </Target>
+    <Target Name="Clean">
+        <CallTarget Targets="VKPlayer:Clean;FMXAudioHGM:Clean"/>
+    </Target>
+    <Target Name="Make">
+        <CallTarget Targets="VKPlayer:Make;FMXAudioHGM:Make"/>
+    </Target>
+    <Import Project="$(BDS)\Bin\CodeGear.Group.Targets" Condition="Exists('$(BDS)\Bin\CodeGear.Group.Targets')"/>
+</Project>

@@ -24,6 +24,9 @@
         <Projects Include="..\FMXAudio\FMXAudioHGM.dproj">
             <Dependencies/>
         </Projects>
+        <Projects Include="..\#Learn\gest\TabbedwithNavigation.dproj">
+            <Dependencies/>
+        </Projects>
     </ItemGroup>
     <ProjectExtensions>
         <Borland.Personality>Default.Personality.12</Borland.Personality>
@@ -95,14 +98,23 @@
     <Target Name="FMXAudioHGM:Make">
         <MSBuild Projects="..\FMXAudio\FMXAudioHGM.dproj" Targets="Make"/>
     </Target>
+    <Target Name="TabbedwithNavigation">
+        <MSBuild Projects="..\#Learn\gest\TabbedwithNavigation.dproj"/>
+    </Target>
+    <Target Name="TabbedwithNavigation:Clean">
+        <MSBuild Projects="..\#Learn\gest\TabbedwithNavigation.dproj" Targets="Clean"/>
+    </Target>
+    <Target Name="TabbedwithNavigation:Make">
+        <MSBuild Projects="..\#Learn\gest\TabbedwithNavigation.dproj" Targets="Make"/>
+    </Target>
     <Target Name="Build">
-        <CallTarget Targets="VKAudioPlayer;Audio;VKComponents;HGMComponents;VKPlayer;Knigavuhe;FMXAudioHGM"/>
+        <CallTarget Targets="VKAudioPlayer;Audio;VKComponents;HGMComponents;VKPlayer;Knigavuhe;FMXAudioHGM;TabbedwithNavigation"/>
     </Target>
     <Target Name="Clean">
-        <CallTarget Targets="VKAudioPlayer:Clean;Audio:Clean;VKComponents:Clean;HGMComponents:Clean;VKPlayer:Clean;Knigavuhe:Clean;FMXAudioHGM:Clean"/>
+        <CallTarget Targets="VKAudioPlayer:Clean;Audio:Clean;VKComponents:Clean;HGMComponents:Clean;VKPlayer:Clean;Knigavuhe:Clean;FMXAudioHGM:Clean;TabbedwithNavigation:Clean"/>
     </Target>
     <Target Name="Make">
-        <CallTarget Targets="VKAudioPlayer:Make;Audio:Make;VKComponents:Make;HGMComponents:Make;VKPlayer:Make;Knigavuhe:Make;FMXAudioHGM:Make"/>
+        <CallTarget Targets="VKAudioPlayer:Make;Audio:Make;VKComponents:Make;HGMComponents:Make;VKPlayer:Make;Knigavuhe:Make;FMXAudioHGM:Make;TabbedwithNavigation:Make"/>
     </Target>
     <Import Project="$(BDS)\Bin\CodeGear.Group.Targets" Condition="Exists('$(BDS)\Bin\CodeGear.Group.Targets')"/>
 </Project>

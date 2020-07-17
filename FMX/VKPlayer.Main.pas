@@ -7,13 +7,14 @@ uses
   FMX.Graphics, FMX.Dialogs, FMX.TabControl, FMX.StdCtrls, FMX.Controls.Presentation, FMX.Gestures, System.Actions,
   FMX.ActnList, VK.API, VK.Components, VK.Entity.User, FMX.Layouts, FMX.Objects, FMX.ListView.Types,
   FMX.ListView.Appearances, FMX.ListView.Adapters.Base, VK.Entity.Audio, VK.Audio, FMX.ListView, BassPlayer.LoadHandle,
-  System.Generics.Collections, System.ImageList, FMX.ImgList, FMX.Effects, FMX.Player, FMX.Player.Shared,
-  FMX.Player.Windows;
+  System.Generics.Collections, System.ImageList, FMX.ImgList, FMX.Effects, FMX.Player, FMX.Player.Shared, FMX.Ani,
+  FMX.ScrollBox, FMX.Memo, FMX.Player.Windows, FMX.Filter.Effects, FMX.Edit;
 
 type
   TBitmapCacheItem = record
     Image: TBitmap;
     Url: string;
+    Loaded: Boolean;
   end;
 
   TBitmapCache = TArray<TBitmapCacheItem>;
@@ -24,8 +25,11 @@ type
     class var
       LoadCounter: Integer;
     procedure LoadFromUrl(const Url: string; UseCache: Boolean = True);
+    procedure LoadFromResource(ResName: string);
+    class procedure SetLoaded(Url: string);
     class function CreateFromUrl(const Url: string): TBitmap;
     class function CreateLazy(const Url: string): TBitmap;
+    class function CreateFromResource(ResName: string; Url: string = ''): TBitmap;
   end;
 
   TPlayRepeat = (prNone, prAll, prOne);
@@ -60,7 +64,7 @@ type
     LastName: string;
     Status: string;
     Music: Integer;
-    AlbumPhoto: string;
+    Photo: string;
     Image: TBitmap;
     Id: Integer;
     CanSeeAudio: Boolean;
@@ -90,22 +94,12 @@ type
   TFormMain = class(TForm)
     TabControlMain: TTabControl;
     TabItemMusic: TTabItem;
-    TabControlPlayer: TTabControl;
-    TabItemPlayer: TTabItem;
-    ToolBar1: TToolBar;
-    lblTitle1: TLabel;
-    btnNext: TSpeedButton;
-    TabItemPlaylist: TTabItem;
-    ToolBar2: TToolBar;
-    lblTitle2: TLabel;
-    btnBack: TSpeedButton;
     TabItemSearch: TTabItem;
     ToolBar3: TToolBar;
     lblTitle3: TLabel;
     TabItemUsers: TTabItem;
     ToolBar4: TToolBar;
     lblTitle4: TLabel;
-    TabItemPlay: TTabItem;
     GestureManager1: TGestureManager;
     ActionList1: TActionList;
     NextTabAction1: TNextTabAction;
@@ -115,28 +109,11 @@ type
     ToolBar6: TToolBar;
     Label1: TLabel;
     ListViewMusic: TListView;
-    Layout2: TLayout;
-    Layout3: TLayout;
-    LabelTitle: TLabel;
-    LabelArtist: TLabel;
-    ImageAlbum: TImage;
     StyleBook: TStyleBook;
-    Layout4: TLayout;
-    Layout5: TLayout;
-    Layout6: TLayout;
-    LabelTime: TLabel;
-    LabelDuration: TLabel;
-    TrackBarPosition: TTrackBar;
     TimerRefresh: TTimer;
     TimerPos: TTimer;
     ImageList64: TImageList;
     TabItemPlaylists: TTabItem;
-    GridPanelLayout1: TGridPanelLayout;
-    SpeedButtonPlayPause: TSpeedButton;
-    SpeedButtonPlayOption: TSpeedButton;
-    SpeedButtonPlayNext: TSpeedButton;
-    SpeedButtonPlayPrev: TSpeedButton;
-    SpeedButtonDownload: TSpeedButton;
     Panel1: TPanel;
     GridPanelLayout2: TGridPanelLayout;
     SpeedButtonPlaylists: TSpeedButton;
@@ -155,11 +132,74 @@ type
     Label2: TLabel;
     ToolBar7: TToolBar;
     LabelUserPlaylist: TLabel;
-    ListViewCurrentPlaylist: TListView;
     ListViewPlaylist: TListView;
     SpeedButton1: TSpeedButton;
-    ShadowEffect1: TShadowEffect;
+    LayoutPopupButtons: TLayout;
+    Circle1: TCircle;
+    Circle2: TCircle;
+    Circle3: TCircle;
+    FloatAnimationPB1: TFloatAnimation;
+    FloatAnimationPB2: TFloatAnimation;
+    FloatAnimationPB3: TFloatAnimation;
+    ShadowEffect3: TShadowEffect;
+    ShadowEffect4: TShadowEffect;
+    ShadowEffect5: TShadowEffect;
+    Image1: TImage;
+    Image2: TImage;
+    Image3: TImage;
+    Rectangle2: TRectangle;
+    FloatAnimationPBBG: TFloatAnimation;
+    AniIndicatorLoad: TAniIndicator;
     FMXPlayer: TFMXPlayer;
+    LayoutPlayer: TLayout;
+    FloatAnimationPlayer: TFloatAnimation;
+    LayoutPlayerBar: TLayout;
+    SpeedButtonBarPlay: TSpeedButton;
+    LayoutBarInfo: TLayout;
+    LabelBarTitle: TLabel;
+    LabelBarArtist: TLabel;
+    SpeedButtonBarAction: TSpeedButton;
+    Layout1: TLayout;
+    ProgressBarPos: TProgressBar;
+    TabControlPlayer: TTabControl;
+    TabItemPlayer: TTabItem;
+    LayoutPlayControl: TLayout;
+    GridPanelLayout1: TGridPanelLayout;
+    SpeedButtonPlayOption: TSpeedButton;
+    SpeedButtonPlayNext: TSpeedButton;
+    SpeedButtonPlayPrev: TSpeedButton;
+    SpeedButtonDownload: TSpeedButton;
+    SpeedButtonPlayPause: TSpeedButton;
+    LayoutPlayInfo: TLayout;
+    LabelTitle: TLabel;
+    LabelArtist: TLabel;
+    LayoutTrackbar: TLayout;
+    Layout5: TLayout;
+    Layout6: TLayout;
+    LabelTime: TLabel;
+    LabelDuration: TLabel;
+    TrackBarPosition: TTrackBar;
+    TabItemPlaylist: TTabItem;
+    ListViewCurrentPlaylist: TListView;
+    Rectangle1: TRectangle;
+    Layout2: TLayout;
+    Layout3: TLayout;
+    SpeedButton3: TSpeedButton;
+    SpeedButton5: TSpeedButton;
+    SpeedButtonSwitchPlay: TSpeedButton;
+    SpeedButtonSwitchList: TSpeedButton;
+    ShadowEffect2: TShadowEffect;
+    ToolBar2: TToolBar;
+    SpeedButton6: TSpeedButton;
+    BloomEffect2: TBloomEffect;
+    Edit1: TEdit;
+    ClearEditButton1: TClearEditButton;
+    Layout4: TLayout;
+    ImageAlbum: TImage;
+    ShadowEffect1: TShadowEffect;
+    FloatAnimationPlayerShift: TFloatAnimation;
+    SaveDialog: TSaveDialog;
+    TimerLoadVisImage: TTimer;
     procedure GestureDone(Sender: TObject; const EventInfo: TGestureEventInfo; var Handled: Boolean);
     procedure FormCreate(Sender: TObject);
     procedure FormDestroy(Sender: TObject);
@@ -180,7 +220,6 @@ type
     procedure TrackBarPositionMouseDown(Sender: TObject; Button: TMouseButton; Shift: TShiftState; X, Y: Single);
     procedure TrackBarPositionChange(Sender: TObject);
     procedure TimerPosTimer(Sender: TObject);
-    procedure ListViewMusicUpdatingObjects(const Sender: TObject; const AItem: TListViewItem; var AHandled: Boolean);
     procedure SpeedButtonPlayNextClick(Sender: TObject);
     procedure SpeedButtonPlayPrevClick(Sender: TObject);
     procedure ListViewPlaylistsItemClick(const Sender: TObject; const AItem: TListViewItem);
@@ -189,7 +228,23 @@ type
     procedure SpeedButton4Click(Sender: TObject);
     procedure FMXPlayerChangeState(Sender: TObject);
     procedure FormCloseQuery(Sender: TObject; var CanClose: Boolean);
+    procedure LayoutPopupButtonsClick(Sender: TObject);
+    procedure FloatAnimationPB3Finish(Sender: TObject);
+    procedure ListViewMusicScrollViewChange(Sender: TObject);
+    procedure FormResize(Sender: TObject);
+    procedure FMXPlayerEnd(Sender: TObject);
+    procedure FloatAnimationPlayerFinish(Sender: TObject);
+    procedure SpeedButton2Click(Sender: TObject);
+    procedure SpeedButtonBarActionClick(Sender: TObject);
+    procedure LayoutBarInfoClick(Sender: TObject);
+    procedure Layout3Click(Sender: TObject);
+    procedure TabControlPlayerChange(Sender: TObject);
+    procedure SpeedButtonDownloadClick(Sender: TObject);
+    procedure TimerLoadVisImageTimer(Sender: TObject);
+    procedure ListViewFriendsItemClick(const Sender: TObject; const AItem: TListViewItem);
   private
+    FCurrentAudio: TAudio;
+    FTerminating: Boolean;
     FToken: string;
     FAppLoading: Boolean;
     FOpenning: Boolean;
@@ -207,6 +262,7 @@ type
     FPlaylist: TAudioList;
     //
     FMyMusic: TAudioList;
+    FFriendMusic: TAudioList;
     FLoadMusic: TLoadThread;
     FPlaylists: TPlaylists;
     FLoadPlaylists: TLoadThread;
@@ -230,6 +286,10 @@ type
     procedure FillFriendItem(ListItem: TListViewItem; Item: TFriend);
     procedure Await;
     procedure Quit;
+    procedure ShowPopupButtons;
+    procedure HidePopupButtons;
+    procedure ClosePlayer;
+    procedure OpenPlayer;
   public
     { Public declarations }
   end;
@@ -240,13 +300,13 @@ var
 implementation
 
 uses
-  VK.FMX.OAuth2, VK.Friends, VK.Entity.Playlist, System.Net.HttpClient;
+  VK.FMX.OAuth2, VK.Friends, VK.Entity.Playlist, System.Net.HttpClient, System.NetEncoding, System.IOUtils, VK.Types;
 
 {$R *.fmx}
 
-procedure OpenTab(Control: TTabControl; Tab: TTabItem);
+procedure OpenTab(Control: TTabControl; Tab: TTabItem; ToRight: Boolean = False);
 begin
-  if Control.ActiveTab.Index < Tab.Index then
+  if (Control.ActiveTab.Index < Tab.Index) or ToRight then
     Control.SetActiveTabWithTransitionAsync(Tab, TTabTransition.Slide, TTabTransitionDirection.Normal, nil)
   else
     Control.SetActiveTabWithTransitionAsync(Tab, TTabTransition.Slide, TTabTransitionDirection.Reversed, nil);
@@ -290,6 +350,7 @@ procedure TFormMain.FillFriendItem(ListItem: TListViewItem; Item: TFriend);
 begin
   with ListItem do
   begin
+    Tag := Item.Id;
     Objects.FindObjectT<TListItemText>('Name').Text := Item.FirstName + ' ' + Item.LastName;
     Objects.FindObjectT<TListItemText>('Status').Text := Item.Status;
     Objects.FindObjectT<TListItemText>('Music').Text := Item.Music.ToString;
@@ -420,6 +481,67 @@ begin
   end;
 end;
 
+procedure TFormMain.ShowPopupButtons;
+begin
+  LayoutPopupButtons.Visible := True;
+  FloatAnimationPBBG.Inverse := False;
+  FloatAnimationPB1.Inverse := False;
+  FloatAnimationPB2.Inverse := False;
+  FloatAnimationPB3.Inverse := False;
+  FloatAnimationPBBG.Start;
+  FloatAnimationPB1.Start;
+  FloatAnimationPB2.Start;
+  FloatAnimationPB3.Start;
+end;
+
+procedure TFormMain.HidePopupButtons;
+begin
+  FloatAnimationPBBG.Inverse := True;
+  FloatAnimationPB1.Inverse := True;
+  FloatAnimationPB2.Inverse := True;
+  FloatAnimationPB3.Inverse := True;
+  FloatAnimationPBBG.Start;
+  FloatAnimationPB1.Start;
+  FloatAnimationPB2.Start;
+  FloatAnimationPB3.Start;
+end;
+
+procedure TFormMain.FloatAnimationPB3Finish(Sender: TObject);
+begin
+  if FloatAnimationPB3.Inverse then
+    LayoutPopupButtons.Visible := False;
+end;
+
+procedure TFormMain.FloatAnimationPlayerFinish(Sender: TObject);
+begin
+  if FloatAnimationPlayer.Inverse then
+    LayoutPlayer.Visible := False;
+end;
+
+procedure TFormMain.OpenPlayer;
+begin
+  LayoutPlayerBar.Visible := True;
+  LayoutPlayer.Position.Point := TPointF.Create(0, ClientHeight);
+  LayoutPlayer.Size.Size := TSizeF.Create(ClientWidth, ClientHeight);
+  LayoutPlayer.Opacity := 0;
+  LayoutPlayer.BringToFront;
+  LayoutPlayer.Visible := True;
+  FloatAnimationPlayerShift.Inverse := True;
+  FloatAnimationPlayerShift.StopValue := ClientHeight;
+  FloatAnimationPlayer.Inverse := False;
+  FloatAnimationPlayer.Start;
+  FloatAnimationPlayerShift.Start;
+end;
+
+procedure TFormMain.ClosePlayer;
+begin
+  LayoutPlayer.Position.Point := TPointF.Create(0, 0);
+  FloatAnimationPlayer.Inverse := True;
+  FloatAnimationPlayerShift.Inverse := False;
+  FloatAnimationPlayer.Start;
+  FloatAnimationPlayerShift.Start;
+end;
+
 procedure TFormMain.FMXPlayerChangeState(Sender: TObject);
 begin
   case FMXPlayer.State of
@@ -428,6 +550,20 @@ begin
   else
     SpeedButtonPlayPause.ImageIndex := 18;
   end;
+  SpeedButtonBarPlay.ImageIndex := SpeedButtonPlayPause.ImageIndex;
+  case FMXPlayer.State of
+    TPlayerState.psPause:
+      SpeedButtonBarAction.ImageIndex := 21;
+  else
+    SpeedButtonBarAction.ImageIndex := 0;
+  end;
+end;
+
+procedure TFormMain.FMXPlayerEnd(Sender: TObject);
+begin
+  if FTerminating then
+    Exit;
+  PlayNext(False);
 end;
 
 procedure TFormMain.FormCloseQuery(Sender: TObject; var CanClose: Boolean);
@@ -447,18 +583,23 @@ end;
 
 procedure TFormMain.FormCreate(Sender: TObject);
 begin
+  FTerminating := False;
+  TBitmap.CreateFromResource('blank');
   TBitmap.LoadCounter := 0;
   FAppLoading := True;
-  CreateLoaders;
-  TabControlMain.ActiveTab := TabItemMusic;
   TabControlMain.TabPosition := TTabPosition.None;
+  CreateLoaders;
 
   FMyMusic := TAudioList.Create;
+  FFriendMusic := TAudioList.Create;
   FPlaylists := TPlaylists.Create;
   FCurrentList := TAudioList.Create;
   FPlaylist := TAudioList.Create;
   FFriends := TFriends.Create;
 
+  LayoutPlayer.Visible := False;
+  LayoutPlayerBar.Visible := False;
+  TabControlMain.ActiveTab := TabItemMusic;
   TabControlPlaylists.ActiveTab := TabItemUserPlaylists;
   if not FMXPlayer.Init(Handle) then
   begin
@@ -471,7 +612,9 @@ procedure TFormMain.FormDestroy(Sender: TObject);
 var
   i: Integer;
 begin
+  FTerminating := True;
   FMyMusic.Free;
+  FFriendMusic.Free;
   FPlaylists.Free;
   FCurrentList.Free;
   FPlaylist.Free;
@@ -480,9 +623,24 @@ begin
     TBitmap.PictureCache[i].Image.Free;
 end;
 
+procedure TFormMain.FormResize(Sender: TObject);
+begin
+  FloatAnimationPB1.StartValue := Height + 50;
+  FloatAnimationPB2.StartValue := Height + 50;
+  FloatAnimationPB3.StartValue := Height + 50;
+
+  FloatAnimationPB1.StopValue := Height - 200;
+  FloatAnimationPB2.StopValue := Height - 280;
+  FloatAnimationPB3.StopValue := Height - 360;
+
+  Circle1.Position.X := Width - 80;
+  Circle2.Position.X := Width - 80;
+  Circle3.Position.X := Width - 80;
+end;
+
 procedure TFormMain.FormShow(Sender: TObject);
 begin
-  TThread.ForceQueue(TThread.Current,
+  TThread.ForceQueue(nil,
     procedure
     begin
       VK.Login;
@@ -490,7 +648,24 @@ begin
 end;
 
 procedure TFormMain.GestureDone(Sender: TObject; const EventInfo: TGestureEventInfo; var Handled: Boolean);
-begin     {
+begin
+  if LayoutPlayer.Visible then
+  begin
+    case EventInfo.GestureID of
+      sgiLeft, sgiRight:
+        begin
+          if TabControlPlayer.ActiveTab = TabItemPlayer then
+            OpenTab(TabControlPlayer, TabItemPlaylist, EventInfo.GestureID = sgiRight)
+          else
+            OpenTab(TabControlPlayer, TabItemPlayer, EventInfo.GestureID = sgiRight);
+          Handled := True;
+        end;
+    end;
+    Exit;
+  end;
+
+
+{
   case EventInfo.GestureID of
     sgiLeft:
       begin
@@ -515,7 +690,6 @@ begin
       Mem: TMemoryStream;
       i: Integer;
     begin
-      Image.Bitmap := TBitmap.CreateFromUrl(Url);
       for i := Low(TBitmap.PictureCache) to High(TBitmap.PictureCache) do
         if TBitmap.PictureCache[i].Url = Url then
         begin
@@ -531,10 +705,15 @@ begin
         i := Length(TBitmap.PictureCache);
         SetLength(TBitmap.PictureCache, i + 1);
         TBitmap.PictureCache[i].Image := TBitmap.Create;
+        TBitmap.PictureCache[i].Url := Url;
         try
           if Mem.Size > 0 then
           begin
-            TBitmap.PictureCache[i].Image.LoadFromStream(Mem);
+            TThread.Synchronize(nil,
+              procedure
+              begin
+                TBitmap.PictureCache[i].Image.LoadFromStream(Mem);
+              end);
           end;
         finally
           TThread.ForceQueue(nil,
@@ -553,6 +732,8 @@ procedure TFormMain.SetInfo(Audio: TAudio);
 begin
   LabelArtist.Text := Audio.Artist;
   LabelTitle.Text := Audio.Title;
+  LabelBarArtist.Text := Audio.Artist;
+  LabelBarTitle.Text := Audio.Title;
   LabelDuration.Text := Audio.Duration;
   Audio.NeedImage;
   if Assigned(Audio.Image) then
@@ -570,7 +751,6 @@ end;
 function TFormMain.Play(Index: Integer): Boolean;
 var
   Item: TVkAudio;
-  Audio: TAudio;
   IsDone, FRes: Boolean;
 begin
   Result := False;
@@ -589,14 +769,14 @@ begin
       Exit(True);
     end;
     ListViewCurrentPlaylist.ItemIndex := Index;
-    Audio := FCurrentList[Index];
-    FPlayingId := Audio.Id;
-    if Audio.Url.IsEmpty then
+    FCurrentAudio := FCurrentList[Index];
+    FPlayingId := FCurrentAudio.Id;
+    if FCurrentAudio.Url.IsEmpty then
     begin
-      if VK.Audio.GetById(Item, Audio.OwnerId, Audio.Id, Audio.AccessKey) then
+      if VK.Audio.GetById(Item, FCurrentAudio.OwnerId, FCurrentAudio.Id, FCurrentAudio.AccessKey) then
       begin
-        Audio.Url := Item.Url;
-        FCurrentList[Index] := Audio;
+        FCurrentAudio.Url := Item.Url;
+        FCurrentList[Index] := FCurrentAudio;
         Item.Free;
       end
       else
@@ -607,11 +787,11 @@ begin
         Exit;
       end;
     end;
-    SetInfo(Audio);
-    if not Audio.Url.IsEmpty then
+    SetInfo(FCurrentAudio);
+    if not FCurrentAudio.Url.IsEmpty then
     begin
       FFailCount := 0;
-      FMXPlayer.StreamURL := Audio.Url;
+      FMXPlayer.StreamURL := FCurrentAudio.Url;
       IsDone := False;
       FRes := False;
       TThread.CreateAnonymousThread(
@@ -670,13 +850,13 @@ begin
   FillCurrentFrom(FMyMusic);
   if not Play(AItem.Index) then
     PlayNext(True);
-  OpenTab(TabControlMain, TabItemPlay);
-  OpenTab(TabControlPlayer, TabItemPlayer);
+  if not LayoutPlayerBar.Visible then
+    OpenPlayer;
 end;
 
-procedure TFormMain.ListViewMusicUpdatingObjects(const Sender: TObject; const AItem: TListViewItem; var AHandled: Boolean);
+procedure TFormMain.ListViewMusicScrollViewChange(Sender: TObject);
 begin
-  //FMyMusic[AItem.Index].NeedImage;
+  //
 end;
 
 procedure TFormMain.ListViewPlaylistItemClick(const Sender: TObject; const AItem: TListViewItem);
@@ -684,8 +864,8 @@ begin
   FillCurrentFrom(FPlaylist);
   if not Play(AItem.Index) then
     PlayNext(True);
-  OpenTab(TabControlMain, TabItemPlay);
-  OpenTab(TabControlPlayer, TabItemPlayer);
+  if not LayoutPlayerBar.Visible then
+    OpenPlayer;
 end;
 
 procedure TFormMain.ListViewPlaylistsItemClick(const Sender: TObject; const AItem: TListViewItem);
@@ -696,10 +876,36 @@ begin
   OpenTab(TabControlPlaylists, TabItemUserPlaylist);
 end;
 
+procedure TFormMain.Layout3Click(Sender: TObject);
+begin
+  if TabControlPlayer.ActiveTab = TabItemPlayer then
+    OpenTab(TabControlPlayer, TabItemPlaylist)
+  else
+    OpenTab(TabControlPlayer, TabItemPlayer)
+end;
+
+procedure TFormMain.LayoutBarInfoClick(Sender: TObject);
+begin
+  OpenPlayer;
+end;
+
+procedure TFormMain.LayoutPopupButtonsClick(Sender: TObject);
+begin
+  HidePopupButtons;
+end;
+
 procedure TFormMain.ListViewCurrentPlaylistItemClick(const Sender: TObject; const AItem: TListViewItem);
 begin
   if not Play(AItem.Index) then
     PlayNext(True);
+end;
+
+procedure TFormMain.ListViewFriendsItemClick(const Sender: TObject; const AItem: TListViewItem);
+begin
+  FVkIdCurrent := AItem.Tag;
+  FLoadMusic.Execute;
+  FLoadPlaylists.Execute;
+  OpenTab(TabControlMain, TabItemMusic);
 end;
 
 procedure TFormMain.VKAuth(Sender: TObject; Url: string; var Token: string; var TokenExpiry: Int64; var
@@ -713,7 +919,7 @@ begin
         FToken := Form.Token;
         if not FToken.IsEmpty then
           Vk.Login;
-      end);
+      end, StyleBook);
   end;
   Token := FToken;
 end;
@@ -752,9 +958,40 @@ begin
   OpenTab(TabControlPlaylists, TabItemUserPlaylists);
 end;
 
+procedure TFormMain.SpeedButton2Click(Sender: TObject);
+begin
+  ClosePlayer;
+end;
+
 procedure TFormMain.SpeedButton4Click(Sender: TObject);
 begin
-  OpenTab(TabControlMain, TabItemPlay);
+  //OpenTab(TabControlMain, TabItemPlay);
+  //Popup1.Popup;
+  FVkIdCurrent := FVkId;
+  FLoadMusic.Execute;
+  FLoadPlaylists.Execute;
+  OpenTab(TabControlMain, TabItemMusic);
+end;
+
+procedure TFormMain.SpeedButtonBarActionClick(Sender: TObject);
+begin
+  if FMXPlayer.IsPause then
+  begin
+    FMXPlayer.Stop;
+    LayoutPlayerBar.Visible := False;
+  end
+  else
+  begin
+    PlayNext(True);
+  end;
+end;
+
+procedure TFormMain.SpeedButtonDownloadClick(Sender: TObject);
+begin
+  if SaveDialog.Execute then
+  begin
+
+  end;
 end;
 
 procedure TFormMain.SpeedButtonMusicClick(Sender: TObject);
@@ -764,12 +1001,7 @@ end;
 
 procedure TFormMain.SpeedButtonSearchClick(Sender: TObject);
 begin
-  //OpenTab(TabControlMain, TabItemSearch);
- { FMXPlayer.StreamURL := 'https://rusradio.hostingradio.ru/rusradio96.aacp';
-  FMXPlayer.Play; }
-  OpenTab(TabControlMain, TabItemPlay);
-  FMXPlayer.FileName := 'D:\Мультимедиа\Музыка\Dear Euphoria\Dear Euphoria - Glorious Laughter.mp3';
-  FMXPlayer.Play;
+  OpenTab(TabControlMain, TabItemSearch);
 end;
 
 procedure TFormMain.TimerRefreshTimer(Sender: TObject);
@@ -785,9 +1017,50 @@ begin
   begin
     FPlayChange := True;
     TrackbarPosition.Value := FMXPlayer.PositionPercent;
+    ProgressBarPos.Value := FMXPlayer.PositionPercent;
     FPlayChange := False;
   end;
+  ListViewMusic.Repaint;
   //TrackbarPosition.SecondPosition := FMXPlayer.BufferringPercent;
+end;
+
+procedure TFormMain.TabControlPlayerChange(Sender: TObject);
+begin
+  SpeedButtonSwitchPlay.Enabled := TabControlPlayer.ActiveTab = TabItemPlayer;
+  SpeedButtonSwitchList.Enabled := TabControlPlayer.ActiveTab = TabItemPlaylist;
+end;
+
+procedure TFormMain.TimerLoadVisImageTimer(Sender: TObject);
+{var
+  i, F, L: Integer;
+  Data: TListBoxChannelData;
+  EPG: TSrEPGItem;
+  FL, LL: TListBoxItem;
+
+  function InRange(Value: Integer): Boolean;
+  begin
+    Result := (Value <= L) and (Value >= F);
+  end;
+        }
+begin
+  {//ListViewMusic.
+    FL := ListViewMusic.ItemByPoint(10, 10);
+    if Assigned(FL) then
+      F := FL.Index
+    else
+      F := 0;
+
+    LL := ListViewMusic.ItemByPoint(10, ListViewMusic.Height - 10);
+    if Assigned(LL) then
+      L := LL.Index
+    else
+      L := 0;
+
+    for i := 0 to ListViewMusic.Count - 1 do
+    begin
+
+  except
+  end;   }
 end;
 
 procedure TFormMain.TimerPosTimer(Sender: TObject);
@@ -885,7 +1158,10 @@ begin
   FLoadMusic := TLoadThread.Create(
     procedure
     begin
+      AniIndicatorLoad.Enabled := True;
+      AniIndicatorLoad.Visible := True;
       ListViewMusic.Enabled := False;
+      ListViewMusic.Visible := False;
       ListViewMusic.BeginUpdate;
       ListViewMusic.Items.Clear;
     end,
@@ -896,40 +1172,34 @@ begin
       Audio: TAudio;
     begin
       Result := False;
-      //FLoadPicMusic.Stop;
-      //FLoadPicMusic.Await(False);
-      //FMyMusic.BeginUpdate;
-      try
-        FMyMusic.Clear;
-        if VK.Audio.Get(Audios, FVkId) then
-        begin
-          try
-            for i := Low(Audios.Items) to High(Audios.Items) do
-            begin
-              if LT.NeedStop then
-                Break;
-              Audio.Fill(Audios.Items[i]);
-              FMyMusic.Add(Audio);
-            end;
-          finally
-            Audios.Free;
+      FMyMusic.Clear;
+      if VK.Audio.Get(Audios, FVkIdCurrent) then
+      begin
+        try
+          for i := Low(Audios.Items) to High(Audios.Items) do
+          begin
+            if LT.NeedStop then
+              Break;
+            Audio.Fill(Audios.Items[i]);
+            FillAudioItem(ListViewMusic.Items.Add, Audio);
+            FMyMusic.Add(Audio);
           end;
-          Result := not LT.NeedStop;
+        finally
+          Audios.Free;
         end;
-      finally
-        //FMyMusic.EndUpdate;
+        Result := not LT.NeedStop;
       end;
     end,
-    procedure(Complete: Boolean)
-    var
-      i: Integer;
-    begin
+    procedure(Complete: Boolean)   { var
+      i: Integer;   }
+    begin    {
       for i := 0 to FMyMusic.Count - 1 do
-        FillAudioItem(ListViewMusic.Items.Add, FMyMusic[i]);
+        FillAudioItem(ListViewMusic.Items.Add, FMyMusic[i]); }
       ListViewMusic.EndUpdate;
       ListViewMusic.Enabled := True;
-      {if Complete then
-        FLoadPicMusic.Execute;  }
+      ListViewMusic.Visible := True;
+      AniIndicatorLoad.Enabled := False;
+      AniIndicatorLoad.Visible := False;
     end);
   {$ENDREGION}
   {$REGION 'FLoadPlaylists'}
@@ -945,42 +1215,36 @@ begin
       i: Integer;
       Playlists: TVkPlaylists;
       Playlist: TPlaylist;
-      //DefImg: Boolean;
     begin
       Result := False;
-      //FPlaylists.BeginUpdate;
-      try
-        FPlaylists.Clear;
-        if VK.Audio.GetPlaylists(Playlists, FVkId) then
-        begin
-          try
-            for i := Low(Playlists.Items) to High(Playlists.Items) do
-            begin
-              if LT.NeedStop then
-                Break;
-              if Length(Playlists.Items[i].MainArtists) > 0 then
-                Playlist.Description := Playlists.Items[i].MainArtists[0].Name
-              else
-                Playlist.Description := Playlists.Items[i].Description;
-              Playlist.Title := Playlists.Items[i].Title;
-              if Assigned(Playlists.Items[i].Photo) then
-                Playlist.AlbumPhoto := Playlists.Items[i].Photo.Photo68
-              else
-                Playlist.AlbumPhoto := '';
+      FPlaylists.Clear;
+      if VK.Audio.GetPlaylists(Playlists, FVkIdCurrent) then
+      begin
+        try
+          for i := Low(Playlists.Items) to High(Playlists.Items) do
+          begin
+            if LT.NeedStop then
+              Break;
+            if Length(Playlists.Items[i].MainArtists) > 0 then
+              Playlist.Description := Playlists.Items[i].MainArtists[0].Name
+            else
+              Playlist.Description := Playlists.Items[i].Description;
+            Playlist.Title := Playlists.Items[i].Title;
+            if Assigned(Playlists.Items[i].Photo) then
+              Playlist.AlbumPhoto := Playlists.Items[i].Photo.Photo68
+            else
+              Playlist.AlbumPhoto := '';
 
-              Playlist.Image := TBitmap.CreateLazy(Playlist.AlbumPhoto);
-              Playlist.Id := Playlists.Items[i].Id;
-              Playlist.OwnerId := Playlists.Items[i].OwnerId;
-              Playlist.Count := Playlists.Items[i].Count;
-              FPlaylists.Add(Playlist);
-            end;
-          finally
-            Playlists.Free;
+            Playlist.Image := TBitmap.CreateLazy(Playlist.AlbumPhoto);
+            Playlist.Id := Playlists.Items[i].Id;
+            Playlist.OwnerId := Playlists.Items[i].OwnerId;
+            Playlist.Count := Playlists.Items[i].Count;
+            FPlaylists.Add(Playlist);
           end;
-          Result := not LT.NeedStop;
+        finally
+          Playlists.Free;
         end;
-      finally
-        //FPlaylists.EndUpdate;
+        Result := not LT.NeedStop;
       end;
     end,
     procedure(Complete: Boolean)
@@ -1005,49 +1269,38 @@ begin
     var
       i: Integer;
       Audios: TVkAudios;
-      Params: TVkAudioParams;
+      Params: TVkParamsAudioGet;
       Audio: TAudio;
     begin
-      //FPlaylist.BeginUpdate;
       FPlaylist.Clear;
       Result := False;
-      try
-        Params.OwnerId(OwnerId);
-        Params.AlbumId(Id);
-        if VK.Audio.Get(Audios, Params) then
-        begin
-          try
-            for i := Low(Audios.Items) to High(Audios.Items) do
+      Params.OwnerId(OwnerId);
+      Params.AlbumId(Id);
+      if VK.Audio.Get(Audios, Params) then
+      begin
+        try
+          for i := Low(Audios.Items) to High(Audios.Items) do
+          begin
+            if not LT.NeedStop then
             begin
-              if not LT.NeedStop then
-              begin
-                Audio.Fill(Audios.Items[i]);
-                FPlaylist.Add(Audio);
-              end;
+              Audio.Fill(Audios.Items[i]);
+              FillAudioItem(ListViewPlaylist.Items.Add, Audio);
+              FPlaylist.Add(Audio);
             end;
-          finally
-            Audios.Free;
           end;
-          Result := not LT.NeedStop;
+        finally
+          Audios.Free;
         end;
-      finally
-        //FPlaylist.EndUpdate;
+        Result := not LT.NeedStop;
       end;
     end,
-    procedure(Complete: Boolean)
-    var
-      i: Integer;
+    procedure(Complete: Boolean)    {var
+      i: Integer; }
     begin
-      for i := 0 to FPlaylist.Count - 1 do
-        FillAudioItem(ListViewPlaylist.Items.Add, FPlaylist[i]);
+      {for i := 0 to FPlaylist.Count - 1 do
+        FillAudioItem(ListViewPlaylist.Items.Add, FPlaylist[i]);    }
       ListViewPlaylist.EndUpdate;
       ListViewPlaylist.Enabled := True;
-    {
-      TableExCurrent.Enabled := True;
-      Play(0);
-      LabelAudioCount.Caption := 'Аудиозаписей: ' + FCurrentList.Count.ToString;
-      if Complete then
-        FLoadPicCurrent.Execute;   }
     end);
   {$ENDREGION}
   {$REGION 'FLoadUsers'}
@@ -1064,41 +1317,36 @@ begin
       Friend: TFriend;
       i: Integer;
     begin
-      //FFriends.BeginUpdate;
       FFriends.Clear;
       Result := False;
-      try
-        if VK.Friends.Get(Users, 'nickname, sex, photo_50, status, can_see_audio', fsName) then
-        begin
-          try
-            for i := Low(Users.Items) to High(Users.Items) do
-            begin
-              if LT.NeedStop then
-                Break;
-              Friend.Id := Users.Items[i].Id;
-              Friend.FirstName := Users.Items[i].FirstName;
-              Friend.LastName := Users.Items[i].LastName;
-              Friend.AlbumPhoto := Users.Items[i].Photo50;
-              Friend.CanSeeAudio := Users.Items[i].CanSeeAudio = 1;
-              Friend.Image := nil;
-              Friend.Status := Users.Items[i].Status;
-              FFriends.Add(Friend);
-            end;
-          finally
-            Users.Free;
+      if VK.Friends.Get(Users, [ffNickname, ffSex, ffPhoto50, ffStatus, ffCanSeeAudio], fsName) then
+      begin
+        try
+          for i := Low(Users.Items) to High(Users.Items) do
+          begin
+            if LT.NeedStop then
+              Break;
+            Friend.Id := Users.Items[i].Id;
+            Friend.FirstName := Users.Items[i].FirstName;
+            Friend.LastName := Users.Items[i].LastName;
+            Friend.Photo := Users.Items[i].Photo50;
+            Friend.CanSeeAudio := Users.Items[i].CanSeeAudio = 1;
+            Friend.Image := TBitmap.CreateLazy(Friend.Photo);
+            Friend.Status := Users.Items[i].Status;
+            FFriends.Add(Friend);
+            FillFriendItem(ListViewFriends.Items.Add, Friend);
           end;
-          Result := not LT.NeedStop;
+        finally
+          Users.Free;
         end;
-      finally
-        //FFriends.EndUpdate;
+        Result := not LT.NeedStop;
       end;
     end,
-    procedure(Complete: Boolean)
-    var
-      i: Integer;
-    begin
+    procedure(Complete: Boolean)    {var
+      i: Integer;    }
+    begin          {
       for i := 0 to FFriends.Count - 1 do
-        FillFriendItem(ListViewFriends.Items.Add, FFriends[i]);
+        FillFriendItem(ListViewFriends.Items.Add, FFriends[i]);  }
       ListViewFriends.EndUpdate;
       ListViewFriends.Enabled := True;
     end);
@@ -1121,7 +1369,7 @@ begin
   FToken := VK.Token;
   //FSettings.SetStr('General', 'Token', FToken);
 
-  if VK.Users.Get(User, 0, 'photo_50') then
+  if VK.Users.Get(User, 0, [ufPhoto50]) then
   begin
     FVkId := User.Id;
     FVkIdCurrent := FVkId;
@@ -1173,23 +1421,34 @@ end;
 
 { TBitmapHelper }
 
+class function TBitmapHelper.CreateFromResource(ResName, Url: string): TBitmap;
+var
+  i: Integer;
+begin
+  i := Length(PictureCache);
+  SetLength(PictureCache, i + 1);
+  PictureCache[i].Image := TBitmap.Create;
+  PictureCache[i].Loaded := False;
+  PictureCache[i].Url := Url;
+  PictureCache[i].Image.LoadFromResource(ResName);
+  Result := PictureCache[i].Image;
+end;
+
 class function TBitmapHelper.CreateFromUrl(const Url: string): TBitmap;
 var
   i: Integer;
 begin
   for i := Low(PictureCache) to High(PictureCache) do
     if PictureCache[i].Url = Url then
-    begin                      {
-      TThread.Queue(TThread.Current,
-        procedure
-        begin
-          //FormMain.ImageBook.Repaint;
-        end);          }
+    begin
       Exit(PictureCache[i].Image);
     end;
   i := Length(PictureCache);
   SetLength(PictureCache, i + 1);
   PictureCache[i].Image := TBitmap.Create;
+  PictureCache[i].Loaded := False;
+  if Length(PictureCache) > 1 then
+    PictureCache[i].Image.Assign(PictureCache[0].Image);
   PictureCache[i].Image.LoadFromUrl(Url, False);
   Result := PictureCache[i].Image;
 end;
@@ -1206,8 +1465,23 @@ begin
   i := Length(PictureCache);
   SetLength(PictureCache, i + 1);
   PictureCache[i].Image := TBitmap.Create;
+  PictureCache[i].Loaded := False;
+  if Length(PictureCache) > 1 then
+    PictureCache[i].Image.Assign(PictureCache[0].Image);
   //PictureCache[i].Image.LoadFromUrl(Url, False);
   Result := PictureCache[i].Image;
+end;
+
+procedure TBitmapHelper.LoadFromResource(ResName: string);
+var
+  Mem: TResourceStream;
+begin
+  Mem := TResourceStream.Create(HInstance, ResName, RT_RCDATA);
+  try
+    Self.LoadFromStream(Mem);
+  finally
+    Mem.Free;
+  end;
 end;
 
 procedure TBitmapHelper.LoadFromUrl(const Url: string; UseCache: Boolean);
@@ -1231,13 +1505,18 @@ begin
       try
         Mem := DownloadURL(Url);
         try
-          i := Length(PictureCache);
-          SetLength(PictureCache, i + 1);
-          PictureCache[i].Image := TBitmap.Create;
           try
             if Mem.Size > 0 then
             begin
-              PictureCache[i].Image.LoadFromStream(Mem);
+              i := Length(PictureCache);
+              SetLength(PictureCache, i + 1);
+              PictureCache[i].Image := TBitmap.Create;
+              PictureCache[i].Url := Url;
+              TThread.Synchronize(nil,
+                procedure
+                begin
+                  PictureCache[i].Image.LoadFromStream(Mem);
+                end);
             end;
           finally
             Self.Assign(PictureCache[i].Image);
@@ -1249,6 +1528,15 @@ begin
         Dec(LoadCounter);
       end;
     end).Start;
+end;
+
+class procedure TBitmapHelper.SetLoaded(Url: string);
+var
+  i: Integer;
+begin
+  for i := Low(PictureCache) to High(PictureCache) do
+    if PictureCache[i].Url = Url then
+      PictureCache[i].Loaded := False;
 end;
 
 end.

@@ -325,7 +325,7 @@ function CreateAvatar(Source: TGraphic; Mask: TPngImage): TPngImage;
 implementation
 
 uses
-  VK.Audio, HGM.Common.Utils, Direct2D, D2D1, Math, VK.Vcl.OAuth2, VK.Friends, Vcl.Themes, Vcl.Styles;
+  VK.Audio, Vk.Types, HGM.Common.Utils, Direct2D, D2D1, Math, VK.Vcl.OAuth2, VK.Friends, Vcl.Themes, Vcl.Styles;
 
 {$R *.dfm}
 
@@ -657,7 +657,7 @@ end;
 
 procedure TFormMain.TableExFriendsItemClick(Sender: TObject; MouseButton: TMouseButton; const Index: Integer);
 var
-  Params: TVkAudioParams;
+  Params: TVkParamsAudioGet;
   Audios: TVkAudios;
   User: TVkUser;
 begin
@@ -1142,7 +1142,7 @@ end;
 
 procedure TFormMain.ButtonFlatMyMusicClick(Sender: TObject);
 var
-  Params: TVkAudioParams;
+  Params: TVkParamsAudioGet;
   Audios: TVkAudios;
   User: TVkUser;
 begin
@@ -1487,7 +1487,7 @@ begin
       FFriends.Clear;
       Result := False;
       try
-        if VK.Friends.Get(Users, 'nickname, sex, photo_50, status, can_see_audio', fsName) then
+        if VK.Friends.Get(Users, [ffNickName, ffSex, ffPhoto50, ffStatus, ffCanSeeAudio], fsName) then
         begin
           try
             for i := Low(Users.Items) to High(Users.Items) do
@@ -1531,7 +1531,7 @@ begin
     var
       i: Integer;
       Audios: TVkAudios;
-      Params: TVkAudioParams;
+      Params: TVkParamsAudioGet;
       Audio: TAudio;
     begin
       FCurrentList.BeginUpdate;
@@ -2056,6 +2056,7 @@ procedure TFormMain.FormCreate(Sender: TObject);
 var
   i: Integer;
 begin
+
   FLoading := TDecoratePanel.Create(Self, PanelLoading, False);
   ActivityIndicatorLoading.Animate := True;
   FLoading.Open(False);
@@ -2320,7 +2321,7 @@ begin
   FToken := VK.Token;
   FSettings.SetStr('General', 'Token', FToken);
 
-  if VK.Users.Get(User, 0, 'photo_50') then
+  if VK.Users.Get(User, 0, [ufPhoto50]) then
   begin
     FVkId := User.id;
     FVkIdCurrent := FVkId;

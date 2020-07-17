@@ -1204,17 +1204,13 @@ object FormMain: TFormMain
       Top = 111
       Width = 594
       Height = 288
-      ActivePage = TabSheetPlaylists
+      ActivePage = TabSheetFriends
       Align = alClient
       Style = tsButtons
       TabOrder = 2
       StyleElements = []
       object TabSheetCurrent: TTabSheet
         Caption = #1058#1077#1082#1091#1097#1080#1081
-        ExplicitLeft = 0
-        ExplicitTop = 0
-        ExplicitWidth = 0
-        ExplicitHeight = 0
         object TableExCurrent: TTableEx
           Left = 0
           Top = 0
@@ -1273,10 +1269,6 @@ object FormMain: TFormMain
       object TabSheetMyMusic: TTabSheet
         Caption = #1052#1091#1079#1099#1082#1072
         ImageIndex = 1
-        ExplicitLeft = 0
-        ExplicitTop = 0
-        ExplicitWidth = 0
-        ExplicitHeight = 0
         object TableExMyMusic: TTableEx
           Left = 0
           Top = 0
@@ -1300,7 +1292,7 @@ object FormMain: TFormMain
             end
             item
               Caption = #1053#1072#1079#1074#1072#1085#1080#1077
-              Width = 532
+              Width = 505
             end>
           DefaultDataDrawing = False
           ItemCount = 1
@@ -1358,7 +1350,7 @@ object FormMain: TFormMain
             end
             item
               Caption = #1053#1072#1079#1074#1072#1085#1080#1077
-              Width = 532
+              Width = 505
             end>
           DefaultDataDrawing = False
           ItemCount = 1
@@ -1393,10 +1385,6 @@ object FormMain: TFormMain
       object TabSheetFriends: TTabSheet
         Caption = #1044#1088#1091#1079#1100#1103
         ImageIndex = 3
-        ExplicitLeft = 0
-        ExplicitTop = 0
-        ExplicitWidth = 0
-        ExplicitHeight = 0
         object MemoLog: TMemo
           Left = 0
           Top = 0
@@ -1430,7 +1418,7 @@ object FormMain: TFormMain
             end
             item
               Caption = #1053#1072#1079#1074#1072#1085#1080#1077
-              Width = 505
+              Width = 532
             end>
           DefaultDataDrawing = False
           ItemCount = 1
@@ -1465,10 +1453,6 @@ object FormMain: TFormMain
       object TabSheetSearch: TTabSheet
         Caption = #1055#1086#1080#1089#1082
         ImageIndex = 4
-        ExplicitLeft = 0
-        ExplicitTop = 0
-        ExplicitWidth = 0
-        ExplicitHeight = 0
         object TableExSearch: TTableEx
           Left = 0
           Top = 0
@@ -1560,7 +1544,7 @@ object FormMain: TFormMain
     AppID = '6121396'
     AppKey = 'AlVXZFMUqyrnABp8ncuU'
     EndPoint = 'https://oauth.vk.com/authorize'
-    Permissions = 'friends,audio'
+    Permissions = [Friends, Audio]
     APIVersion = '5.103'
     BaseURL = 'https://api.vk.com/method'
     OnAuth = VKAuth
@@ -1568,7 +1552,6 @@ object FormMain: TFormMain
     OnLog = VKLog
     OnError = VKError
     OnErrorLogin = VKErrorLogin
-    Logging = False
     Left = 64
     Top = 256
   end
@@ -4005,8 +3988,13 @@ object FormMain: TFormMain
     Top = 322
   end
   object SaveDialogMp3: TFileSaveDialog
+    DefaultExtension = '.mp3'
     FavoriteLinks = <>
-    FileTypes = <>
+    FileTypes = <
+      item
+        DisplayName = 'MP3'
+        FileMask = '*.mp3'
+      end>
     Options = []
     Left = 64
     Top = 319
