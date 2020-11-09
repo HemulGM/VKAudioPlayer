@@ -4,8 +4,8 @@
         <ProjectFileVersion>12</ProjectFileVersion>
     </ProjectExtensions>
     <PropertyGroup>
-        <DeviceId Condition="'$(Platform)'=='Android'"/>
-        <DeviceId Condition="'$(Platform)'=='Android64'"/>
+        <DeviceId Condition="'$(Platform)'=='Android'">127.0.0.1:62001</DeviceId>
+        <DeviceId Condition="'$(Platform)'=='Android64'">127.0.0.1:62001</DeviceId>
     </PropertyGroup>
     <ItemGroup Condition="'$(Platform)'=='iOSDevice64'"/>
     <ItemGroup Condition="'$(Platform)'=='Win64'"/>
@@ -79,15 +79,6 @@
             <RemoteCommand/>
             <Overwrite>True</Overwrite>
         </DeployFile>
-        <DeployFile Include="Lib\x86\libbassenc_mp3.so" Condition="'$(Config)'=='Debug'">
-            <RemoteDir>VKPlayer\library\lib\x86\</RemoteDir>
-            <RemoteName>libbassenc_mp3.so</RemoteName>
-            <DeployClass>File</DeployClass>
-            <Operation>0</Operation>
-            <LocalCommand/>
-            <RemoteCommand/>
-            <Overwrite>True</Overwrite>
-        </DeployFile>
         <DeployFile Include="Android\Debug\splash_image_def.xml" Condition="'$(Config)'=='Debug'">
             <RemoteDir>VKPlayer\res\drawable\</RemoteDir>
             <RemoteName>splash_image_def.xml</RemoteName>
@@ -142,15 +133,6 @@
             <RemoteCommand/>
             <Overwrite>True</Overwrite>
         </DeployFile>
-        <DeployFile Include="Lib\x86\libbass_ssl.so" Condition="'$(Config)'=='Debug'">
-            <RemoteDir>VKPlayer\library\lib\x86\</RemoteDir>
-            <RemoteName>libbass_ssl.so</RemoteName>
-            <DeployClass>File</DeployClass>
-            <Operation>0</Operation>
-            <LocalCommand/>
-            <RemoteCommand/>
-            <Overwrite>True</Overwrite>
-        </DeployFile>
         <DeployFile Include="..\Media\FM_SplashImage_640x480.png" Condition="'$(Config)'=='Debug'">
             <RemoteDir>VKPlayer\res\drawable-large\</RemoteDir>
             <RemoteName>splash_image.png</RemoteName>
@@ -172,15 +154,6 @@
         <DeployFile Include="Lib\armeabi-v7a\libbass_ssl.so" Condition="'$(Config)'=='Debug'">
             <RemoteDir>VKPlayer\library\lib\armeabi-v7a\</RemoteDir>
             <RemoteName>libbass_ssl.so</RemoteName>
-            <DeployClass>File</DeployClass>
-            <Operation>0</Operation>
-            <LocalCommand/>
-            <RemoteCommand/>
-            <Overwrite>True</Overwrite>
-        </DeployFile>
-        <DeployFile Include="Lib\x86\libbassenc_ogg.so" Condition="'$(Config)'=='Debug'">
-            <RemoteDir>VKPlayer\library\lib\x86\</RemoteDir>
-            <RemoteName>libbassenc_ogg.so</RemoteName>
             <DeployClass>File</DeployClass>
             <Operation>0</Operation>
             <LocalCommand/>
@@ -295,20 +268,20 @@
             <RemoteCommand/>
             <Overwrite>True</Overwrite>
         </DeployFile>
-        <DeployFile Include="Lib\x86\libbassenc.so" Condition="'$(Config)'=='Debug'">
-            <RemoteDir>VKPlayer\library\lib\x86\</RemoteDir>
-            <RemoteName>libbassenc.so</RemoteName>
+        <DeployFile Include="Lib\armeabi-v7a\libbassenc_flac.so" Condition="'$(Config)'=='Release'">
+            <RemoteDir>VKPlayer\library\lib\armeabi-v7a\</RemoteDir>
+            <RemoteName>libbassenc_flac.so</RemoteName>
             <DeployClass>File</DeployClass>
             <Operation>0</Operation>
             <LocalCommand/>
             <RemoteCommand/>
             <Overwrite>True</Overwrite>
         </DeployFile>
-        <DeployFile Include="Lib\armeabi-v7a\libbassenc_flac.so" Condition="'$(Config)'=='Release'">
-            <RemoteDir>VKPlayer\library\lib\armeabi-v7a\</RemoteDir>
-            <RemoteName>libbassenc_flac.so</RemoteName>
-            <DeployClass>File</DeployClass>
-            <Operation>0</Operation>
+        <DeployFile Include="$(BDS)\lib\android\debug\mips\libnative-activity.so" Condition="'$(Config)'=='Debug'">
+            <RemoteDir>VKPlayer\library\lib\mips\</RemoteDir>
+            <RemoteName>libVKPlayer.so</RemoteName>
+            <DeployClass>AndroidLibnativeMipsFile</DeployClass>
+            <Operation>1</Operation>
             <LocalCommand/>
             <RemoteCommand/>
             <Overwrite>True</Overwrite>
@@ -358,15 +331,6 @@
             <RemoteCommand/>
             <Overwrite>True</Overwrite>
         </DeployFile>
-        <DeployFile Include="Lib\x86\libbassenc_opus.so" Condition="'$(Config)'=='Debug'">
-            <RemoteDir>VKPlayer\library\lib\x86\</RemoteDir>
-            <RemoteName>libbassenc_opus.so</RemoteName>
-            <DeployClass>File</DeployClass>
-            <Operation>0</Operation>
-            <LocalCommand/>
-            <RemoteCommand/>
-            <Overwrite>True</Overwrite>
-        </DeployFile>
         <DeployFile Include="Lib\armeabi-v7a\libbass.so" Condition="'$(Config)'=='Release'">
             <RemoteDir>VKPlayer\library\lib\armeabi-v7a\</RemoteDir>
             <RemoteName>libbass.so</RemoteName>
@@ -390,6 +354,15 @@
             <RemoteName>libbassenc_opus.so</RemoteName>
             <DeployClass>File</DeployClass>
             <Operation>0</Operation>
+            <LocalCommand/>
+            <RemoteCommand/>
+            <Overwrite>True</Overwrite>
+        </DeployFile>
+        <DeployFile Include="$(NDKBasePath)\prebuilt\android-arm\gdbserver\gdbserver" Condition="'$(Config)'=='Debug'">
+            <RemoteDir>VKPlayer\library\lib\armeabi-v7a\</RemoteDir>
+            <RemoteName>gdbserver</RemoteName>
+            <DeployClass>AndroidGDBServer</DeployClass>
+            <Operation>1</Operation>
             <LocalCommand/>
             <RemoteCommand/>
             <Overwrite>True</Overwrite>
@@ -593,15 +566,6 @@
             <RemoteCommand/>
             <Overwrite>True</Overwrite>
         </DeployFile>
-        <DeployFile Include="Lib\x86\libbass.so" Condition="'$(Config)'=='Debug'">
-            <RemoteDir>VKPlayer\library\lib\x86\</RemoteDir>
-            <RemoteName>libbass.so</RemoteName>
-            <DeployClass>File</DeployClass>
-            <Operation>0</Operation>
-            <LocalCommand/>
-            <RemoteCommand/>
-            <Overwrite>True</Overwrite>
-        </DeployFile>
         <DeployFile Include="$(BDS)\bin\Artwork\Android\FM_NotificationIcon_72x72.png" Condition="'$(Config)'=='Debug'">
             <RemoteDir>VKPlayer\res\drawable-xxhdpi\</RemoteDir>
             <RemoteName>ic_notification.png</RemoteName>
@@ -616,15 +580,6 @@
             <RemoteName>styles.xml</RemoteName>
             <DeployClass>AndroidSplashStyles</DeployClass>
             <Operation>1</Operation>
-            <LocalCommand/>
-            <RemoteCommand/>
-            <Overwrite>True</Overwrite>
-        </DeployFile>
-        <DeployFile Include="Lib\x86\libbassflac.so" Condition="'$(Config)'=='Debug'">
-            <RemoteDir>VKPlayer\library\lib\x86\</RemoteDir>
-            <RemoteName>libbassflac.so</RemoteName>
-            <DeployClass>File</DeployClass>
-            <Operation>0</Operation>
             <LocalCommand/>
             <RemoteCommand/>
             <Overwrite>True</Overwrite>
@@ -782,19 +737,19 @@
             <RemoteCommand/>
             <Overwrite>True</Overwrite>
         </DeployFile>
-        <DeployFile Include="Lib\x86\libbassenc_flac.so" Condition="'$(Config)'=='Debug'">
-            <RemoteDir>VKPlayer\library\lib\x86\</RemoteDir>
-            <RemoteName>libbassenc_flac.so</RemoteName>
-            <DeployClass>File</DeployClass>
-            <Operation>0</Operation>
-            <LocalCommand/>
-            <RemoteCommand/>
-            <Overwrite>True</Overwrite>
-        </DeployFile>
         <DeployFile Include="..\Media\96.png" Condition="'$(Config)'=='Release'">
             <RemoteDir>VKPlayer\res\drawable-xhdpi\</RemoteDir>
             <RemoteName>ic_launcher.png</RemoteName>
             <DeployClass>Android_LauncherIcon96</DeployClass>
+            <Operation>1</Operation>
+            <LocalCommand/>
+            <RemoteCommand/>
+            <Overwrite>True</Overwrite>
+        </DeployFile>
+        <DeployFile Include="$(BDS)\lib\android\debug\armeabi\libnative-activity.so" Condition="'$(Config)'=='Debug'">
+            <RemoteDir>VKPlayer\library\lib\armeabi\</RemoteDir>
+            <RemoteName>libVKPlayer.so</RemoteName>
+            <DeployClass>AndroidLibnativeArmeabiFile</DeployClass>
             <Operation>1</Operation>
             <LocalCommand/>
             <RemoteCommand/>
@@ -1121,10 +1076,10 @@
             <RemoteCommand/>
             <Overwrite>True</Overwrite>
         </DeployFile>
-        <DeployFile Include="$(BDS)\lib\android\release\mips\libnative-activity.so" Condition="'$(Config)'=='Release'">
-            <RemoteDir>VKPlayer\library\lib\mips\</RemoteDir>
-            <RemoteName>libVKPlayer.so</RemoteName>
-            <DeployClass>AndroidLibnativeMipsFile</DeployClass>
+        <DeployFile Include="..\Media\FM_SplashImage_470x320.png" Condition="'$(Config)'=='Debug'">
+            <RemoteDir>VKPlayer\res\drawable-normal\</RemoteDir>
+            <RemoteName>splash_image.png</RemoteName>
+            <DeployClass>Android_SplashImage470</DeployClass>
             <Operation>1</Operation>
             <LocalCommand/>
             <RemoteCommand/>
@@ -1166,6 +1121,15 @@
             <RemoteCommand/>
             <Overwrite>True</Overwrite>
         </DeployFile>
+        <DeployFile Include="..\Media\FM_SplashImage_960x720.png" Condition="'$(Config)'=='Debug'">
+            <RemoteDir>VKPlayer\res\drawable-xlarge\</RemoteDir>
+            <RemoteName>splash_image.png</RemoteName>
+            <DeployClass>Android_SplashImage960</DeployClass>
+            <Operation>1</Operation>
+            <LocalCommand/>
+            <RemoteCommand/>
+            <Overwrite>True</Overwrite>
+        </DeployFile>
         <DeployFile Include="Lib\arm64\libbass_ssl.so" Condition="'$(Config)'=='Debug'">
             <RemoteDir>VKPlayer\library\lib\arm64\</RemoteDir>
             <RemoteName>libbass_ssl.so</RemoteName>
@@ -1197,6 +1161,15 @@
             <RemoteDir>VKPlayer\res\drawable-mdpi\</RemoteDir>
             <RemoteName>ic_notification.png</RemoteName>
             <DeployClass>Android_NotificationIcon24</DeployClass>
+            <Operation>1</Operation>
+            <LocalCommand/>
+            <RemoteCommand/>
+            <Overwrite>True</Overwrite>
+        </DeployFile>
+        <DeployFile Include="..\Media\FM_SplashImage_640x480.png" Condition="'$(Config)'=='Debug'">
+            <RemoteDir>VKPlayer\res\drawable-large\</RemoteDir>
+            <RemoteName>splash_image.png</RemoteName>
+            <DeployClass>Android_SplashImage640</DeployClass>
             <Operation>1</Operation>
             <LocalCommand/>
             <RemoteCommand/>
@@ -1463,15 +1436,6 @@
             <RemoteCommand/>
             <Overwrite>True</Overwrite>
         </DeployFile>
-        <DeployFile Include="$(BDS)\bin\Artwork\Android\FM_SplashImage_470x320.png" Condition="'$(Config)'=='Debug'">
-            <RemoteDir>VKPlayer\res\drawable-normal\</RemoteDir>
-            <RemoteName>splash_image.png</RemoteName>
-            <DeployClass>Android_SplashImage470</DeployClass>
-            <Operation>1</Operation>
-            <LocalCommand/>
-            <RemoteCommand/>
-            <Overwrite>True</Overwrite>
-        </DeployFile>
         <DeployFile Include="Lib\arm64\libbassenc_flac.so" Condition="'$(Config)'=='Debug'">
             <RemoteDir>VKPlayer\library\lib\arm64\</RemoteDir>
             <RemoteName>libbassenc_flac.so</RemoteName>
@@ -1526,15 +1490,6 @@
             <RemoteCommand/>
             <Overwrite>True</Overwrite>
         </DeployFile>
-        <DeployFile Include="$(BDS)\lib\android\release\armeabi\libnative-activity.so" Condition="'$(Config)'=='Release'">
-            <RemoteDir>VKPlayer\library\lib\armeabi\</RemoteDir>
-            <RemoteName>libVKPlayer.so</RemoteName>
-            <DeployClass>AndroidLibnativeArmeabiFile</DeployClass>
-            <Operation>1</Operation>
-            <LocalCommand/>
-            <RemoteCommand/>
-            <Overwrite>True</Overwrite>
-        </DeployFile>
         <DeployFile Include="Lib\arm64\libbassflac.so" Condition="'$(Config)'=='Release'">
             <RemoteDir>VKPlayer\library\lib\arm64\</RemoteDir>
             <RemoteName>libbassflac.so</RemoteName>
@@ -1576,15 +1531,6 @@
             <RemoteName>libbassenc_mp3.so</RemoteName>
             <DeployClass>File</DeployClass>
             <Operation>0</Operation>
-            <LocalCommand/>
-            <RemoteCommand/>
-            <Overwrite>True</Overwrite>
-        </DeployFile>
-        <DeployFile Include="$(BDS)\bin\Artwork\Android\FM_SplashImage_426x320.png" Condition="'$(Config)'=='Debug'">
-            <RemoteDir>VKPlayer\res\drawable-small\</RemoteDir>
-            <RemoteName>splash_image.png</RemoteName>
-            <DeployClass>Android_SplashImage426</DeployClass>
-            <Operation>1</Operation>
             <LocalCommand/>
             <RemoteCommand/>
             <Overwrite>True</Overwrite>
@@ -1631,15 +1577,6 @@
             <RemoteName>libbassenc_flac.so</RemoteName>
             <DeployClass>File</DeployClass>
             <Operation>0</Operation>
-            <LocalCommand/>
-            <RemoteCommand/>
-            <Overwrite>True</Overwrite>
-        </DeployFile>
-        <DeployFile Include="$(BDS)\lib\android\release\armeabi-v7a\libnative-activity.so" Condition="'$(Config)'=='Release'">
-            <RemoteDir>VKPlayer\library\lib\armeabi-v7a\</RemoteDir>
-            <RemoteName>libVKPlayer.so</RemoteName>
-            <DeployClass>AndroidLibnativeArmeabiv7aFile</DeployClass>
-            <Operation>1</Operation>
             <LocalCommand/>
             <RemoteCommand/>
             <Overwrite>True</Overwrite>
@@ -1708,15 +1645,6 @@
             <RemoteCommand/>
             <Overwrite>True</Overwrite>
         </DeployFile>
-        <DeployFile Include="$(BDS)\bin\Artwork\Android\FM_SplashImage_960x720.png" Condition="'$(Config)'=='Debug'">
-            <RemoteDir>VKPlayer\res\drawable-xlarge\</RemoteDir>
-            <RemoteName>splash_image.png</RemoteName>
-            <DeployClass>Android_SplashImage960</DeployClass>
-            <Operation>1</Operation>
-            <LocalCommand/>
-            <RemoteCommand/>
-            <Overwrite>True</Overwrite>
-        </DeployFile>
         <DeployFile Include="$(BDS)\bin\Artwork\Android\FM_LauncherIcon_72x72.png" Condition="'$(Config)'=='Debug'">
             <RemoteDir>VKPlayer\res\drawable-hdpi\</RemoteDir>
             <RemoteName>ic_launcher.png</RemoteName>
@@ -1731,15 +1659,6 @@
             <RemoteName>libbassenc_mp3.so</RemoteName>
             <DeployClass>File</DeployClass>
             <Operation>0</Operation>
-            <LocalCommand/>
-            <RemoteCommand/>
-            <Overwrite>True</Overwrite>
-        </DeployFile>
-        <DeployFile Include="$(BDS)\bin\Artwork\Android\FM_SplashImage_640x480.png" Condition="'$(Config)'=='Debug'">
-            <RemoteDir>VKPlayer\res\drawable-large\</RemoteDir>
-            <RemoteName>splash_image.png</RemoteName>
-            <DeployClass>Android_SplashImage640</DeployClass>
-            <Operation>1</Operation>
             <LocalCommand/>
             <RemoteCommand/>
             <Overwrite>True</Overwrite>
@@ -1766,6 +1685,15 @@
             <RemoteDir>VKPlayer\res\values\</RemoteDir>
             <RemoteName>colors.xml</RemoteName>
             <DeployClass>Android_Colors</DeployClass>
+            <Operation>1</Operation>
+            <LocalCommand/>
+            <RemoteCommand/>
+            <Overwrite>True</Overwrite>
+        </DeployFile>
+        <DeployFile Include="..\Media\FM_SplashImage_426x320.png" Condition="'$(Config)'=='Debug'">
+            <RemoteDir>VKPlayer\res\drawable-small\</RemoteDir>
+            <RemoteName>splash_image.png</RemoteName>
+            <DeployClass>Android_SplashImage426</DeployClass>
             <Operation>1</Operation>
             <LocalCommand/>
             <RemoteCommand/>

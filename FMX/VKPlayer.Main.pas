@@ -5,10 +5,10 @@ interface
 uses
   System.SysUtils, System.Types, System.UITypes, System.Classes, System.Variants, FMX.Types, FMX.Controls, FMX.Forms,
   FMX.Graphics, FMX.Dialogs, FMX.TabControl, FMX.StdCtrls, FMX.Controls.Presentation, FMX.Gestures, System.Actions,
-  FMX.ActnList, VK.API, VK.Components, VK.Entity.User, FMX.Layouts, FMX.Objects, FMX.ListView.Types,
+  FMX.ActnList, VK.API, VK.Components, VK.Entity.Profile, FMX.Layouts, FMX.Objects, FMX.ListView.Types,
   FMX.ListView.Appearances, FMX.ListView.Adapters.Base, VK.Entity.Audio, VK.Audio, FMX.ListView, BassPlayer.LoadHandle,
-  System.Generics.Collections, System.ImageList, FMX.ImgList, FMX.Effects, FMX.Player, FMX.Player.Shared, FMX.Ani,
-  FMX.ScrollBox, FMX.Memo, FMX.Player.Windows, FMX.Filter.Effects, FMX.Edit;
+  System.Generics.Collections, System.ImageList, FMX.ImgList, FMX.Effects, FMX.Player, FMX.Ani,
+  FMX.ScrollBox, FMX.Memo, FMX.Filter.Effects, FMX.Edit;
 
 type
   TBitmapCacheItem = record
@@ -71,24 +71,13 @@ type
   end;
 
   TAudioList = class(TList<TAudio>)
- { public
-    function Find(AudioId: Integer): Integer; overload;
-    function Find(Query: string; StartFrom: Integer = 0): Integer; overload;  }
     function IndexIn(Index: Integer): Boolean;
   end;
 
   TPlaylists = class(TList<TPlaylist>)
-  {public
-    function Find(Query: string; StartFrom: Integer = 0): Integer; overload; }
   end;
 
   TFriends = class(TList<TFriend>)
- { protected
-    function _AddRef: Integer; stdcall;
-    function _Release: Integer; stdcall;
-    function QueryInterface(const IID: TGUID; out Obj): HResult; stdcall;
-  public
-    function Find(Query: string; StartFrom: Integer = 0): Integer; overload; }
   end;
 
   TFormMain = class(TForm)
@@ -186,8 +175,6 @@ type
     Layout3: TLayout;
     SpeedButton3: TSpeedButton;
     SpeedButton5: TSpeedButton;
-    SpeedButtonSwitchPlay: TSpeedButton;
-    SpeedButtonSwitchList: TSpeedButton;
     ShadowEffect2: TShadowEffect;
     ToolBar2: TToolBar;
     SpeedButton6: TSpeedButton;
@@ -200,6 +187,9 @@ type
     FloatAnimationPlayerShift: TFloatAnimation;
     SaveDialog: TSaveDialog;
     TimerLoadVisImage: TTimer;
+    GridPanelLayout3: TGridPanelLayout;
+    SpeedButtonSwitchList: TSpeedButton;
+    SpeedButtonSwitchPlay: TSpeedButton;
     procedure GestureDone(Sender: TObject; const EventInfo: TGestureEventInfo; var Handled: Boolean);
     procedure FormCreate(Sender: TObject);
     procedure FormDestroy(Sender: TObject);
@@ -270,7 +260,7 @@ type
     FFriends: TFriends;
     FLoadUsers: TLoadThread;
     //
-    procedure SetCurrentUser(User: TVkUser);
+    procedure SetCurrentUser(User: TVkProfile);
     procedure SetAvatar(Url: string);
     procedure ReloadItems;
     procedure CreateLoaders;
@@ -583,6 +573,9 @@ end;
 
 procedure TFormMain.FormCreate(Sender: TObject);
 begin
+  {$IFDEF ANDROID}
+  FullScreen := True;
+  {$ENDIF}
   FTerminating := False;
   TBitmap.CreateFromResource('blank');
   TBitmap.LoadCounter := 0;
@@ -948,7 +941,7 @@ begin
   //
 end;
 
-procedure TFormMain.SetCurrentUser(User: TVkUser);
+procedure TFormMain.SetCurrentUser(User: TVkProfile);
 begin
   Caption := 'VK Audio Player [' + User.GetFullName + ']';
 end;
@@ -1166,35 +1159,46 @@ begin
       ListViewMusic.Items.Clear;
     end,
     function(LT: TLoadThread): Boolean
-    var
-      i: Integer;
-      Audios: TVkAudios;
-      Audio: TAudio;
     begin
-      Result := False;
       FMyMusic.Clear;
-      if VK.Audio.Get(Audios, FVkIdCurrent) then
-      begin
-        try
-          for i := Low(Audios.Items) to High(Audios.Items) do
+      VK.Walk(
+        function(Offset: Integer; var Cancel: Boolean): Integer
+        var
+          i: Integer;
+          Audios: TVkAudios;
+          Audio: TAudio;
+          Params: TVkParamsAudioGet;
+        begin
+          Result := 0;
+          Params.OwnerId(FVkIdCurrent);
+          Params.Count(1000);
+          Params.Offset(Offset);
+          if VK.Audio.Get(Audios, Params) then
           begin
-            if LT.NeedStop then
-              Break;
-            Audio.Fill(Audios.Items[i]);
-            FillAudioItem(ListViewMusic.Items.Add, Audio);
-            FMyMusic.Add(Audio);
-          end;
-        finally
-          Audios.Free;
-        end;
-        Result := not LT.NeedStop;
-      end;
+            Result := Length(Audios.Items);
+            try
+              for i := Low(Audios.Items) to High(Audios.Items) do
+              begin
+                if LT.NeedStop then
+                begin
+                  Cancel := True;
+                  Break;
+                end;
+                Audio.Fill(Audios.Items[i]);
+                FillAudioItem(ListViewMusic.Items.Add, Audio);
+                FMyMusic.Add(Audio);
+              end;
+            finally
+              Audios.Free;
+            end;
+          end
+          else
+            Cancel := True;
+        end, 1000);
+      Result := not LT.NeedStop;
     end,
-    procedure(Complete: Boolean)   { var
-      i: Integer;   }
-    begin    {
-      for i := 0 to FMyMusic.Count - 1 do
-        FillAudioItem(ListViewMusic.Items.Add, FMyMusic[i]); }
+    procedure(Complete: Boolean)
+    begin
       ListViewMusic.EndUpdate;
       ListViewMusic.Enabled := True;
       ListViewMusic.Visible := True;
@@ -1313,13 +1317,13 @@ begin
     end,
     function(LT: TLoadThread): Boolean
     var
-      Users: TVkUsers;
+      Users: TVkProfiles;
       Friend: TFriend;
       i: Integer;
     begin
       FFriends.Clear;
       Result := False;
-      if VK.Friends.Get(Users, [ffNickname, ffSex, ffPhoto50, ffStatus, ffCanSeeAudio], fsName) then
+      if VK.Friends.Get(Users, [ufNickname, ufSex, ufPhoto50, ufStatus, ufCanSeeAudio], fsName) then
       begin
         try
           for i := Low(Users.Items) to High(Users.Items) do
@@ -1363,7 +1367,7 @@ end;
 
 procedure TFormMain.VKLogin(Sender: TObject);
 var
-  User: TVkUser;
+  User: TVkProfile;
 begin
   FFailCount := 0;
   FToken := VK.Token;

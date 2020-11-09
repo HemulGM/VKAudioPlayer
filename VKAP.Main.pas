@@ -6,7 +6,7 @@ uses
   Winapi.Windows, Winapi.Messages, System.SysUtils, System.Variants, System.Classes, Vcl.Graphics, Vcl.Controls,
   Vcl.Forms, Vcl.Dialogs, System.Types, VK.API, VK.Components, HGM.Common.Settings, Vcl.Grids, HGM.Controls.VirtualTable,
   Vcl.ExtCtrls, BassPlayer, Vcl.StdCtrls, HGM.Button, Vcl.ComCtrls, HGM.Controls.PanelExt, System.ImageList, Vcl.ImgList,
-  Vcl.Imaging.pngimage, System.Generics.Collections, Vcl.Imaging.jpeg, VK.Entity.Playlist, VK.Entity.User,
+  Vcl.Imaging.pngimage, System.Generics.Collections, Vcl.Imaging.jpeg, VK.Entity.Playlist, VK.Entity.Profile,
   BassPlayer.LoadHandle, VK.Entity.Audio, VKAP.Player, SQLiteTable3, SQLLang, Vcl.Menus, Vcl.WinXCtrls,
   HGM.Controls.TrackBar, System.Win.TaskbarCore, Vcl.Taskbar, HGM.Tools.Hint, Vcl.Styles.Utils.SysStyleHook;
 
@@ -288,7 +288,7 @@ type
     procedure UpdateImages(Url: string; Image: TPicture);
     procedure FillCurrentFromPlaylist(Index: Integer);
     procedure ReloadItems;
-    procedure SetCurrentUser(User: TVkUser);
+    procedure SetCurrentUser(User: TVkProfile);
     procedure NextRepeat;
     procedure SetRepeat(Value: TPlayRepeat);
     procedure Shuffle;
@@ -618,7 +618,7 @@ begin
   end;
 end;
 
-procedure TFormMain.SetCurrentUser(User: TVkUser);
+procedure TFormMain.SetCurrentUser(User: TVkProfile);
 begin
   Caption := 'VK Audio Player [' + User.GetFullName + ']';
 end;
@@ -659,7 +659,7 @@ procedure TFormMain.TableExFriendsItemClick(Sender: TObject; MouseButton: TMouse
 var
   Params: TVkParamsAudioGet;
   Audios: TVkAudios;
-  User: TVkUser;
+  User: TVkProfile;
 begin
   if not FFriends.IndexIn(Index) then
     Exit;
@@ -1144,7 +1144,7 @@ procedure TFormMain.ButtonFlatMyMusicClick(Sender: TObject);
 var
   Params: TVkParamsAudioGet;
   Audios: TVkAudios;
-  User: TVkUser;
+  User: TVkProfile;
 begin
   ButtonFlatMyMusic.Hide;
   FVkId := FVkIdCurrent;
@@ -1479,7 +1479,7 @@ begin
     end,
     function(LT: TLoadThread): Boolean
     var
-      Users: TVkUsers;
+      Users: TVkProfiles;
       Friend: TFriend;
       i: Integer;
     begin
@@ -1487,7 +1487,7 @@ begin
       FFriends.Clear;
       Result := False;
       try
-        if VK.Friends.Get(Users, [ffNickName, ffSex, ffPhoto50, ffStatus, ffCanSeeAudio], fsName) then
+        if VK.Friends.Get(Users, [ufNickName, ufSex, ufPhoto50, ufStatus, ufCanSeeAudio], fsName) then
         begin
           try
             for i := Low(Users.Items) to High(Users.Items) do
@@ -2315,7 +2315,7 @@ end;
 
 procedure TFormMain.VKLogin(Sender: TObject);
 var
-  User: TVkUser;
+  User: TVkProfile;
 begin
   FFailCount := 0;
   FToken := VK.Token;

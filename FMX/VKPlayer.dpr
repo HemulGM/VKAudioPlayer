@@ -1,7 +1,5 @@
 program VKPlayer;
 
-
-
 {$R *.dres}
 
 uses
