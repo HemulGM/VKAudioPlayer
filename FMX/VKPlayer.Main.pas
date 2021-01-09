@@ -7,8 +7,8 @@ uses
   FMX.Graphics, FMX.Dialogs, FMX.TabControl, FMX.StdCtrls, FMX.Controls.Presentation, FMX.Gestures, System.Actions,
   FMX.ActnList, VK.API, VK.Components, VK.Entity.Profile, FMX.Layouts, FMX.Objects, FMX.ListView.Types,
   FMX.ListView.Appearances, FMX.ListView.Adapters.Base, VK.Entity.Audio, VK.Audio, FMX.ListView, BassPlayer.LoadHandle,
-  System.Generics.Collections, System.ImageList, FMX.ImgList, FMX.Effects, FMX.Player, FMX.Ani,
-  FMX.ScrollBox, FMX.Memo, FMX.Filter.Effects, FMX.Edit;
+  System.Generics.Collections, System.ImageList, FMX.ImgList, FMX.Effects, FMX.Player, FMX.Ani, FMX.ScrollBox, FMX.Memo,
+  FMX.Filter.Effects, FMX.Edit;
 
 type
   TBitmapCacheItem = record
@@ -220,7 +220,6 @@ type
     procedure FormCloseQuery(Sender: TObject; var CanClose: Boolean);
     procedure LayoutPopupButtonsClick(Sender: TObject);
     procedure FloatAnimationPB3Finish(Sender: TObject);
-    procedure ListViewMusicScrollViewChange(Sender: TObject);
     procedure FormResize(Sender: TObject);
     procedure FMXPlayerEnd(Sender: TObject);
     procedure FloatAnimationPlayerFinish(Sender: TObject);
@@ -232,6 +231,7 @@ type
     procedure SpeedButtonDownloadClick(Sender: TObject);
     procedure TimerLoadVisImageTimer(Sender: TObject);
     procedure ListViewFriendsItemClick(const Sender: TObject; const AItem: TListViewItem);
+    procedure ListViewMusicButtonClick(const Sender: TObject; const AItem: TListItem; const AObject: TListItemSimpleControl);
   private
     FCurrentAudio: TAudio;
     FTerminating: Boolean;
@@ -290,13 +290,14 @@ var
 implementation
 
 uses
-  VK.FMX.OAuth2, VK.Friends, VK.Entity.Playlist, System.Net.HttpClient, System.NetEncoding, System.IOUtils, VK.Types;
+  VK.FMX.OAuth2, VK.Friends, VK.Entity.Playlist, System.Net.HttpClient, System.Threading, System.NetEncoding,
+  System.IOUtils, VK.Types;
 
 {$R *.fmx}
 
 procedure OpenTab(Control: TTabControl; Tab: TTabItem; ToRight: Boolean = False);
 begin
-  if (Control.ActiveTab.Index < Tab.Index) or ToRight then
+  if ToRight then
     Control.SetActiveTabWithTransitionAsync(Tab, TTabTransition.Slide, TTabTransitionDirection.Normal, nil)
   else
     Control.SetActiveTabWithTransitionAsync(Tab, TTabTransition.Slide, TTabTransitionDirection.Reversed, nil);
@@ -838,6 +839,14 @@ begin
       PlayPrev(HandlePlay);
 end;
 
+procedure TFormMain.ListViewMusicButtonClick(const Sender: TObject; const AItem: TListItem; const AObject:
+  TListItemSimpleControl);
+begin
+  if AObject.Name = 'Delete' then
+    if VK.Audio.Delete(FMyMusic[AItem.Index].Id, FMyMusic[AItem.Index].OwnerId) then
+      ShowMessage('Удалено');
+end;
+
 procedure TFormMain.ListViewMusicItemClick(const Sender: TObject; const AItem: TListViewItem);
 begin
   FillCurrentFrom(FMyMusic);
@@ -845,11 +854,6 @@ begin
     PlayNext(True);
   if not LayoutPlayerBar.Visible then
     OpenPlayer;
-end;
-
-procedure TFormMain.ListViewMusicScrollViewChange(Sender: TObject);
-begin
-  //
 end;
 
 procedure TFormMain.ListViewPlaylistItemClick(const Sender: TObject; const AItem: TListViewItem);
@@ -948,7 +952,7 @@ end;
 
 procedure TFormMain.SpeedButton1Click(Sender: TObject);
 begin
-  OpenTab(TabControlPlaylists, TabItemUserPlaylists);
+  OpenTab(TabControlPlaylists, TabItemUserPlaylists, True);
 end;
 
 procedure TFormMain.SpeedButton2Click(Sender: TObject);
@@ -1334,7 +1338,7 @@ begin
             Friend.FirstName := Users.Items[i].FirstName;
             Friend.LastName := Users.Items[i].LastName;
             Friend.Photo := Users.Items[i].Photo50;
-            Friend.CanSeeAudio := Users.Items[i].CanSeeAudio = 1;
+            Friend.CanSeeAudio := Users.Items[i].CanSeeAudio;
             Friend.Image := TBitmap.CreateLazy(Friend.Photo);
             Friend.Status := Users.Items[i].Status;
             FFriends.Add(Friend);
@@ -1472,7 +1476,7 @@ begin
   PictureCache[i].Loaded := False;
   if Length(PictureCache) > 1 then
     PictureCache[i].Image.Assign(PictureCache[0].Image);
-  //PictureCache[i].Image.LoadFromUrl(Url, False);
+  PictureCache[i].Image.LoadFromUrl(Url, False);
   Result := PictureCache[i].Image;
 end;
 
@@ -1490,7 +1494,7 @@ end;
 
 procedure TBitmapHelper.LoadFromUrl(const Url: string; UseCache: Boolean);
 begin
-  TThread.CreateAnonymousThread(
+  TTask.Run(
     procedure
     var
       Mem: TMemoryStream;
@@ -1531,7 +1535,7 @@ begin
       finally
         Dec(LoadCounter);
       end;
-    end).Start;
+    end);
 end;
 
 class procedure TBitmapHelper.SetLoaded(Url: string);

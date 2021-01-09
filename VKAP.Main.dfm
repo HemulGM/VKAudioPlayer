@@ -331,8 +331,8 @@ object FormMain: TFormMain
           AlignWithMargins = True
           Left = 3
           Top = 6
-          Width = 42
-          Height = 24
+          Width = 24
+          Height = 15
           Margins.Top = 6
           Margins.Bottom = 6
           Align = alClient
@@ -346,8 +346,6 @@ object FormMain: TFormMain
           ParentFont = False
           Layout = tlCenter
           OnClick = LabelTimeClick
-          ExplicitWidth = 24
-          ExplicitHeight = 15
         end
       end
       object TrackbarPosition: ThTrackbar
@@ -671,7 +669,7 @@ object FormMain: TFormMain
         Left = 15
         Top = 4
         Width = 9
-        Height = 28
+        Height = 17
         Margins.Left = 15
         Align = alLeft
         Caption = '...'
@@ -682,7 +680,6 @@ object FormMain: TFormMain
         Font.Style = []
         ParentFont = False
         Layout = tlCenter
-        ExplicitHeight = 17
       end
       object Shape2: TShape
         Left = 0
@@ -1397,6 +1394,10 @@ object FormMain: TFormMain
       object TabSheetFriends: TTabSheet
         Caption = #1044#1088#1091#1079#1100#1103
         ImageIndex = 3
+        ExplicitLeft = 0
+        ExplicitTop = 0
+        ExplicitWidth = 0
+        ExplicitHeight = 0
         object MemoLog: TMemo
           Left = 0
           Top = 0
@@ -1562,6 +1563,7 @@ object FormMain: TFormMain
     EndPoint = 'https://oauth.vk.com/authorize'
     Permissions = [Friends, Audio]
     BaseURL = 'https://api.vk.com/method'
+    UsePseudoAsync = True
     Proxy.Port = 0
     OnAuth = VKAuth
     OnLogin = VKLogin

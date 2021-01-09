@@ -14,11 +14,11 @@ uses
   VK.API in '..\VK_API\VK.API.pas',
   BassPlayer.LoadHandle in 'BassPlayer.LoadHandle.pas',
   VKAP.Player in 'VKAP.Player.pas' {FormPlayer},
-  SQLite3 in '..\SQLite\SQLite3.pas',
-  SQLiteTable3 in '..\SQLite\SQLiteTable3.pas',
-  SQLLang in '..\SQLite\SQLLang.pas',
   Vcl.Styles.Utils.SysStyleHook in '..\#Fork\vcl-styles-utils\Common\Vcl.Styles.Utils.SysStyleHook.pas',
-  Vcl.Styles.Hooks in '..\#Fork\vcl-styles-utils\Common\Vcl.Styles.Hooks.pas';
+  Vcl.Styles.Hooks in '..\#Fork\vcl-styles-utils\Common\Vcl.Styles.Hooks.pas',
+  HGM.SQLang in '..\SQLite\HGM.SQLang.pas',
+  HGM.SQLite in '..\SQLite\HGM.SQLite.pas',
+  HGM.SQLite.Wrapper in '..\SQLite\HGM.SQLite.Wrapper.pas';
 
 {$R *.res}
 

@@ -3,10 +3,12 @@ unit BassPlayer.LoadHandle;
 interface
 
 uses
-  System.SysUtils, System.Variants, System.Classes, System.Generics.Collections;
+  System.SysUtils, System.Variants, System.Classes, System.Generics.Collections, System.Threading;
 
 type
   TLoadThread = class
+    class var
+      TaskPoll: TThreadPool;
   private
     FBefore: TProc;
     FAsync: TFunc<TLoadThread, Boolean>;
@@ -22,6 +24,7 @@ type
     property IsWorking: Boolean read FWorking;
     property NeedStop: Boolean read FDoStopThread;
     constructor Create(Before: TProc; Async: TFunc<TLoadThread, Boolean>; After: TProc<Boolean>);
+    class procedure StopAll;
   end;
 
   TLoadPlaylist = class(TLoadThread)
@@ -73,7 +76,7 @@ end;
 
 procedure TLoadThread.FProc;
 begin
-  TThread.CreateAnonymousThread(
+  TTask.Run(
     procedure
     var
       DoAfter: Boolean;
@@ -105,12 +108,18 @@ begin
         end;
       except
       end;
-    end).Start;
+    end, TaskPoll);
 end;
 
 procedure TLoadThread.Stop;
 begin
   FDoStopThread := True;
+end;
+
+class procedure TLoadThread.StopAll;
+begin
+  TaskPoll.Free;
+  TaskPoll := TThreadPool.Create;
 end;
 
 { TLoadPlaylist }
@@ -131,7 +140,7 @@ end;
 
 procedure TLoadPlaylist.FProc(OwnerId, Id: Integer);
 begin
-  TThread.CreateAnonymousThread(
+  TTask.Run(
     procedure
     var
       DoAfter: Boolean;
@@ -163,7 +172,7 @@ begin
         end;
       except
       end;
-    end).Start;
+    end, TaskPoll);
 end;
 
 { TLoaders }
@@ -220,7 +229,7 @@ end;
 
 procedure TLoadSearch.FProc(Query: string);
 begin
-  TThread.CreateAnonymousThread(
+  TTask.Run(
     procedure
     var
       DoAfter: Boolean;
@@ -252,8 +261,15 @@ begin
         end;
       except
       end;
-    end).Start;
+    end, TaskPoll);
 end;
+
+initialization
+  TLoadThread.TaskPoll := TThreadPool.Create;
+
+finalization
+  if Assigned(TLoadThread.TaskPoll) then
+    TLoadThread.TaskPoll.Free;
 
 end.
 

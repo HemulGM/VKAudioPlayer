@@ -7,7 +7,7 @@ uses
   Vcl.Forms, Vcl.Dialogs, System.Types, VK.API, VK.Components, HGM.Common.Settings, Vcl.Grids, HGM.Controls.VirtualTable,
   Vcl.ExtCtrls, BassPlayer, Vcl.StdCtrls, HGM.Button, Vcl.ComCtrls, HGM.Controls.PanelExt, System.ImageList, Vcl.ImgList,
   Vcl.Imaging.pngimage, System.Generics.Collections, Vcl.Imaging.jpeg, VK.Entity.Playlist, VK.Entity.Profile,
-  BassPlayer.LoadHandle, VK.Entity.Audio, VKAP.Player, SQLiteTable3, SQLLang, Vcl.Menus, Vcl.WinXCtrls,
+  BassPlayer.LoadHandle, VK.Entity.Audio, VKAP.Player, HGM.SQLite, HGM.SQLang, Vcl.Menus, Vcl.WinXCtrls,
   HGM.Controls.TrackBar, System.Win.TaskbarCore, Vcl.Taskbar, HGM.Tools.Hint, Vcl.Styles.Utils.SysStyleHook;
 
 type
@@ -60,6 +60,9 @@ type
       fnImage = 'icImage';
   private
     FDB: TSQLiteDatabase;
+    FCanFind: Boolean;
+    FFinding: Boolean;
+    FSaving: Boolean;
   public
     procedure LoadImages;
     procedure SaveImages;
@@ -1498,7 +1501,7 @@ begin
               Friend.FirstName := Users.Items[i].FirstName;
               Friend.LastName := Users.Items[i].LastName;
               Friend.AlbumPhoto := Users.Items[i].Photo50;
-              Friend.CanSeeAudio := Users.Items[i].CanSeeAudio = 1;
+              Friend.CanSeeAudio := Users.Items[i].CanSeeAudio;
               Friend.Image := nil;
               Friend.Status := Users.Items[i].Status;
               FFriends.Add(Friend);
@@ -2056,7 +2059,6 @@ procedure TFormMain.FormCreate(Sender: TObject);
 var
   i: Integer;
 begin
-
   FLoading := TDecoratePanel.Create(Self, PanelLoading, False);
   ActivityIndicatorLoading.Animate := True;
   FLoading.Open(False);
@@ -2148,6 +2150,9 @@ end;
 procedure TFormMain.FormDestroy(Sender: TObject);
 begin
   FPlayer.Stop;
+  Hide;
+  FAlbumThumbs.SaveImages;
+  TLoadThread.StopAll;
   FSearchList.Free;
   FCurrentList.Free;
   FMyMusic.Free;
@@ -2157,7 +2162,6 @@ begin
   FPlayImage.Free;
   FPauseImage.Free;
   FActiveImage.Free;
-  FAlbumThumbs.SaveImages;
   FAlbumThumbs.Free;
   FLoadUsers.Free;
   FLoadPlaylist.Free;
@@ -2297,7 +2301,7 @@ end;
 
 procedure TFormMain.VKErrorLogin(Sender: TObject; E: Exception; Code: Integer; Text: string);
 begin
-  //ShowMessage(Text);
+  ShowMessage(Text);
 end;
 
 procedure TFormMain.VKLog(Sender: TObject; const Value: string);
@@ -2335,7 +2339,6 @@ begin
     FVkId := -1;
   FAppLoading := False;
 end;
-
 { TAlbumThumb }
 
 class function TAlbumThumb.CreateItem(AImage: TPicture; AUrl: string): TAlbumThumb;
@@ -2351,6 +2354,9 @@ constructor TAlbumThumbs.Create(ADB: TSQLiteDatabase);
 begin
   inherited Create;
   FDB := ADB;
+  FFinding := False;
+  FSaving := False;
+  FCanFind := FDB.TableExists(TableName);
 end;
 
 destructor TAlbumThumbs.Destroy;
@@ -2370,45 +2376,53 @@ var
   i, ID: Integer;
   Mem: TMemoryStream;
 begin
-  if not FDB.TableExists(TableName) then
-  begin
-    with SQL.CreateTable(TableName) do
+  while FSaving do
+    Sleep(50);
+  FSaving := True;
+  try
+    if not FDB.TableExists(TableName) then
     begin
-      AddField(fnID, ftInteger, True, True);
-      AddField(fnURL, ftString);
-      AddField(fnImage, ftBlob);
-      FDB.ExecSQL(GetSQL);
-      EndCreate;
-    end;
-  end;
-  for i := 0 to Count - 1 do
-  begin
-    if Items[i].Url.IsEmpty or Items[i].Stored then
-      Continue;
-    with SQL.Select(TableName, [fnID]) do
-    begin
-      WhereFieldEqual(fnURL, Items[i].Url);
-      ID := FDB.GetTableValue(GetSQL);
-      EndCreate;
-    end;
-    if ID < 0 then
-      with SQL.InsertInto(TableName) do
+      with SQL.CreateTable(TableName) do
       begin
-        AddValue(fnURL, Items[i].Url);
+        AddField(fnID, ftInteger, True, True);
+        AddField(fnURL, ftString);
+        AddField(fnImage, ftBlob);
         FDB.ExecSQL(GetSQL);
-        ID := FDB.GetLastInsertRowID;
         EndCreate;
       end;
-    with SQL.UpdateBlob(TableName, fnImage) do
-    begin
-      WhereFieldEqual(fnID, ID);
-      Mem := TMemoryStream.Create;
-      Items[i].Image.SaveToStream(Mem);
-      if Mem.Size > 0 then
-        FDB.UpdateBlob(GetSQL, Mem);
-      Mem.Free;
-      EndCreate;
+      FCanFind := True;
     end;
+    for i := 0 to Count - 1 do
+    begin
+      if Items[i].Url.IsEmpty or Items[i].Stored then
+        Continue;
+      with SQL.Select(TableName, [fnID]) do
+      begin
+        WhereFieldEqual(fnURL, Items[i].Url);
+        ID := FDB.GetTableValue(GetSQL);
+        EndCreate;
+      end;
+      if ID < 0 then
+        with SQL.InsertInto(TableName) do
+        begin
+          AddValue(fnURL, Items[i].Url);
+          FDB.ExecSQL(GetSQL);
+          ID := FDB.LastInsertRowID;
+          EndCreate;
+        end;
+      with SQL.UpdateBlob(TableName, fnImage) do
+      begin
+        WhereFieldEqual(fnID, ID);
+        Mem := TMemoryStream.Create;
+        Items[i].Image.SaveToStream(Mem);
+        if Mem.Size > 0 then
+          FDB.UpdateBlob(GetSQL, Mem);
+        Mem.Free;
+        EndCreate;
+      end;
+    end;
+  finally
+    FSaving := False;
   end;
 end;
 
@@ -2422,7 +2436,7 @@ begin
     Exit;
   with SQL.Select(TableName, [fnURL, fnImage]) do
   begin
-    Table := FDB.GetTable(GetSQL);
+    Table := FDB.Query(GetSQL);
     Table.MoveFirst;
     while not Table.EOF do
     begin
@@ -2454,35 +2468,42 @@ var
 begin
   Index := -1;
   Result := False;
-  if not FDB.TableExists(TableName) then
+  if not FCanFind then
     Exit;
-  with SQL.Select(TableName, [fnURL, fnImage]) do
-  begin
-    WhereFieldEqual(fnURL, Url);
-    Table := FDB.GetTable(GetSQL);
-    try
-      Table.MoveFirst;
-      if Table.RowCount > 0 then
-      begin
-        Mem := Table.FieldAsBlob(fnImage);
-        if Assigned(Mem) then
+  while FFinding do
+    Sleep(50);
+  FFinding := True;
+  try
+    with SQL.Select(TableName, [fnURL, fnImage]) do
+    begin
+      WhereFieldEqual(fnURL, Url);
+      Table := FDB.Query(GetSQL);
+      try
+        Table.MoveFirst;
+        if Table.RowCount > 0 then
         begin
-          try
-            Item.Image := TPicture.Create;
-            Mem.Position := 0;
-            Item.Image.LoadFromStream(Mem);
-            Item.URL := Table.FieldAsString(fnURL);
-            Item.Stored := True;
-            Index := Add(Item);
-            Result := True;
-          except
+          Mem := Table.FieldAsBlob(fnImage);
+          if Assigned(Mem) then
+          begin
+            try
+              Item.Image := TPicture.Create;
+              Mem.Position := 0;
+              Item.Image.LoadFromStream(Mem);
+              Item.URL := Table.FieldAsString(fnURL);
+              Item.Stored := True;
+              Index := Add(Item);
+              Result := True;
+            except
+            end;
           end;
         end;
+      finally
+        Table.Free;
+        EndCreate;
       end;
-    finally
-      Table.Free;
-      EndCreate;
     end;
+  finally
+    FFinding := False;
   end;
 end;
 

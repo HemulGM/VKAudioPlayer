@@ -27,6 +27,9 @@
         <Projects Include="..\#Learn\gest\TabbedwithNavigation.dproj">
             <Dependencies/>
         </Projects>
+        <Projects Include="FMXWindows\VKAudio.dproj">
+            <Dependencies/>
+        </Projects>
     </ItemGroup>
     <ProjectExtensions>
         <Borland.Personality>Default.Personality.12</Borland.Personality>
@@ -107,14 +110,23 @@
     <Target Name="TabbedwithNavigation:Make">
         <MSBuild Projects="..\#Learn\gest\TabbedwithNavigation.dproj" Targets="Make"/>
     </Target>
+    <Target Name="VKAudio">
+        <MSBuild Projects="FMXWindows\VKAudio.dproj"/>
+    </Target>
+    <Target Name="VKAudio:Clean">
+        <MSBuild Projects="FMXWindows\VKAudio.dproj" Targets="Clean"/>
+    </Target>
+    <Target Name="VKAudio:Make">
+        <MSBuild Projects="FMXWindows\VKAudio.dproj" Targets="Make"/>
+    </Target>
     <Target Name="Build">
-        <CallTarget Targets="VKAudioPlayer;Audio;VKComponents;HGMComponents;VKPlayer;Knigavuhe;FMXAudioHGM;TabbedwithNavigation"/>
+        <CallTarget Targets="VKAudioPlayer;Audio;VKComponents;HGMComponents;VKPlayer;Knigavuhe;FMXAudioHGM;TabbedwithNavigation;VKAudio"/>
     </Target>
     <Target Name="Clean">
-        <CallTarget Targets="VKAudioPlayer:Clean;Audio:Clean;VKComponents:Clean;HGMComponents:Clean;VKPlayer:Clean;Knigavuhe:Clean;FMXAudioHGM:Clean;TabbedwithNavigation:Clean"/>
+        <CallTarget Targets="VKAudioPlayer:Clean;Audio:Clean;VKComponents:Clean;HGMComponents:Clean;VKPlayer:Clean;Knigavuhe:Clean;FMXAudioHGM:Clean;TabbedwithNavigation:Clean;VKAudio:Clean"/>
     </Target>
     <Target Name="Make">
-        <CallTarget Targets="VKAudioPlayer:Make;Audio:Make;VKComponents:Make;HGMComponents:Make;VKPlayer:Make;Knigavuhe:Make;FMXAudioHGM:Make;TabbedwithNavigation:Make"/>
+        <CallTarget Targets="VKAudioPlayer:Make;Audio:Make;VKComponents:Make;HGMComponents:Make;VKPlayer:Make;Knigavuhe:Make;FMXAudioHGM:Make;TabbedwithNavigation:Make;VKAudio:Make"/>
     </Target>
     <Import Project="$(BDS)\Bin\CodeGear.Group.Targets" Condition="Exists('$(BDS)\Bin\CodeGear.Group.Targets')"/>
 </Project>

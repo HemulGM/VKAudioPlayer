@@ -40,6 +40,7 @@ type
     procedure SetVolume(const AValue: Single);
     function GetVolume: Single;
     procedure UpdateChannelVolume;
+    function GetDefaultDevice: Cardinal;
   public
     FStreamURL: string;
     FActiveChannel: HSTREAM;
@@ -55,6 +56,7 @@ type
     procedure Stop;
     procedure Pause;
     function Resume: Boolean;
+    procedure ResetAudioChannel;
     function GetTimeFromPercent(Value: Extended): string;
     procedure SetStreamURL(AUrl: string);
     procedure SetStatusProc(AProc: TStatusProc);
@@ -138,6 +140,7 @@ function TBASSPlayer.Init(Handle: THandle): Boolean;
 begin
   if BASS_Available then
   begin
+    BASS_SetConfig(BASS_CONFIG_DEV_DEFAULT, 1);
     if BASS_Init(-1, 44100, 0, Handle, nil) then
     begin
       BASS_PluginLoad(PChar(BASS_FOLDER + 'bass_acc.dll'), 0 or BASS_UNICODE);
@@ -161,6 +164,26 @@ begin
   end;
 end;
 
+function TBASSPlayer.GetDefaultDevice: Cardinal;
+var
+  i: Integer;
+  Info: BASS_DEVICEINFO;
+begin
+  Result := 0;
+  for i := 0 to 10 do
+    if BASS_GetDeviceInfo(i, Info) then
+      if Info.flags and BASS_DEVICE_DEFAULT = BASS_DEVICE_DEFAULT then
+        Exit(i);
+end;
+
+procedure TBASSPlayer.ResetAudioChannel;
+begin
+  if BASS_GetDevice <> GetDefaultDevice then
+    BASS_Init(GetDefaultDevice, 44100, BASS_DEVICE_DEFAULT, 0, nil);
+  if FActiveChannel <> 0 then
+    BASS_ChannelSetDevice(FActiveChannel, GetDefaultDevice);
+end;
+
 function TBASSPlayer.Play: Boolean;
 begin
   Result := False;
@@ -174,7 +197,6 @@ begin
   try
     FActiveChannel := BASS_StreamCreateURL(PChar(FStreamURL), 0, BASS_STREAM_STATUS or
       BASS_STREAM_AUTOFREE or BASS_UNICODE or BASS_MP3_SETPOS, nil, nil);
-
     if FActiveChannel <> 0 then
     begin
       UpdateChannelVolume;
