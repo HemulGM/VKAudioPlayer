@@ -31,6 +31,10 @@ type
     Id: Integer;
     OwnerId: Integer;
     AccessKey: string;
+    Title: string;
+    Detail: string;
+    Info: string;
+    CoverUrl: string;
   end;
 
 implementation

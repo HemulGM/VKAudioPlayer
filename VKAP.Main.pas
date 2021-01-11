@@ -2285,6 +2285,7 @@ begin
   begin
     FToken := '';
     FSettings.SetStr('General', 'Token', FToken);
+    VK.Token := '';
 
     //Вызываем авторизацию после того, как выйдем из всего этого стека
     TThread.CreateAnonymousThread(

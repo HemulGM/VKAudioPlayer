@@ -9,8 +9,12 @@ uses
   FMX.Filter.Effects, VKAudioWin.Classes;
 
 type
+  TOnOpenPlaylist = procedure(Sender: TObject; const PlaylistInfo: TPlaylistInfo) of object;
+
   TListBoxItemPlaylist = class(TListBoxItem)
   private
+    FHotAnimate: TFloatAnimation;
+    FHotAnimateControls: TFloatAnimation;
     FPlaylistInfo: TPlaylistInfo;
     FAlbum: TBitmap;
     FAlbumPhoto: string;
@@ -26,64 +30,23 @@ type
     SpeedButtonAdd: TSpeedButton;
     SpeedButtonPlay: TSpeedButton;
     SpeedButtonShare: TSpeedButton;
+    FOnOpen: TOnOpenPlaylist;
     procedure FMouseEnter(Sender: TObject);
     procedure FMouseLeave(Sender: TObject);
     procedure FOnBitmapChange(Sender: TObject);
     procedure SpeedButtonAddMouseEnter(Sender: TObject);
+    procedure FOnClick(Sender: TObject);
+    procedure SetOnOpen(const Value: TOnOpenPlaylist);
   public
     constructor Create(AOwner: TComponent); overload; override;
     constructor Create(AOwner: TComponent; Playlist: TVkAudioPlaylist); overload;
     constructor Create(AOwner: TComponent; From: TListBoxItemPlaylist); overload;
     destructor Destroy; override;
     property PlaylistInfo: TPlaylistInfo read FPlaylistInfo;
+    property OnOpen: TOnOpenPlaylist read FOnOpen write SetOnOpen;
   end;
 
 implementation
-
-{
-var
-  Rectangle32 := TRectangle.Create(Self);
-  Layout40 := TLayout.Create(Self);
-  Label37 := TLabel.Create(Self);
-  Label38 := TLabel.Create(Self);
-  Label39 := TLabel.Create(Self);
-  RectanglePlaylistCover := TRectangle.Create(Self);
-  LayoutPlaylistControls := TLayout.Create(Self);
-  SpeedButton5 := TSpeedButton.Create(Self);
-  SpeedButton10 := TSpeedButton.Create(Self);
-  SpeedButton11 := TSpeedButton.Create(Self);
-  Label73 := TLabel.Create(Self);
-  Label74 := TLabel.Create(Self);
-  Glyph3 := TGlyph.Create(Self);
-  Glyph4 := TGlyph.Create(Self);
-
-  // Fill.Bitmap.Bitmap := // please assign
-  Rectangle32.OnMouseEnter := Rectangle32MouseEnter;
-  Rectangle32.OnMouseLeave := Rectangle32MouseLeave;
-  Label37.StyledSettings := [FontColor];
-  Label37.Text := #1053#1086#1074#1086#1075#1086#1076#1085#1080#1081;
-  Label38.StyledSettings := [];
-  Label38.Text := 'Noize MC';
-  Label39.StyledSettings := [];
-  Label39.Text := '2017';
-  RectanglePlaylistCover.OnMouseEnter := Rectangle32MouseEnter;
-  RectanglePlaylistCover.OnMouseLeave := Rectangle32MouseLeave;
-  SpeedButton5.ImageIndex := 8;
-  SpeedButton5.StyleLookup := 'SpeedButton9Style1';
-  SpeedButton5.OnClick := SpeedButton5Click;
-  SpeedButton10.ImageIndex := 10;
-  SpeedButton10.StyleLookup := 'SpeedButton9Style1';
-  SpeedButton11.ImageIndex := 9;
-  SpeedButton11.StyleLookup := 'SpeedButtonPlaylistPlay';
-  SpeedButton11.OnClick := SpeedButton11Click;
-  Label73.StyledSettings := [Family, Size, Style];
-  Label73.Text := '60';
-  Label74.StyledSettings := [Family, Size, Style];
-  Label74.Text := '325';
-  Glyph3.ImageIndex := 11;
-  Glyph4.ImageIndex := 12;
-
-}
 
 uses
   VKAudioWin.Main, HGM.FMX.Image;
@@ -108,10 +71,12 @@ begin
   SpeedButtonAdd := TSpeedButton.Create(Self);
   SpeedButtonPlay := TSpeedButton.Create(Self);
   SpeedButtonShare := TSpeedButton.Create(Self);
+  FHotAnimate := TFloatAnimation.Create(Self);
+  FHotAnimateControls := TFloatAnimation.Create(Self);
 
   HitTest := True;
   Height := 210;
-  Width := 154;
+  Width := 153;
   Padding.Rect := TRectF.Create(5, 5, 5, 5);
 
   RectangleItemImage.Parent := Self;
@@ -132,15 +97,22 @@ begin
   RectangleItemImageHot.Align := TAlignLayout.Center;
   RectangleItemImageHot.Height := 143;
   RectangleItemImageHot.HitTest := True;
+  RectangleItemImageHot.OnClick := FOnClick;
   RectangleItemImageHot.Fill.Kind := TBrushKind.Solid;
-  RectangleItemImageHot.Fill.Color := $46000000;
+  RectangleItemImageHot.Fill.Color := $66000000;
   RectangleItemImageHot.OnMouseEnter := FMouseEnter;
   RectangleItemImageHot.OnMouseLeave := FMouseLeave;
   RectangleItemImageHot.Stroke.Kind := TBrushKind.None;
   RectangleItemImageHot.Width := 143;
   RectangleItemImageHot.XRadius := 8;
   RectangleItemImageHot.YRadius := 8;
-  RectangleItemImageHot.Visible := False;
+  RectangleItemImageHot.Opacity := 0;
+  RectangleItemImageHot.Visible := True;
+
+  FHotAnimate.Parent := RectangleItemImageHot;
+  FHotAnimate.PropertyName := 'Opacity';
+  FHotAnimate.Delay := 0;
+  FHotAnimate.Duration := 0.2;
 
   LabelItemCount.Parent := RectangleItemImageHot;
   LabelItemCount.Text := '20';
@@ -170,6 +142,7 @@ begin
   LabelItemText.TextSettings.Font.Family := 'Roboto';
   LabelItemText.TextSettings.Font.Size := 13;
   LabelItemText.Text := 'Новогодний';
+  LabelItemText.WordWrap := False;
 
   LabelItemDetail.Parent := LayoutItemText;
   LabelItemDetail.Align := TAlignLayout.Top;
@@ -180,6 +153,7 @@ begin
   LabelItemDetail.TextSettings.Font.Size := 13;
   LabelItemDetail.TextSettings.FontColor := $FF939393;
   LabelItemDetail.Text := 'Noize MC';
+  LabelItemDetail.WordWrap := False;
 
   LabelItemYear.Parent := LayoutItemText;
   LabelItemYear.Align := TAlignLayout.Bottom;
@@ -194,8 +168,14 @@ begin
   LayoutControls.Parent := RectangleItemImageHot;
   LayoutControls.Align := TAlignLayout.Center;
   LayoutControls.Padding.Rect := TRectF.Create(2, 0, 2, 0);
+  LayoutControls.Margins.Rect := TRectF.Create(0, 5, 0, 0);
   LayoutControls.Height := 60;
   LayoutControls.Width := 125;
+
+  FHotAnimateControls.Parent := LayoutControls;
+  FHotAnimateControls.PropertyName := 'Margins.Top';
+  FHotAnimateControls.Delay := 0;
+  FHotAnimateControls.Duration := 0.2;
 
   SpeedButtonAdd.Parent := LayoutControls;
   SpeedButtonAdd.Align := TAlignLayout.Left;
@@ -229,15 +209,39 @@ end;
 
 procedure TListBoxItemPlaylist.FMouseEnter(Sender: TObject);
 begin
-  RectangleItemImageHot.Visible := True;
+  if (FHotAnimate.StopValue <> 1) or (RectangleItemImageHot.Opacity < 1) and (not FHotAnimate.Running) then
+  begin
+    FHotAnimate.Enabled := False;
+    FHotAnimate.StartValue := RectangleItemImageHot.Opacity;
+    FHotAnimate.StopValue := 1;
+    FHotAnimate.Enabled := True;
+
+    FHotAnimateControls.Enabled := False;
+    FHotAnimateControls.StartValue := LayoutControls.Margins.Top;
+    FHotAnimateControls.StopValue := 0;
+    FHotAnimateControls.Enabled := True;
+  end;
 end;
 
 procedure TListBoxItemPlaylist.FMouseLeave(Sender: TObject);
 begin
   if not LayoutControls.AbsoluteRect.Contains(FormMain.ScreenToClient(Screen.MousePos)) then
   begin
-    RectangleItemImageHot.Visible := False;
+    FHotAnimate.Enabled := False;
+    FHotAnimate.StartValue := RectangleItemImageHot.Opacity;
+    FHotAnimate.StopValue := 0;
+    FHotAnimate.Enabled := True;
+
+    FHotAnimateControls.Enabled := False;
+    FHotAnimateControls.StartValue := LayoutControls.Margins.Top;
+    FHotAnimateControls.StopValue := 5;
+    FHotAnimateControls.Enabled := True;
   end;
+end;
+
+procedure TListBoxItemPlaylist.SetOnOpen(const Value: TOnOpenPlaylist);
+begin
+  FOnOpen := Value;
 end;
 
 procedure TListBoxItemPlaylist.SpeedButtonAddMouseEnter(Sender: TObject);
@@ -252,6 +256,12 @@ begin
   RectangleItemImage.Fill.Bitmap.Bitmap := FAlbum;
 end;
 
+procedure TListBoxItemPlaylist.FOnClick(Sender: TObject);
+begin
+  if Assigned(FOnOpen) then
+    FOnOpen(Self, FPlaylistInfo);
+end;
+
 constructor TListBoxItemPlaylist.Create(AOwner: TComponent; Playlist: TVkAudioPlaylist);
 begin
   Create(AOwner);
@@ -261,11 +271,15 @@ begin
     SpeedButtonAdd.ImageIndex := 13;
   LabelItemCount.Text := Playlist.Count.ToString;
   LabelItemStats.Text := Playlist.Plays.ToString;
-  LabelItemDetail.Text := Playlist.Description;
+  if Length(Playlist.MainArtists) > 0 then
+    LabelItemDetail.Text := Playlist.MainArtists[0].Name
+  else
+    LabelItemDetail.Text := Playlist.Description;
   if Playlist.Year > 0 then
     LabelItemYear.Text := Playlist.Year.ToString
   else
     LabelItemYear.Text := '';
+
   LabelItemText.Text := Playlist.Title;
   if Assigned(Playlist.Photo) then
     FAlbumPhoto := Playlist.Photo.Photo270
@@ -275,6 +289,10 @@ begin
   FPlaylistInfo.Id := Playlist.Id;
   FPlaylistInfo.OwnerId := Playlist.OwnerId;
   FPlaylistInfo.AccessKey := Playlist.AccessKey;
+  FPlaylistInfo.Title := LabelItemText.Text;
+  FPlaylistInfo.Detail := LabelItemDetail.Text;
+  FPlaylistInfo.CoverUrl := FAlbumPhoto;
+  FPlaylistInfo.Info := Playlist.Plays.ToString + ' прослушивания · обновлён ' + DateTimeToStr(Playlist.UpdateTime);
 end;
 
 constructor TListBoxItemPlaylist.Create(AOwner: TComponent; From: TListBoxItemPlaylist);

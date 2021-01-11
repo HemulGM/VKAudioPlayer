@@ -7,7 +7,9 @@ uses
   FMX.Graphics, FMX.Dialogs, FMX.Layouts, FMX.TabControl, FMX.Controls.Presentation, FMX.StdCtrls, FMX.Edit, FMX.ListBox,
   FMX.Objects, FMX.Ani, VK.API, VK.Components, FMX.Player, FMX.Trayicon.Win, HGM.Common.Settings, VK.Entity.Audio,
   System.ImageList, VK.Entity.Profile, FMX.ImgList, FMX.Effects, FMX.Filter.Effects, VKAudioWin.Classes,
-  FMX.SVGIconImage, FMX.SVGIconImageList, Winapi.Foundation.Types, Winapi.WinRT;
+  FMX.SVGIconImage, FMX.SVGIconImageList, Winapi.Foundation.Types, Winapi.WinRT, VKAudioWin.View.ListItemAudio,
+  VKAudioWin.View.ListItemPlaylist, VKAudioWin.View.ListItemUser, VKAudioWin.View.ListItemSheffle,
+  System.Math.Vectors, FMX.Controls3D, FMX.Objects3D, FMX.Viewport3D;
 
 type
   TFormMain = class(TForm)
@@ -97,7 +99,7 @@ type
     TabItemFriend: TTabItem;
     ListBoxFriendMusic: TListBox;
     SpeedButtonNoTab: TSpeedButton;
-    SpeedButton1: TSpeedButton;
+    SpeedButtonPlay: TSpeedButton;
     Rectangle1: TRectangle;
     Path2: TPath;
     SpeedButton2: TSpeedButton;
@@ -297,6 +299,19 @@ type
     Glyph4: TGlyph;
     LayoutPlalistsCount: TLayout;
     LabelPlaylistsCount: TLabel;
+    TabItemPlaylist: TTabItem;
+    ListBoxPlaylist: TListBox;
+    LayoutPlaylistInfo: TLayout;
+    ImagePlaylistCover: TImage;
+    Layout53: TLayout;
+    LabelPlaylistTitle: TLabel;
+    LabelPlaylistDetail: TLabel;
+    LabelPlaylistInfo: TLabel;
+    Layout54: TLayout;
+    SpeedButtonPlaylistAdd: TSpeedButton;
+    SpeedButtonPlaylistShare: TSpeedButton;
+    SpeedButtonPlaylistMore: TSpeedButton;
+    ButtonPlaylistClose: TButton;
     procedure SpeedButtonCurrentClick(Sender: TObject);
     procedure SpeedButtonMusicClick(Sender: TObject);
     procedure SpeedButtonPlaylistsClick(Sender: TObject);
@@ -331,6 +346,8 @@ type
     procedure Rectangle32MouseLeave(Sender: TObject);
     procedure SpeedButton11Click(Sender: TObject);
     procedure SpeedButton5Click(Sender: TObject);
+    procedure ButtonPlaylistCloseClick(Sender: TObject);
+    procedure SpeedButtonPlayClick(Sender: TObject);
   private
     FCurrentPlaylist: TCurrentPlaylist;
     FMusicOffset: Integer;
@@ -343,6 +360,7 @@ type
     FSettings: TSettingsIni;
     FNeedCatalog: Boolean;
     FNeedPlaylists: Boolean;
+    FPlaylistAlbum: TBitmap;
     procedure SelectTab(Tab: TTabItem; SelectionButton: TSpeedButton);
     procedure UpdateSizeTab;
     procedure FDoScroll(Delta: Single);
@@ -354,6 +372,9 @@ type
     procedure SelectActiveAudio;
     procedure LoadCatalog;
     procedure LoadPlaylists(Reset: Boolean = False);
+    procedure FOnOpenPlaylist(Sender: TObject; const PlaylistInfo: TPlaylistInfo);
+    procedure LoadPlaylist(const PlaylistInfo: TPlaylistInfo);
+    procedure FOnPlaylistAlbumChange(Sender: TObject);
   public
     { Public declarations }
   end;
@@ -364,11 +385,15 @@ var
 implementation
 
 uses
-  System.Math, VKAudioWin.View.ListItemAudio, VKAudioWin.View.ListItemPlaylist, VKAudioWin.View.ListItemUser,
-  VKAudioWin.View.ListItemSheffle, Vk.Types, System.Threading, HGM.FMX.Image, VK.Clients, VK.Entity.Playlist,
-  VK.Entity.Audio.Catalog, VK.FMX.OAuth2, VK.Audio, VK.Friends;
+  System.Math, Vk.Types, System.Threading, HGM.FMX.Image, VK.Clients, VK.Entity.Playlist, VK.Entity.Audio.Catalog,
+  VK.FMX.OAuth2, VK.Audio, VK.Friends;
 
 {$R *.fmx}
+
+procedure TFormMain.ButtonPlaylistCloseClick(Sender: TObject);
+begin
+  SelectTab(TabItemPlaylists, nil);
+end;
 
 procedure TFormMain.ButtonRecomendUserNextClick(Sender: TObject);
 begin
@@ -423,8 +448,21 @@ begin
   SelectActiveAudio;
 end;
 
+procedure TFormMain.FOnOpenPlaylist(Sender: TObject; const PlaylistInfo: TPlaylistInfo);
+begin
+  LoadPlaylist(PlaylistInfo);
+  SelectTab(TabItemPlaylist, nil);
+end;
+
+procedure TFormMain.FOnPlaylistAlbumChange(Sender: TObject);
+begin
+  ImagePlaylistCover.Bitmap := FPlaylistAlbum;
+end;
+
 procedure TFormMain.FormCreate(Sender: TObject);
 begin
+  FPlaylistAlbum := TBitmap.Create;
+  FPlaylistAlbum.OnChange := FOnPlaylistAlbumChange;
   FNeedCatalog := True;
   FNeedPlaylists := True;
   FSettings := TSettingsIni.CreateDefault('VKAudioPlayer');
@@ -437,6 +475,8 @@ end;
 
 procedure TFormMain.FormDestroy(Sender: TObject);
 begin
+  FPlaylistAlbum.OnChange := nil;
+  FPlaylistAlbum.Free;
   FSettings.Free;
 end;
 
@@ -547,6 +587,7 @@ begin
   if FCurrentFriendId <> TListBoxItemUser(Item).Id then
     LoadFriend(TListBoxItemUser(Item).Id, True);
   SelectTab(TabItemFriend, nil);
+  EditSearch.Text := TListBoxItemUser(Item).Id.ToString;
 end;
 
 procedure TFormMain.SelectTab(Tab: TTabItem; SelectionButton: TSpeedButton);
@@ -597,6 +638,14 @@ begin
   SelectTab(TabItemMyMusic, SpeedButtonMusic);
 end;
 
+procedure TFormMain.SpeedButtonPlayClick(Sender: TObject);
+begin
+  if FMXPlayer.IsPlay then
+    FMXPlayer.Pause
+  else if FMXPlayer.IsPause then
+    FMXPlayer.Play;
+end;
+
 procedure TFormMain.SpeedButtonPlaylistsClick(Sender: TObject);
 begin
   if FNeedPlaylists then
@@ -625,13 +674,14 @@ begin
         end;
       finally
         ListBoxCatalog.EndUpdate;
+        UpdateSizeTab;
       end;
     end);  }
 end;
 
 procedure TFormMain.LoadPlaylists;
 begin
-  FNeedPlaylists := False;
+  //FNeedPlaylists := False;
   LabelPlaylistsCount.Text := 'Загрузка...';
   if Reset then
   begin
@@ -645,6 +695,7 @@ begin
       Playlists: TVkPlaylists;
       Playlist: TVkAudioPlaylist;
       Params: TVkParamsPlaylist;
+      Item: TListBoxItemPlaylist;
     begin
       try
         Params.OwnerId(Vk.UserId);
@@ -658,7 +709,10 @@ begin
               TThread.Synchronize(nil,
                 procedure
                 begin
-                  ListBoxPlaylists.AddObject(TListBoxItemPlaylist.Create(ListBoxPlaylists, Playlist));
+                  Playlist.IsFollowing := True;
+                  Item := TListBoxItemPlaylist.Create(ListBoxPlaylists, Playlist);
+                  Item.OnOpen := FOnOpenPlaylist;
+                  ListBoxPlaylists.AddObject(Item);
                 end);
             end;
             TThread.Synchronize(nil,
@@ -676,6 +730,7 @@ begin
           procedure
           begin
             ListBoxPlaylists.EndUpdate;
+            UpdateSizeTab;
           end);
       end;
     end);
@@ -730,9 +785,14 @@ begin
   begin
     LayoutClient.Height := LayoutTabs.Height + 16 + ListBoxFriendMusic.Items.Count * (48 + 6) + 2;
   end
+  else if TabControl.ActiveTab = TabItemPlaylist then
+  begin
+    LayoutClient.Height := LayoutTabs.Height + 16 + LayoutPlaylistInfo.Height + 20 + ListBoxPlaylist.Items.Count * (48 + 6) + 2;
+  end
   else if TabControl.ActiveTab = TabItemPlaylists then
   begin
-    LayoutClient.Height := LayoutTabs.Height + 16 + LayoutPlalistsCount.Height + (4 + 20) + (ListBoxPlaylists.Items.Count div ListBoxPlaylists.Columns) * (210 + 6) + 2;
+    LayoutClient.Height := LayoutTabs.Height + 16 + LayoutPlalistsCount.Height + (4 + 20) + Ceil(ListBoxPlaylists.Items.Count
+      / ListBoxPlaylists.Columns) * (210 + 6) + 2;
   end
   else if TabControl.ActiveTab = TabItemMyMusic then
   begin
@@ -825,6 +885,53 @@ begin
           procedure
           begin
             ListBoxFriendMusic.EndUpdate;
+            UpdateSizeTab;
+          end);
+      end;
+    end);
+end;
+
+procedure TFormMain.LoadPlaylist(const PlaylistInfo: TPlaylistInfo);
+begin
+  FPlaylistAlbum.LoadFromUrlAsync(PlaylistInfo.CoverUrl);
+  LabelPlaylistTitle.Text := PlaylistInfo.Title;
+  LabelPlaylistDetail.Text := PlaylistInfo.Detail;
+  LabelPlaylistInfo.Text := PlaylistInfo.Info;
+
+  ListBoxPlaylist.Clear;
+  ListBoxPlaylist.BeginUpdate;
+  TTask.Run(
+    procedure
+    var
+      Audios: TVkAudios;
+      Audio: TVkAudio;
+      Params: TVkParamsAudioGet;
+    begin
+      try
+        Params.PlaylistId(PlaylistInfo.Id);
+        Params.OwnerId(PlaylistInfo.OwnerId);
+        Params.AccessKey(PlaylistInfo.AccessKey);
+        Params.Count(200);
+        if VK.Audio.Get(Audios, Params) then
+        begin
+          try
+            for Audio in Audios.Items do
+            begin
+              TThread.Synchronize(nil,
+                procedure
+                begin
+                  ListBoxPlaylist.AddObject(TListBoxItemAudio.Create(ListBoxPlaylist, Audio));
+                end);
+            end;
+          finally
+            Audios.Free;
+          end;
+        end;
+      finally
+        TThread.ForceQueue(nil,
+          procedure
+          begin
+            ListBoxPlaylist.EndUpdate;
             UpdateSizeTab;
           end);
       end;
