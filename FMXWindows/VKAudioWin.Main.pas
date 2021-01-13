@@ -8,8 +8,8 @@ uses
   FMX.Objects, FMX.Ani, VK.API, VK.Components, FMX.Player, FMX.Trayicon.Win, HGM.Common.Settings, VK.Entity.Audio,
   System.ImageList, VK.Entity.Profile, FMX.ImgList, FMX.Effects, FMX.Filter.Effects, VKAudioWin.Classes,
   FMX.SVGIconImage, FMX.SVGIconImageList, Winapi.Foundation.Types, Winapi.WinRT, VKAudioWin.View.ListItemAudio,
-  VKAudioWin.View.ListItemPlaylist, VKAudioWin.View.ListItemUser, VKAudioWin.View.ListItemSheffle,
-  System.Math.Vectors, FMX.Controls3D, FMX.Objects3D, FMX.Viewport3D;
+  VKAudioWin.View.ListItemPlaylist, VKAudioWin.View.ListItemUser, VKAudioWin.View.ListItemSheffle, System.Math.Vectors,
+  FMX.Controls3D, FMX.Objects3D, FMX.Viewport3D;
 
 type
   TFormMain = class(TForm)
@@ -28,7 +28,7 @@ type
     EditSearch: TEdit;
     SearchEditButton1: TSearchEditButton;
     LayoutFooter: TLayout;
-    Label1: TLabel;
+    LabelNowPlay: TLabel;
     Label2: TLabel;
     ListBoxCurrent: TListBox;
     StyleBook1: TStyleBook;
@@ -113,13 +113,13 @@ type
     Layout3: TLayout;
     Layout4: TLayout;
     Layout5: TLayout;
-    Label3: TLabel;
-    Label4: TLabel;
+    LabelPlayTitle: TLabel;
+    LabelPlayArtist: TLabel;
     TrackBar1: TTrackBar;
     Layout6: TLayout;
-    Label5: TLabel;
+    LabelPlayTime: TLabel;
     Layout7: TLayout;
-    TrackBar2: TTrackBar;
+    TrackBarVolume: TTrackBar;
     Layout8: TLayout;
     SpeedButton4: TSpeedButton;
     SpeedButton6: TSpeedButton;
@@ -348,24 +348,28 @@ type
     procedure SpeedButton5Click(Sender: TObject);
     procedure ButtonPlaylistCloseClick(Sender: TObject);
     procedure SpeedButtonPlayClick(Sender: TObject);
+    procedure ListBoxPlaylistItemClick(const Sender: TCustomListBox; const Item: TListBoxItem);
+    procedure TrackBarVolumeChange(Sender: TObject);
   private
     FCurrentPlaylist: TCurrentPlaylist;
     FMusicOffset: Integer;
     FPlaylistsOffset: Integer;
     FFriendMusicOffset: Integer;
-    FCurrentFriendId: Integer;
+    FCurrentFriend: TFriendInfo;
     FRUsersOffset: Integer;
     FScrollImpulse: Single;
     FActiveAudioInfo: TAudioInfo;
     FSettings: TSettingsIni;
     FNeedCatalog: Boolean;
     FNeedPlaylists: Boolean;
-    FPlaylistAlbum: TBitmap;
+    FPlaylistAlbum: TBitmap;   
+    FAudioCover: TBitmap;
+    FPlaylistInfo: TPlaylistInfo;
     procedure SelectTab(Tab: TTabItem; SelectionButton: TSpeedButton);
     procedure UpdateSizeTab;
     procedure FDoScroll(Delta: Single);
     procedure LoadMusic(Reset: Boolean = False);
-    procedure LoadFriend(UserId: Integer; Reset: Boolean = False);
+    procedure LoadFriend(Info: TFriendInfo; Reset: Boolean = False);
     procedure PlayAudio(Info: TAudioInfo);
     procedure LoadRecomendUser(Reset: Boolean = False);
     procedure CopyAudioList(Src, Dest: TListBox);
@@ -373,8 +377,11 @@ type
     procedure LoadCatalog;
     procedure LoadPlaylists(Reset: Boolean = False);
     procedure FOnOpenPlaylist(Sender: TObject; const PlaylistInfo: TPlaylistInfo);
-    procedure LoadPlaylist(const PlaylistInfo: TPlaylistInfo);
-    procedure FOnPlaylistAlbumChange(Sender: TObject);
+    procedure FOnPlayPlaylist(Sender: TObject; const PlaylistInfo: TPlaylistInfo);
+    procedure LoadPlaylist(const PlaylistInfo: TPlaylistInfo; const AutoStart: Boolean);
+    procedure FOnPlaylistAlbumChange(Sender: TObject);   
+    procedure FOnAudioCoverChange(Sender: TObject);
+    procedure FOnCurrentPlaylistChange(const Sender: TCurrentPlaylist);
   public
     { Public declarations }
   end;
@@ -429,18 +436,29 @@ procedure TFormMain.SelectActiveAudio;
   begin
     List.ItemIndex := -1;
     for i := 0 to Pred(List.Count) do
+    begin
       if List.ListItems[i] is TListBoxItemAudio then
-        if (List.ListItems[i] as TListBoxItemAudio).AudioInfo.Id = FActiveAudioInfo.Id then
+      begin
+        List.ListItems[i].IsSelected := (List.ListItems[i] as TListBoxItemAudio).AudioInfo.Id = FActiveAudioInfo.Id;
+      end
+      else if List.ListItems[i] is TListBoxItemPlaylist then
+      begin
+        if (List.ListItems[i] as TListBoxItemPlaylist).PlaylistInfo.Id = FCurrentPlaylist.Id then
         begin
-          List.ListItems[i].IsSelected := True;
-          Break;
-        end;
+          (List.ListItems[i] as TListBoxItemPlaylist).SetActive(FMXPlayer.IsPlay);
+        end
+        else
+          (List.ListItems[i] as TListBoxItemPlaylist).SetActive(False);
+      end;
+    end;
   end;
 
 begin
   SelectActiveAudioFor(ListBoxCurrent);
   SelectActiveAudioFor(ListBoxMusic);
   SelectActiveAudioFor(ListBoxFriendMusic);
+  SelectActiveAudioFor(ListBoxPlaylist);
+  SelectActiveAudioFor(ListBoxPlaylists);
 end;
 
 procedure TFormMain.FMXPlayerChangeState(Sender: TObject);
@@ -450,7 +468,7 @@ end;
 
 procedure TFormMain.FOnOpenPlaylist(Sender: TObject; const PlaylistInfo: TPlaylistInfo);
 begin
-  LoadPlaylist(PlaylistInfo);
+  LoadPlaylist(PlaylistInfo, False);
   SelectTab(TabItemPlaylist, nil);
 end;
 
@@ -459,10 +477,50 @@ begin
   ImagePlaylistCover.Bitmap := FPlaylistAlbum;
 end;
 
+procedure TFormMain.FOnPlayPlaylist(Sender: TObject; const PlaylistInfo: TPlaylistInfo);
+begin
+  if not FCurrentPlaylist.Compare(lkPlaylist, PlaylistInfo.Id) then
+  begin
+    LoadPlaylist(PlaylistInfo, True);
+  end
+  else
+  begin
+    if ListBoxCurrent.Count > 0 then
+      PlayAudio(TListBoxItemAudio(ListBoxCurrent.ListItems[0]).AudioInfo);
+  end;
+  SelectActiveAudio;
+end;
+
+procedure TFormMain.FOnAudioCoverChange(Sender: TObject);
+begin
+  RectangleActiveCover.Fill.Bitmap.Bitmap := FAudioCover;
+end;
+
+procedure TFormMain.FOnCurrentPlaylistChange(const Sender: TCurrentPlaylist);
+begin
+  LayoutFooter.Visible := Sender.Kind <> lkNone;
+  case Sender.Kind of
+    lkNone:
+      LabelNowPlay.Text := '';
+    lkMusic:
+      LabelNowPlay.Text := 'Сейчас играет - Моя музыка';
+    lkFriend:
+      LabelNowPlay.Text := 'Сейчас играет - Аудиозаписи ' + Sender.FriendInfo.FirstName;
+    lkPlaylist:
+      LabelNowPlay.Text := 'Сейчас играет - ' + Sender.PlaylistInfo.Title;
+    lkCustom:
+      LabelNowPlay.Text := '';
+  end;
+end;
+
 procedure TFormMain.FormCreate(Sender: TObject);
 begin
+  FCurrentPlaylist := TCurrentPlaylist.Create;
+  FCurrentPlaylist.OnChange := FOnCurrentPlaylistChange;
   FPlaylistAlbum := TBitmap.Create;
-  FPlaylistAlbum.OnChange := FOnPlaylistAlbumChange;
+  FPlaylistAlbum.OnChange := FOnPlaylistAlbumChange;    
+  FAudioCover := TBitmap.Create;
+  FAudioCover.OnChange := FOnAudioCoverChange;
   FNeedCatalog := True;
   FNeedPlaylists := True;
   FSettings := TSettingsIni.CreateDefault('VKAudioPlayer');
@@ -478,6 +536,7 @@ begin
   FPlaylistAlbum.OnChange := nil;
   FPlaylistAlbum.Free;
   FSettings.Free;
+  FCurrentPlaylist.Free;
 end;
 
 procedure TFormMain.FormKeyDown(Sender: TObject; var Key: Word; var KeyChar: Char; Shift: TShiftState);
@@ -512,6 +571,11 @@ end;
 procedure TFormMain.PlayAudio(Info: TAudioInfo);
 begin
   FActiveAudioInfo := Info;
+  LabelPlayTitle.Text := Info.Title;
+  LabelPlayArtist.Text := Info.Artist;
+  LabelPlayTime.Text := Info.Duration;
+  RectangleActiveCover.Fill.Bitmap.Bitmap.LoadFromResource('cover');
+  FAudioCover.LoadFromUrlAsync(Info.CoverUrl);
   TTask.Run(
     procedure
     var
@@ -519,8 +583,18 @@ begin
     begin
       if VK.Audio.GetById(Item, Info.OwnerId, Info.Id, Info.AccessKey) then
       try
-        FMXPlayer.StreamURL := Item.Url;
-        FMXPlayer.Play;
+        if (FMXPlayer.StreamURL = Item.Url) then
+          if FMXPlayer.IsPlay then
+            FMXPlayer.Pause
+          else if FMXPlayer.IsPause then
+            FMXPlayer.Resume
+          else
+            FMXPlayer.Pause
+        else
+        begin
+          FMXPlayer.StreamURL := Item.Url;
+          FMXPlayer.Play;
+        end;
       finally
         Item.Free;
       end;
@@ -565,10 +639,10 @@ end;
 procedure TFormMain.ListBoxFriendMusicItemClick(const Sender: TCustomListBox; const Item: TListBoxItem);
 begin
   PlayAudio(TListBoxItemAudio(Item).AudioInfo);
-  if not FCurrentPlaylist.Compare(lkFriend, FCurrentFriendId) then
+  if not FCurrentPlaylist.Compare(lkFriend, FCurrentFriend.Id) then
   begin
     CopyAudioList(ListBoxFriendMusic, ListBoxCurrent);
-    FCurrentPlaylist.Friend(FCurrentFriendId);
+    FCurrentPlaylist.Friend(FCurrentFriend);
   end;
 end;
 
@@ -582,10 +656,22 @@ begin
   end;
 end;
 
+procedure TFormMain.ListBoxPlaylistItemClick(const Sender: TCustomListBox; const Item: TListBoxItem);
+begin
+  PlayAudio(TListBoxItemAudio(Item).AudioInfo);
+  if not FCurrentPlaylist.Compare(lkPlaylist, FPlaylistInfo.Id) then
+  begin
+    CopyAudioList(ListBoxPlaylist, ListBoxCurrent);
+    FCurrentPlaylist.Playlist(FPlaylistInfo);
+  end;
+end;
+
 procedure TFormMain.ListBoxRecomendUserItemClick(const Sender: TCustomListBox; const Item: TListBoxItem);
 begin
-  if FCurrentFriendId <> TListBoxItemUser(Item).Id then
-    LoadFriend(TListBoxItemUser(Item).Id, True);
+  if FCurrentFriend.Id <> TListBoxItemUser(Item).Id then
+  begin
+    LoadFriend(TListBoxItemUser(Item).UserInfo, True);
+  end;
   SelectTab(TabItemFriend, nil);
   EditSearch.Text := TListBoxItemUser(Item).Id.ToString;
 end;
@@ -681,7 +767,7 @@ end;
 
 procedure TFormMain.LoadPlaylists;
 begin
-  //FNeedPlaylists := False;
+  FNeedPlaylists := False;
   LabelPlaylistsCount.Text := 'Загрузка...';
   if Reset then
   begin
@@ -712,6 +798,7 @@ begin
                   Playlist.IsFollowing := True;
                   Item := TListBoxItemPlaylist.Create(ListBoxPlaylists, Playlist);
                   Item.OnOpen := FOnOpenPlaylist;
+                  Item.OnPlay := FOnPlayPlaylist;
                   ListBoxPlaylists.AddObject(Item);
                 end);
             end;
@@ -772,6 +859,11 @@ begin
     FScrollImpulse := 0;
     TimerUpdateScroll.Enabled := False;
   end;
+end;
+
+procedure TFormMain.TrackBarVolumeChange(Sender: TObject);
+begin
+  FMXPlayer.VolumeChannel := TrackBarVolume.Value;
 end;
 
 procedure TFormMain.UpdateSizeTab;
@@ -845,7 +937,7 @@ end;
 
 procedure TFormMain.LoadFriend;
 begin
-  FCurrentFriendId := UserId;
+  FCurrentFriend := Info;
   if Reset then
   begin
     FFriendMusicOffset := 0;
@@ -863,7 +955,7 @@ begin
       try
         Params.Offset(FFriendMusicOffset);
         Params.Count(50);
-        Params.OwnerId(UserId);
+        Params.OwnerId(FCurrentFriend.Id);
         if VK.Audio.Get(Audios, Params) then
         begin
           try
@@ -891,8 +983,9 @@ begin
     end);
 end;
 
-procedure TFormMain.LoadPlaylist(const PlaylistInfo: TPlaylistInfo);
+procedure TFormMain.LoadPlaylist(const PlaylistInfo: TPlaylistInfo; const AutoStart: Boolean);
 begin
+  FPlaylistInfo := PlaylistInfo;
   FPlaylistAlbum.LoadFromUrlAsync(PlaylistInfo.CoverUrl);
   LabelPlaylistTitle.Text := PlaylistInfo.Title;
   LabelPlaylistDetail.Text := PlaylistInfo.Detail;
@@ -933,6 +1026,13 @@ begin
           begin
             ListBoxPlaylist.EndUpdate;
             UpdateSizeTab;
+            if AutoStart then
+            begin
+              CopyAudioList(ListBoxPlaylist, ListBoxCurrent);
+              FCurrentPlaylist.Playlist(PlaylistInfo);
+              FOnPlayPlaylist(Self, FPlaylistInfo);
+            end;
+            SelectActiveAudio;
           end);
       end;
     end);

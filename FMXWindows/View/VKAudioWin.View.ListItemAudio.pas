@@ -104,6 +104,7 @@ begin
   LabelItemTime.Text := '3:48';
   LabelItemTime.TextAlign := TTextAlign.Trailing;
   LabelItemTime.Width := 30;
+  LabelItemTime.WordWrap := False;
 
   LayoutItemText.Parent := Self;
   LayoutItemText.Align := TAlignLayout.Client;
@@ -116,6 +117,7 @@ begin
   LabelItemText.TextSettings.Font.Family := 'Roboto';
   LabelItemText.TextSettings.Font.Size := 12.5;
   LabelItemText.Text := 'Ласточка';
+  LabelItemText.WordWrap := False;
 
   LabelItemDetail.Parent := LayoutItemText;
   LabelItemDetail.Align := TAlignLayout.Bottom;
@@ -125,6 +127,7 @@ begin
   LabelItemDetail.TextSettings.Font.Size := 12.5;
   LabelItemDetail.TextSettings.FontColor := $FF939393;
   LabelItemDetail.Text := 'Анна Пингина';
+  LabelItemDetail.WordWrap := False;
 
   LayoutControls1.Parent := Self;
   LayoutControls1.Align := TAlignLayout.Right;
@@ -185,6 +188,10 @@ begin
   FAudioInfo.Id := Audio.Id;
   FAudioInfo.OwnerId := Audio.OwnerId;
   FAudioInfo.AccessKey := Audio.AccessKey;
+  FAudioInfo.Title := Audio.Title;
+  FAudioInfo.Artist := Audio.Artist;
+  FAudioInfo.Duration := Audio.DurationText('%d:%.2d');
+  FAudioInfo.CoverUrl := FAlbumPhoto;
 end;
 
 constructor TListBoxItemAudio.Create(AOwner: TComponent; From: TListBoxItemAudio);

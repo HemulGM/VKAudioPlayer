@@ -5,7 +5,7 @@
         <FrameworkType>FMX</FrameworkType>
         <MainSource>VKAudio.dpr</MainSource>
         <Base>True</Base>
-        <Config Condition="'$(Config)'==''">Debug</Config>
+        <Config Condition="'$(Config)'==''">Release</Config>
         <Platform Condition="'$(Platform)'==''">Win32</Platform>
         <TargetedPlatforms>37983</TargetedPlatforms>
         <AppType>Application</AppType>
@@ -408,6 +408,10 @@
         <DCCReference Include="View\VKAudioWin.View.ListItemUser.pas"/>
         <DCCReference Include="View\VKAudioWin.View.ListItemSheffle.pas"/>
         <DCCReference Include="View\VKAudioWin.View.ListItemPlaylist.pas"/>
+        <RcItem Include="D:\Temp\Iconion\VK1\album.png">
+            <ResourceType>RCDATA</ResourceType>
+            <ResourceId>cover</ResourceId>
+        </RcItem>
         <BuildConfiguration Include="Release">
             <Key>Cfg_2</Key>
             <CfgParent>Base</CfgParent>
@@ -452,6 +456,12 @@
                 <DeployFile LocalName="Win32\Debug\VKAudio.exe" Configuration="Debug" Class="ProjectOutput">
                     <Platform Name="Win32">
                         <RemoteName>VKAudio.exe</RemoteName>
+                        <Overwrite>true</Overwrite>
+                    </Platform>
+                </DeployFile>
+                <DeployFile LocalName="D:\Temp\Iconion\VK1\album.png" Configuration="Debug" Class="ProjectFile">
+                    <Platform Name="Win32">
+                        <RemoteDir>.\</RemoteDir>
                         <Overwrite>true</Overwrite>
                     </Platform>
                 </DeployFile>

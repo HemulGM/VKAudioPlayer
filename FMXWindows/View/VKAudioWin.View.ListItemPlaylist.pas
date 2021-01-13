@@ -31,12 +31,15 @@ type
     SpeedButtonPlay: TSpeedButton;
     SpeedButtonShare: TSpeedButton;
     FOnOpen: TOnOpenPlaylist;
+    FOnPlay: TOnOpenPlaylist;
     procedure FMouseEnter(Sender: TObject);
     procedure FMouseLeave(Sender: TObject);
     procedure FOnBitmapChange(Sender: TObject);
     procedure SpeedButtonAddMouseEnter(Sender: TObject);
     procedure FOnClick(Sender: TObject);
+    procedure FOnClickPlay(Sender: TObject);
     procedure SetOnOpen(const Value: TOnOpenPlaylist);
+    procedure SetOnPlay(const Value: TOnOpenPlaylist);
   public
     constructor Create(AOwner: TComponent); overload; override;
     constructor Create(AOwner: TComponent; Playlist: TVkAudioPlaylist); overload;
@@ -44,6 +47,8 @@ type
     destructor Destroy; override;
     property PlaylistInfo: TPlaylistInfo read FPlaylistInfo;
     property OnOpen: TOnOpenPlaylist read FOnOpen write SetOnOpen;
+    procedure SetActive(const Value: Boolean);
+    property OnPlay: TOnOpenPlaylist read FOnPlay write SetOnPlay;
   end;
 
 implementation
@@ -196,6 +201,7 @@ begin
   SpeedButtonPlay.Text := '';
   SpeedButtonPlay.Width := 52;
   SpeedButtonPlay.Height := 59;
+  SpeedButtonPlay.OnClick := FOnClickPlay;
 
   SpeedButtonShare.Parent := LayoutControls;
   SpeedButtonShare.Align := TAlignLayout.Right;
@@ -239,9 +245,22 @@ begin
   end;
 end;
 
+procedure TListBoxItemPlaylist.SetActive(const Value: Boolean);
+begin
+  if Value then
+    SpeedButtonPlay.ImageIndex := 14
+  else
+    SpeedButtonPlay.ImageIndex := 9;
+end;
+
 procedure TListBoxItemPlaylist.SetOnOpen(const Value: TOnOpenPlaylist);
 begin
   FOnOpen := Value;
+end;
+
+procedure TListBoxItemPlaylist.SetOnPlay(const Value: TOnOpenPlaylist);
+begin
+  FOnPlay := Value;
 end;
 
 procedure TListBoxItemPlaylist.SpeedButtonAddMouseEnter(Sender: TObject);
@@ -260,6 +279,12 @@ procedure TListBoxItemPlaylist.FOnClick(Sender: TObject);
 begin
   if Assigned(FOnOpen) then
     FOnOpen(Self, FPlaylistInfo);
+end;
+
+procedure TListBoxItemPlaylist.FOnClickPlay(Sender: TObject);
+begin
+  if Assigned(FOnPlay) then
+    FOnPlay(Self, FPlaylistInfo);
 end;
 
 constructor TListBoxItemPlaylist.Create(AOwner: TComponent; Playlist: TVkAudioPlaylist);

@@ -19,6 +19,7 @@ type
     LabelItemText: TLabel;
     LabelItemDetail: TLabel;
     FId: Integer;
+    FUserInfo: TFriendInfo;
     procedure FMouseEnter(Sender: TObject);
     procedure FMouseLeave(Sender: TObject);
     procedure FClick(Sender: TObject);
@@ -29,6 +30,7 @@ type
     constructor Create(AOwner: TComponent; Profile: TVkProfile); overload;
     destructor Destroy; override;
     property Id: Integer read FId write SetId;
+    property UserInfo: TFriendInfo read FUserInfo;
   end;
 
 implementation
@@ -101,6 +103,9 @@ var
   Id: Integer;
 begin
   Create(AOwner);
+  FUserInfo.Id := Profile.Id;
+  FUserInfo.FullName := Profile.GetFullName;
+  FUserInfo.FirstName := Profile.FirstName;
   FId := Profile.Id;
   LabelItemText.Text := Profile.GetFullName;
   LabelItemDetail.Text := '...';
