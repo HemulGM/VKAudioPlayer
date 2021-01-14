@@ -26,7 +26,7 @@ type
     TabItemSearch: TTabItem;
     PanelControls: TPanel;
     EditSearch: TEdit;
-    SearchEditButton1: TSearchEditButton;
+    SearchEditButton: TSearchEditButton;
     LayoutFooter: TLayout;
     LabelNowPlay: TLabel;
     Label2: TLabel;
@@ -350,6 +350,7 @@ type
     procedure SpeedButtonPlayClick(Sender: TObject);
     procedure ListBoxPlaylistItemClick(const Sender: TCustomListBox; const Item: TListBoxItem);
     procedure TrackBarVolumeChange(Sender: TObject);
+    procedure SearchEditButtonClick(Sender: TObject);
   private
     FCurrentPlaylist: TCurrentPlaylist;
     FMusicOffset: Integer;
@@ -362,7 +363,7 @@ type
     FSettings: TSettingsIni;
     FNeedCatalog: Boolean;
     FNeedPlaylists: Boolean;
-    FPlaylistAlbum: TBitmap;   
+    FPlaylistAlbum: TBitmap;
     FAudioCover: TBitmap;
     FPlaylistInfo: TPlaylistInfo;
     procedure SelectTab(Tab: TTabItem; SelectionButton: TSpeedButton);
@@ -379,7 +380,7 @@ type
     procedure FOnOpenPlaylist(Sender: TObject; const PlaylistInfo: TPlaylistInfo);
     procedure FOnPlayPlaylist(Sender: TObject; const PlaylistInfo: TPlaylistInfo);
     procedure LoadPlaylist(const PlaylistInfo: TPlaylistInfo; const AutoStart: Boolean);
-    procedure FOnPlaylistAlbumChange(Sender: TObject);   
+    procedure FOnPlaylistAlbumChange(Sender: TObject);
     procedure FOnAudioCoverChange(Sender: TObject);
     procedure FOnCurrentPlaylistChange(const Sender: TCurrentPlaylist);
   public
@@ -420,12 +421,17 @@ end;
 procedure TFormMain.EditSearchChangeTracking(Sender: TObject);
 begin
   ClearEditButtonSearch.Visible := not EditSearch.Text.IsEmpty;
-  SearchEditButton1.Align := TAlignLayout.MostRight;
+  SearchEditButton.Align := TAlignLayout.MostRight;
 end;
 
 procedure TFormMain.FloatAnimationSelectionTabPosProcess(Sender: TObject);
 begin
   LayoutTabs.InvalidateRect(LayoutTabs.ClipRect);
+end;
+
+procedure TFormMain.SearchEditButtonClick(Sender: TObject);
+begin
+  //VK.Audio.GetCatalog()
 end;
 
 procedure TFormMain.SelectActiveAudio;
@@ -518,7 +524,7 @@ begin
   FCurrentPlaylist := TCurrentPlaylist.Create;
   FCurrentPlaylist.OnChange := FOnCurrentPlaylistChange;
   FPlaylistAlbum := TBitmap.Create;
-  FPlaylistAlbum.OnChange := FOnPlaylistAlbumChange;    
+  FPlaylistAlbum.OnChange := FOnPlaylistAlbumChange;
   FAudioCover := TBitmap.Create;
   FAudioCover.OnChange := FOnAudioCoverChange;
   FNeedCatalog := True;
@@ -1025,7 +1031,8 @@ begin
           procedure
           begin
             ListBoxPlaylist.EndUpdate;
-            UpdateSizeTab;
+            if TabControl.ActiveTab = TabItemPlaylist then
+              UpdateSizeTab;
             if AutoStart then
             begin
               CopyAudioList(ListBoxPlaylist, ListBoxCurrent);
