@@ -207,7 +207,7 @@ end;
 
 destructor TListBoxItemAudio.Destroy;
 begin
-  FAlbum.OnChange := nil;
+  FAlbum.Free;
   inherited;
 end;
 

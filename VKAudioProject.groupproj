@@ -24,10 +24,16 @@
         <Projects Include="..\FMXAudio\FMXAudioHGM.dproj">
             <Dependencies/>
         </Projects>
-        <Projects Include="..\#Learn\gest\TabbedwithNavigation.dproj">
+        <Projects Include="FMXWindows\VKAudio.dproj">
             <Dependencies/>
         </Projects>
-        <Projects Include="FMXWindows\VKAudio.dproj">
+        <Projects Include="..\VK_API\Samples\Auth\VKAuth.dproj">
+            <Dependencies/>
+        </Projects>
+        <Projects Include="C:\Users\hemulgm\Desktop\Новая папка\Project2.dproj">
+            <Dependencies/>
+        </Projects>
+        <Projects Include="..\FMXAudio\Sample\Recorder\Project21.dproj">
             <Dependencies/>
         </Projects>
     </ItemGroup>
@@ -101,15 +107,6 @@
     <Target Name="FMXAudioHGM:Make">
         <MSBuild Projects="..\FMXAudio\FMXAudioHGM.dproj" Targets="Make"/>
     </Target>
-    <Target Name="TabbedwithNavigation">
-        <MSBuild Projects="..\#Learn\gest\TabbedwithNavigation.dproj"/>
-    </Target>
-    <Target Name="TabbedwithNavigation:Clean">
-        <MSBuild Projects="..\#Learn\gest\TabbedwithNavigation.dproj" Targets="Clean"/>
-    </Target>
-    <Target Name="TabbedwithNavigation:Make">
-        <MSBuild Projects="..\#Learn\gest\TabbedwithNavigation.dproj" Targets="Make"/>
-    </Target>
     <Target Name="VKAudio">
         <MSBuild Projects="FMXWindows\VKAudio.dproj"/>
     </Target>
@@ -119,14 +116,41 @@
     <Target Name="VKAudio:Make">
         <MSBuild Projects="FMXWindows\VKAudio.dproj" Targets="Make"/>
     </Target>
+    <Target Name="VKAuth">
+        <MSBuild Projects="..\VK_API\Samples\Auth\VKAuth.dproj"/>
+    </Target>
+    <Target Name="VKAuth:Clean">
+        <MSBuild Projects="..\VK_API\Samples\Auth\VKAuth.dproj" Targets="Clean"/>
+    </Target>
+    <Target Name="VKAuth:Make">
+        <MSBuild Projects="..\VK_API\Samples\Auth\VKAuth.dproj" Targets="Make"/>
+    </Target>
+    <Target Name="Project2">
+        <MSBuild Projects="C:\Users\hemulgm\Desktop\Новая папка\Project2.dproj"/>
+    </Target>
+    <Target Name="Project2:Clean">
+        <MSBuild Projects="C:\Users\hemulgm\Desktop\Новая папка\Project2.dproj" Targets="Clean"/>
+    </Target>
+    <Target Name="Project2:Make">
+        <MSBuild Projects="C:\Users\hemulgm\Desktop\Новая папка\Project2.dproj" Targets="Make"/>
+    </Target>
+    <Target Name="Project21">
+        <MSBuild Projects="..\FMXAudio\Sample\Recorder\Project21.dproj"/>
+    </Target>
+    <Target Name="Project21:Clean">
+        <MSBuild Projects="..\FMXAudio\Sample\Recorder\Project21.dproj" Targets="Clean"/>
+    </Target>
+    <Target Name="Project21:Make">
+        <MSBuild Projects="..\FMXAudio\Sample\Recorder\Project21.dproj" Targets="Make"/>
+    </Target>
     <Target Name="Build">
-        <CallTarget Targets="VKAudioPlayer;Audio;VKComponents;HGMComponents;VKPlayer;Knigavuhe;FMXAudioHGM;TabbedwithNavigation;VKAudio"/>
+        <CallTarget Targets="VKAudioPlayer;Audio;VKComponents;HGMComponents;VKPlayer;Knigavuhe;FMXAudioHGM;VKAudio;VKAuth;Project2;Project21"/>
     </Target>
     <Target Name="Clean">
-        <CallTarget Targets="VKAudioPlayer:Clean;Audio:Clean;VKComponents:Clean;HGMComponents:Clean;VKPlayer:Clean;Knigavuhe:Clean;FMXAudioHGM:Clean;TabbedwithNavigation:Clean;VKAudio:Clean"/>
+        <CallTarget Targets="VKAudioPlayer:Clean;Audio:Clean;VKComponents:Clean;HGMComponents:Clean;VKPlayer:Clean;Knigavuhe:Clean;FMXAudioHGM:Clean;VKAudio:Clean;VKAuth:Clean;Project2:Clean;Project21:Clean"/>
     </Target>
     <Target Name="Make">
-        <CallTarget Targets="VKAudioPlayer:Make;Audio:Make;VKComponents:Make;HGMComponents:Make;VKPlayer:Make;Knigavuhe:Make;FMXAudioHGM:Make;TabbedwithNavigation:Make;VKAudio:Make"/>
+        <CallTarget Targets="VKAudioPlayer:Make;Audio:Make;VKComponents:Make;HGMComponents:Make;VKPlayer:Make;Knigavuhe:Make;FMXAudioHGM:Make;VKAudio:Make;VKAuth:Make;Project2:Make;Project21:Make"/>
     </Target>
     <Import Project="$(BDS)\Bin\CodeGear.Group.Targets" Condition="Exists('$(BDS)\Bin\CodeGear.Group.Targets')"/>
 </Project>

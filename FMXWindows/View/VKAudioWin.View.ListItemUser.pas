@@ -104,10 +104,10 @@ var
 begin
   Create(AOwner);
   FUserInfo.Id := Profile.Id;
-  FUserInfo.FullName := Profile.GetFullName;
+  FUserInfo.FullName := Profile.FullName;
   FUserInfo.FirstName := Profile.FirstName;
   FId := Profile.Id;
-  LabelItemText.Text := Profile.GetFullName;
+  LabelItemText.Text := FUserInfo.FullName;
   LabelItemDetail.Text := '...';
   Id := Profile.Id;
   FAlbumPhoto := Profile.Photo50;

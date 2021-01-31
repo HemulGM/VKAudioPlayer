@@ -16,6 +16,9 @@ uses
 
 begin
   Application.Initialize;
+  {$IFDEF DEBUG}
+  ReportMemoryLeaksOnShutdown := True;
+  {$ENDIF}
   Application.CreateForm(TFormMain, FormMain);
   Application.Run;
 end.

@@ -192,7 +192,6 @@ type
     procedure ButtonFlatNextClick(Sender: TObject);
     procedure ButtonFlatPlayPauseClick(Sender: TObject);
     procedure VKLogin(Sender: TObject);
-    procedure VKErrorLogin(Sender: TObject; E: Exception; Code: Integer; Text: string);
     procedure FormCloseQuery(Sender: TObject; var CanClose: Boolean);
     procedure LabelTimeClick(Sender: TObject);
     procedure TimerEquTimer(Sender: TObject);
@@ -623,7 +622,7 @@ end;
 
 procedure TFormMain.SetCurrentUser(User: TVkProfile);
 begin
-  Caption := 'VK Audio Player [' + User.GetFullName + ']';
+  Caption := 'VK Audio Player [' + User.FullName + ']';
 end;
 
 procedure TFormMain.SetAvatar(Url: string);
@@ -2298,11 +2297,6 @@ begin
           end);
       end).Start;
   end;
-end;
-
-procedure TFormMain.VKErrorLogin(Sender: TObject; E: Exception; Code: Integer; Text: string);
-begin
-  ShowMessage(Text);
 end;
 
 procedure TFormMain.VKLog(Sender: TObject; const Value: string);

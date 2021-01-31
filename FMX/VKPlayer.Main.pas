@@ -7,8 +7,8 @@ uses
   FMX.Graphics, FMX.Dialogs, FMX.TabControl, FMX.StdCtrls, FMX.Controls.Presentation, FMX.Gestures, System.Actions,
   FMX.ActnList, VK.API, VK.Components, VK.Entity.Profile, FMX.Layouts, FMX.Objects, FMX.ListView.Types,
   FMX.ListView.Appearances, FMX.ListView.Adapters.Base, VK.Entity.Audio, VK.Audio, FMX.ListView, BassPlayer.LoadHandle,
-  System.Generics.Collections, System.ImageList, FMX.ImgList, FMX.Effects, FMX.Player, FMX.Ani, FMX.ScrollBox, FMX.Memo,
-  FMX.Filter.Effects, FMX.Edit;
+  System.Generics.Collections, System.ImageList, FMX.ImgList, FMX.Effects, FMX.BassComponents, FMX.Ani, FMX.ScrollBox,
+  FMX.Memo, FMX.Filter.Effects, FMX.Edit, FMX.BASS.Classes, FMX.Player;
 
 type
   TBitmapCacheItem = record
@@ -197,7 +197,6 @@ type
     procedure VKError(Sender: TObject; E: Exception; Code: Integer; Text: string);
     procedure VKLogin(Sender: TObject);
     procedure FormShow(Sender: TObject);
-    procedure VKErrorLogin(Sender: TObject; E: Exception; Code: Integer; Text: string);
     procedure SpeedButtonMusicClick(Sender: TObject);
     procedure SpeedButtonSearchClick(Sender: TObject);
     procedure SpeedButtonUsersClick(Sender: TObject);
@@ -940,14 +939,9 @@ begin
   end;
 end;
 
-procedure TFormMain.VKErrorLogin(Sender: TObject; E: Exception; Code: Integer; Text: string);
-begin
-  //
-end;
-
 procedure TFormMain.SetCurrentUser(User: TVkProfile);
 begin
-  Caption := 'VK Audio Player [' + User.GetFullName + ']';
+  Caption := 'VK Audio Player [' + User.FullName + ']';
 end;
 
 procedure TFormMain.SpeedButton1Click(Sender: TObject);
