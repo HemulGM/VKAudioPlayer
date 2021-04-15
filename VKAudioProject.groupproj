@@ -30,10 +30,7 @@
         <Projects Include="..\VK_API\Samples\Auth\VKAuth.dproj">
             <Dependencies/>
         </Projects>
-        <Projects Include="C:\Users\hemulgm\Desktop\Новая папка\Project2.dproj">
-            <Dependencies/>
-        </Projects>
-        <Projects Include="..\FMXAudio\Sample\Recorder\Project21.dproj">
+        <Projects Include="..\FMXAudio\Sample\Recorder\MicRecordSample.dproj">
             <Dependencies/>
         </Projects>
     </ItemGroup>
@@ -125,32 +122,23 @@
     <Target Name="VKAuth:Make">
         <MSBuild Projects="..\VK_API\Samples\Auth\VKAuth.dproj" Targets="Make"/>
     </Target>
-    <Target Name="Project2">
-        <MSBuild Projects="C:\Users\hemulgm\Desktop\Новая папка\Project2.dproj"/>
+    <Target Name="MicRecordSample">
+        <MSBuild Projects="..\FMXAudio\Sample\Recorder\MicRecordSample.dproj"/>
     </Target>
-    <Target Name="Project2:Clean">
-        <MSBuild Projects="C:\Users\hemulgm\Desktop\Новая папка\Project2.dproj" Targets="Clean"/>
+    <Target Name="MicRecordSample:Clean">
+        <MSBuild Projects="..\FMXAudio\Sample\Recorder\MicRecordSample.dproj" Targets="Clean"/>
     </Target>
-    <Target Name="Project2:Make">
-        <MSBuild Projects="C:\Users\hemulgm\Desktop\Новая папка\Project2.dproj" Targets="Make"/>
-    </Target>
-    <Target Name="Project21">
-        <MSBuild Projects="..\FMXAudio\Sample\Recorder\Project21.dproj"/>
-    </Target>
-    <Target Name="Project21:Clean">
-        <MSBuild Projects="..\FMXAudio\Sample\Recorder\Project21.dproj" Targets="Clean"/>
-    </Target>
-    <Target Name="Project21:Make">
-        <MSBuild Projects="..\FMXAudio\Sample\Recorder\Project21.dproj" Targets="Make"/>
+    <Target Name="MicRecordSample:Make">
+        <MSBuild Projects="..\FMXAudio\Sample\Recorder\MicRecordSample.dproj" Targets="Make"/>
     </Target>
     <Target Name="Build">
-        <CallTarget Targets="VKAudioPlayer;Audio;VKComponents;HGMComponents;VKPlayer;Knigavuhe;FMXAudioHGM;VKAudio;VKAuth;Project2;Project21"/>
+        <CallTarget Targets="VKAudioPlayer;Audio;VKComponents;HGMComponents;VKPlayer;Knigavuhe;FMXAudioHGM;VKAudio;VKAuth;MicRecordSample"/>
     </Target>
     <Target Name="Clean">
-        <CallTarget Targets="VKAudioPlayer:Clean;Audio:Clean;VKComponents:Clean;HGMComponents:Clean;VKPlayer:Clean;Knigavuhe:Clean;FMXAudioHGM:Clean;VKAudio:Clean;VKAuth:Clean;Project2:Clean;Project21:Clean"/>
+        <CallTarget Targets="VKAudioPlayer:Clean;Audio:Clean;VKComponents:Clean;HGMComponents:Clean;VKPlayer:Clean;Knigavuhe:Clean;FMXAudioHGM:Clean;VKAudio:Clean;VKAuth:Clean;MicRecordSample:Clean"/>
     </Target>
     <Target Name="Make">
-        <CallTarget Targets="VKAudioPlayer:Make;Audio:Make;VKComponents:Make;HGMComponents:Make;VKPlayer:Make;Knigavuhe:Make;FMXAudioHGM:Make;VKAudio:Make;VKAuth:Make;Project2:Make;Project21:Make"/>
+        <CallTarget Targets="VKAudioPlayer:Make;Audio:Make;VKComponents:Make;HGMComponents:Make;VKPlayer:Make;Knigavuhe:Make;FMXAudioHGM:Make;VKAudio:Make;VKAuth:Make;MicRecordSample:Make"/>
     </Target>
     <Import Project="$(BDS)\Bin\CodeGear.Group.Targets" Condition="Exists('$(BDS)\Bin\CodeGear.Group.Targets')"/>
 </Project>

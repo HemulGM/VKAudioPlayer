@@ -20,10 +20,12 @@ type
     FAlbumPhoto: string;
     RectangleItemImage: TRectangle;
     RectangleItemImageHot: TRectangle;
-    LabelItemCount: TLabel;
     LayoutItemText: TLayout;
+    LabelItemCount: TLabel;
     LabelItemText: TLabel;
     LabelItemStats: TLabel;
+    GlyphStats: TGlyph;
+    GlyphCount: TGlyph;
     LabelItemDetail: TLabel;
     LabelItemYear: TLabel;
     LayoutControls: TLayout;
@@ -32,6 +34,8 @@ type
     SpeedButtonShare: TSpeedButton;
     FOnOpen: TOnOpenPlaylist;
     FOnPlay: TOnOpenPlaylist;
+    FSVGList: TCustomImageList;
+    FDefaultImage: TBitmap;
     procedure FMouseEnter(Sender: TObject);
     procedure FMouseLeave(Sender: TObject);
     procedure FOnBitmapChange(Sender: TObject);
@@ -40,6 +44,8 @@ type
     procedure FOnClickPlay(Sender: TObject);
     procedure SetOnOpen(const Value: TOnOpenPlaylist);
     procedure SetOnPlay(const Value: TOnOpenPlaylist);
+    procedure SetSVGList(const Value: TCustomImageList);
+    procedure SetDefaultImage(const Value: TBitmap);
   public
     constructor Create(AOwner: TComponent); overload; override;
     constructor Create(AOwner: TComponent; Playlist: TVkAudioPlaylist); overload;
@@ -49,12 +55,14 @@ type
     property OnOpen: TOnOpenPlaylist read FOnOpen write SetOnOpen;
     procedure SetActive(const Value: Boolean);
     property OnPlay: TOnOpenPlaylist read FOnPlay write SetOnPlay;
+    property SVGList: TCustomImageList read FSVGList write SetSVGList;
+    property DefaultImage: TBitmap read FDefaultImage write SetDefaultImage;
   end;
 
 implementation
 
 uses
-  VKAudioWin.Main, HGM.FMX.Image;
+  HGM.FMX.Image;
 
 { TListBoxItemAudio }
 
@@ -69,7 +77,6 @@ begin
   LabelItemStats := TLabel.Create(Self);
   LayoutItemText := TLayout.Create(Self);
   LabelItemText := TLabel.Create(Self);
-  LabelItemStats := TLabel.Create(Self);
   LabelItemDetail := TLabel.Create(Self);
   LabelItemYear := TLabel.Create(Self);
   LayoutControls := TLayout.Create(Self);
@@ -90,7 +97,6 @@ begin
   RectangleItemImage.HitTest := True;
   RectangleItemImage.Fill.Kind := TBrushKind.Bitmap;
   RectangleItemImage.Fill.Bitmap.WrapMode := TWrapMode.TileStretch;
-  RectangleItemImage.Fill.Bitmap.Bitmap := FormMain.ImageList.Bitmap(TSizeF.Create(143, 143), 0);
   RectangleItemImage.OnMouseEnter := FMouseEnter;
   RectangleItemImage.OnMouseLeave := FMouseLeave;
   RectangleItemImage.Stroke.Kind := TBrushKind.None;
@@ -122,7 +128,7 @@ begin
   LabelItemCount.Parent := RectangleItemImageHot;
   LabelItemCount.Text := '20';
   LabelItemCount.Height := 17;
-  LabelItemCount.Width := 30;
+  LabelItemCount.Width := 40;
   LabelItemCount.StyledSettings := [TStyledSetting.Family, TStyledSetting.Size, TStyledSetting.Style];
   LabelItemCount.FontColor := TAlphaColorRec.White;
   LabelItemCount.Position.Point := TPointF.Create(43, 115);
@@ -130,10 +136,32 @@ begin
   LabelItemStats.Parent := RectangleItemImageHot;
   LabelItemStats.Text := '654';
   LabelItemStats.Height := 17;
-  LabelItemStats.Width := 30;
+  LabelItemStats.Width := 40;
   LabelItemStats.StyledSettings := [TStyledSetting.Family, TStyledSetting.Size, TStyledSetting.Style];
   LabelItemStats.FontColor := TAlphaColorRec.White;
   LabelItemStats.Position.Point := TPointF.Create(92, 115);
+
+  GlyphStats := TGlyph.Create(Self);
+  with GlyphStats do
+  begin
+    Parent := RectangleItemImageHot;
+    Position.X := 79;
+    Position.Y := 115;
+    Size.Width := 19;
+    Size.Height := 20;
+    ImageIndex := 12;
+  end;
+
+  GlyphCount := TGlyph.Create(Self);
+  with GlyphCount do
+  begin
+    Parent := RectangleItemImageHot;
+    Position.X := 31;
+    Position.Y := 115;
+    Size.Width := 20;
+    Size.Height := 17;
+    ImageIndex := 11;
+  end;
 
   LayoutItemText.Parent := Self;
   LayoutItemText.Align := TAlignLayout.Bottom;
@@ -185,7 +213,6 @@ begin
   SpeedButtonAdd.Parent := LayoutControls;
   SpeedButtonAdd.Align := TAlignLayout.Left;
   SpeedButtonAdd.ImageIndex := 8;
-  SpeedButtonAdd.Images := FormMain.SVGIconImageList1;
   SpeedButtonAdd.StyleLookup := 'SpeedButton9Style1';
   SpeedButtonAdd.Text := '';
   SpeedButtonAdd.Width := 28;
@@ -195,7 +222,6 @@ begin
   SpeedButtonPlay.Parent := LayoutControls;
   SpeedButtonPlay.Align := TAlignLayout.Center;
   SpeedButtonPlay.ImageIndex := 9;
-  SpeedButtonPlay.Images := FormMain.SVGIconImageList1;
   SpeedButtonPlay.Margins.Rect := TRectF.Create(4, 0, 0, 0);
   SpeedButtonPlay.StyleLookup := 'SpeedButtonPlaylistPlay';
   SpeedButtonPlay.Text := '';
@@ -206,7 +232,6 @@ begin
   SpeedButtonShare.Parent := LayoutControls;
   SpeedButtonShare.Align := TAlignLayout.Right;
   SpeedButtonShare.ImageIndex := 10;
-  SpeedButtonShare.Images := FormMain.SVGIconImageList1;
   SpeedButtonShare.Margins.Rect := TRectF.Create(0, 0, 0, 6);
   SpeedButtonShare.StyleLookup := 'SpeedButton9Style1';
   SpeedButtonShare.Text := '';
@@ -231,7 +256,7 @@ end;
 
 procedure TListBoxItemPlaylist.FMouseLeave(Sender: TObject);
 begin
-  if not LayoutControls.AbsoluteRect.Contains(FormMain.ScreenToClient(Screen.MousePos)) then
+  if not LayoutControls.AbsoluteRect.Contains(LayoutControls.Scene.ScreenToLocal(Screen.MousePos)) then
   begin
     FHotAnimate.Enabled := False;
     FHotAnimate.StartValue := RectangleItemImageHot.Opacity;
@@ -253,6 +278,12 @@ begin
     SpeedButtonPlay.ImageIndex := 9;
 end;
 
+procedure TListBoxItemPlaylist.SetDefaultImage(const Value: TBitmap);
+begin
+  FDefaultImage := Value;
+  RectangleItemImage.Fill.Bitmap.Bitmap := FDefaultImage;
+end;
+
 procedure TListBoxItemPlaylist.SetOnOpen(const Value: TOnOpenPlaylist);
 begin
   FOnOpen := Value;
@@ -261,6 +292,16 @@ end;
 procedure TListBoxItemPlaylist.SetOnPlay(const Value: TOnOpenPlaylist);
 begin
   FOnPlay := Value;
+end;
+
+procedure TListBoxItemPlaylist.SetSVGList(const Value: TCustomImageList);
+begin
+  FSVGList := Value;
+  SpeedButtonAdd.Images := FSVGList;
+  SpeedButtonPlay.Images := FSVGList;
+  SpeedButtonShare.Images := FSVGList;
+  GlyphCount.Images := FSVGList;
+  GlyphStats.Images := FSVGList;
 end;
 
 procedure TListBoxItemPlaylist.SpeedButtonAddMouseEnter(Sender: TObject);
@@ -288,14 +329,27 @@ begin
 end;
 
 constructor TListBoxItemPlaylist.Create(AOwner: TComponent; Playlist: TVkAudioPlaylist);
+
+  function NumToShortString(const Value: Integer): string;
+  begin
+    if Value >= 1000000000 then
+      Result := FormatFloat('0.0b', Value / 1000000000)
+    else if Value >= 1000000 then
+      Result := FormatFloat('0.0m', Value / 1000000)
+    else if Value >= 1000 then
+      Result := FormatFloat('0.0k', Value / 1000)
+    else
+      Result := Value.ToString;
+  end;
+
 begin
   Create(AOwner);
   if Playlist.IsFollowing then
     SpeedButtonAdd.ImageIndex := 8
   else
     SpeedButtonAdd.ImageIndex := 13;
-  LabelItemCount.Text := Playlist.Count.ToString;
-  LabelItemStats.Text := Playlist.Plays.ToString;
+  LabelItemCount.Text := NumToShortString(Playlist.Count);
+  LabelItemStats.Text := NumToShortString(Playlist.Plays);
   if Length(Playlist.MainArtists) > 0 then
     LabelItemDetail.Text := Playlist.MainArtists[0].Name
   else

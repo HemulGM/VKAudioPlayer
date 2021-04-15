@@ -5,7 +5,7 @@
         <FrameworkType>FMX</FrameworkType>
         <MainSource>VKPlayer.dpr</MainSource>
         <Base>True</Base>
-        <Config Condition="'$(Config)'==''">Debug</Config>
+        <Config Condition="'$(Config)'==''">Release</Config>
         <Platform Condition="'$(Platform)'==''">Win32</Platform>
         <TargetedPlatforms>32787</TargetedPlatforms>
         <AppType>Application</AppType>
@@ -231,12 +231,11 @@
         <DCC_DebugInformation>0</DCC_DebugInformation>
     </PropertyGroup>
     <PropertyGroup Condition="'$(Cfg_2_Android)'!=''">
-        <VerInfo_Build>7</VerInfo_Build>
+        <VerInfo_Build>20</VerInfo_Build>
         <PF_KeyStore>Android\Release\release.keystore</PF_KeyStore>
         <PF_KeyStorePass>852E47FF5FBE07BAA359716CD16AE34E81C60513A04997C197A00FAA8E6C3C8BDB0CA39AE3191C62C1BB5726FAB3C317BAE9365104262291163B45CFE5942290C916F30AD544FACCD3C13B45727285CBF788334FC3107209EB5A</PF_KeyStorePass>
         <PF_AliasKey>vkaudioplayerhgm</PF_AliasKey>
         <PF_AliasKeyPass>852E47FF5FBE07BACF62E567A4037BF3E41508107EECECF197E40FA78E273CF6DB5EA3DEE3551C63C1A4572EFACFC36ABAB3361C046522D316204584E58822A2C958F35CD507FA8FBFBAAF0007301D44921D3E131DF90939EB5A</PF_AliasKeyPass>
-        <BT_BuildType>AppStore</BT_BuildType>
         <AUP_ACCESS_COARSE_LOCATION>false</AUP_ACCESS_COARSE_LOCATION>
         <AUP_ACCESS_FINE_LOCATION>false</AUP_ACCESS_FINE_LOCATION>
         <AUP_CALL_PHONE>false</AUP_CALL_PHONE>
@@ -245,13 +244,14 @@
         <AUP_READ_PHONE_STATE>false</AUP_READ_PHONE_STATE>
         <AUP_WRITE_CALENDAR>false</AUP_WRITE_CALENDAR>
         <VerInfo_AutoIncVersion>true</VerInfo_AutoIncVersion>
-        <VerInfo_Keys>package=com.embarcadero.$(MSBuildProjectName);label=$(MSBuildProjectName);versionCode=7;versionName=1.0.0;persistent=False;restoreAnyVersion=False;installLocation=preferExternal;largeHeap=False;theme=TitleBar;hardwareAccelerated=true;apiKey=;apiKey=</VerInfo_Keys>
+        <VerInfo_Keys>package=com.embarcadero.$(MSBuildProjectName);label=$(MSBuildProjectName);versionCode=20;versionName=1.0.0;persistent=False;restoreAnyVersion=False;installLocation=preferExternal;largeHeap=False;theme=TitleBar;hardwareAccelerated=true;apiKey=;apiKey=</VerInfo_Keys>
         <Android_SplashGravity>center</Android_SplashGravity>
+        <BT_BuildType>AppStore</BT_BuildType>
     </PropertyGroup>
     <PropertyGroup Condition="'$(Cfg_2_Android64)'!=''">
         <VerInfo_AutoIncVersion>true</VerInfo_AutoIncVersion>
-        <VerInfo_Build>8</VerInfo_Build>
-        <VerInfo_Keys>package=com.embarcadero.$(MSBuildProjectName);label=$(MSBuildProjectName);versionCode=8;versionName=1.0.0;persistent=False;restoreAnyVersion=False;installLocation=preferExternal;largeHeap=False;theme=TitleBar;hardwareAccelerated=true;apiKey=;apiKey=</VerInfo_Keys>
+        <VerInfo_Build>17</VerInfo_Build>
+        <VerInfo_Keys>package=com.embarcadero.$(MSBuildProjectName);label=$(MSBuildProjectName);versionCode=17;versionName=1.0.0;persistent=False;restoreAnyVersion=False;installLocation=preferExternal;largeHeap=False;theme=TitleBar;hardwareAccelerated=true;apiKey=;apiKey=</VerInfo_Keys>
         <Android_NotificationAccentColor>#000000</Android_NotificationAccentColor>
         <BT_BuildType>AppStore</BT_BuildType>
         <PF_KeyStore>Android\Release\release.keystore</PF_KeyStore>
@@ -475,6 +475,7 @@
                 <DeployFile LocalName="Lib\x86_64\libbassenc_ogg.so" Configuration="Release" Class="File">
                     <Platform Name="Android64">
                         <RemoteDir>library\lib\x86_64</RemoteDir>
+                        <Enabled>false</Enabled>
                         <RemoteName>libbassenc_ogg.so</RemoteName>
                         <Overwrite>true</Overwrite>
                     </Platform>
@@ -614,6 +615,12 @@
                         <Overwrite>true</Overwrite>
                     </Platform>
                 </DeployFile>
+                <DeployFile LocalName="$(BDS)\lib\android\release\armeabi\libnative-activity.so" Configuration="Release" Class="AndroidLibnativeArmeabiFile">
+                    <Platform Name="Android">
+                        <RemoteName>libVKPlayer.so</RemoteName>
+                        <Overwrite>true</Overwrite>
+                    </Platform>
+                </DeployFile>
                 <DeployFile LocalName="Lib\armeabi-v7a\libbassenc_ogg.so" Configuration="Debug" Class="File">
                     <Platform Name="Android">
                         <RemoteDir>library\lib\armeabi-v7a</RemoteDir>
@@ -640,12 +647,6 @@
                 <DeployFile LocalName="..\Media\FM_SplashImage_470x320.png" Configuration="Debug" Class="Android_SplashImage470">
                     <Platform Name="Android64">
                         <RemoteName>splash_image.png</RemoteName>
-                        <Overwrite>true</Overwrite>
-                    </Platform>
-                </DeployFile>
-                <DeployFile LocalName="$(BDS)\lib\android\release\mips\libnative-activity.so" Configuration="Release" Class="AndroidLibnativeMipsFile">
-                    <Platform Name="Android64">
-                        <RemoteName>libVKPlayer.so</RemoteName>
                         <Overwrite>true</Overwrite>
                     </Platform>
                 </DeployFile>
@@ -961,6 +962,7 @@
                 <DeployFile LocalName="Lib\x86_64\libbassenc.so" Configuration="Release" Class="File">
                     <Platform Name="Android64">
                         <RemoteDir>library\lib\x86_64</RemoteDir>
+                        <Enabled>false</Enabled>
                         <RemoteName>libbassenc.so</RemoteName>
                         <Overwrite>true</Overwrite>
                     </Platform>
@@ -1193,9 +1195,16 @@
                         <Overwrite>true</Overwrite>
                     </Platform>
                 </DeployFile>
+                <DeployFile LocalName="$(BDS)\lib\android\release\mips\libnative-activity.so" Configuration="Release" Class="AndroidLibnativeMipsFile">
+                    <Platform Name="Android">
+                        <RemoteName>libVKPlayer.so</RemoteName>
+                        <Overwrite>true</Overwrite>
+                    </Platform>
+                </DeployFile>
                 <DeployFile LocalName="Lib\x86_64\libbass_ssl.so" Configuration="Release" Class="File">
                     <Platform Name="Android64">
                         <RemoteDir>library\lib\x86_64</RemoteDir>
+                        <Enabled>false</Enabled>
                         <RemoteName>libbass_ssl.so</RemoteName>
                         <Overwrite>true</Overwrite>
                     </Platform>
@@ -1220,12 +1229,6 @@
                 <DeployFile LocalName="Android64\Release\styles-v21.xml" Configuration="Release" Class="AndroidSplashStylesV21">
                     <Platform Name="Android64">
                         <RemoteName>styles.xml</RemoteName>
-                        <Overwrite>true</Overwrite>
-                    </Platform>
-                </DeployFile>
-                <DeployFile LocalName="$(BDS)\lib\android\release\armeabi\libnative-activity.so" Configuration="Release" Class="AndroidLibnativeArmeabiFile">
-                    <Platform Name="Android64">
-                        <RemoteName>libVKPlayer.so</RemoteName>
                         <Overwrite>true</Overwrite>
                     </Platform>
                 </DeployFile>
@@ -1376,13 +1379,8 @@
                 <DeployFile LocalName="Lib\x86_64\libbassenc_flac.so" Configuration="Release" Class="File">
                     <Platform Name="Android64">
                         <RemoteDir>library\lib\x86_64</RemoteDir>
+                        <Enabled>false</Enabled>
                         <RemoteName>libbassenc_flac.so</RemoteName>
-                        <Overwrite>true</Overwrite>
-                    </Platform>
-                </DeployFile>
-                <DeployFile LocalName="$(BDS)\lib\android\release\armeabi-v7a\libnative-activity.so" Configuration="Release" Class="AndroidLibnativeArmeabiv7aFile">
-                    <Platform Name="Android64">
-                        <RemoteName>libVKPlayer.so</RemoteName>
                         <Overwrite>true</Overwrite>
                     </Platform>
                 </DeployFile>
@@ -1466,6 +1464,7 @@
                 <DeployFile LocalName="Lib\x86_64\libbassflac.so" Configuration="Release" Class="File">
                     <Platform Name="Android64">
                         <RemoteDir>library\lib\x86_64</RemoteDir>
+                        <Enabled>false</Enabled>
                         <RemoteName>libbassflac.so</RemoteName>
                         <Overwrite>true</Overwrite>
                     </Platform>
@@ -1480,6 +1479,7 @@
                 <DeployFile LocalName="Lib\x86_64\libbassenc_opus.so" Configuration="Release" Class="File">
                     <Platform Name="Android64">
                         <RemoteDir>library\lib\x86_64</RemoteDir>
+                        <Enabled>false</Enabled>
                         <RemoteName>libbassenc_opus.so</RemoteName>
                         <Overwrite>true</Overwrite>
                     </Platform>
@@ -1563,6 +1563,7 @@
                 <DeployFile LocalName="Lib\x86_64\libbassenc_mp3.so" Configuration="Release" Class="File">
                     <Platform Name="Android64">
                         <RemoteDir>library\lib\x86_64</RemoteDir>
+                        <Enabled>false</Enabled>
                         <RemoteName>libbassenc_mp3.so</RemoteName>
                         <Overwrite>true</Overwrite>
                     </Platform>
@@ -1595,6 +1596,7 @@
                 <DeployFile LocalName="Lib\x86_64\libbass.so" Configuration="Release" Class="File">
                     <Platform Name="Android64">
                         <RemoteDir>library\lib\x86_64</RemoteDir>
+                        <Enabled>false</Enabled>
                         <RemoteName>libbass.so</RemoteName>
                         <Overwrite>true</Overwrite>
                     </Platform>

@@ -1489,7 +1489,7 @@ begin
       FFriends.Clear;
       Result := False;
       try
-        if VK.Friends.Get(Users, [ufNickName, ufSex, ufPhoto50, ufStatus, ufCanSeeAudio], fsName) then
+        if VK.Friends.Get(Users, [TVkProfileField.NickName, TVkProfileField.Sex, TVkProfileField.Photo50, TVkProfileField.Status, TVkProfileField.CanSeeAudio], TVkFriendsOrder.Name) then
         begin
           try
             for i := Low(Users.Items) to High(Users.Items) do
@@ -2140,9 +2140,7 @@ begin
   FLoadPicFriends.Stop;
   FLoadPicSearch.Stop;
   FLoadPicMusic.Stop;
-  while FLoadPicMusic.IsWorking or FLoadPicSearch.IsWorking or FLoadSearch.IsWorking or FLoadPlaylist.IsWorking or
-    FLoadMusic.IsWorking or FLoadPlaylists.IsWorking or FLoadPicCurrent.IsWorking or FLoadUsers.IsWorking or
-    FLoadPicFriends.IsWorking do
+  while FLoadPicMusic.IsWorking or FLoadPicSearch.IsWorking or FLoadSearch.IsWorking or FLoadPlaylist.IsWorking or FLoadMusic.IsWorking or FLoadPlaylists.IsWorking or FLoadPicCurrent.IsWorking or FLoadUsers.IsWorking or FLoadPicFriends.IsWorking do
     Application.ProcessMessages;
 end;
 
@@ -2264,8 +2262,7 @@ begin
   FormPlayer.BringToFront;
 end;
 
-procedure TFormMain.VKAuth(Sender: TObject; Url: string; var Token: string; var TokenExpiry: Int64; var
-  ChangePasswordHash: string);
+procedure TFormMain.VKAuth(Sender: TObject; Url: string; var Token: string; var TokenExpiry: Int64; var ChangePasswordHash: string);
 begin
   if FToken.IsEmpty then
   begin
@@ -2320,7 +2317,7 @@ begin
   FToken := VK.Token;
   FSettings.SetStr('General', 'Token', FToken);
 
-  if VK.Users.Get(User, 0, [ufPhoto50]) then
+  if VK.Users.Get(User, 0, [TVkProfileField.Photo50]) then
   begin
     FVkId := User.id;
     FVkIdCurrent := FVkId;

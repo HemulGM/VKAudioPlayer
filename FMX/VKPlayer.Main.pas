@@ -275,11 +275,11 @@ type
     procedure FillFriendItem(ListItem: TListViewItem; Item: TFriend);
     procedure Await;
     procedure Quit;
-    procedure ShowPopupButtons;
     procedure HidePopupButtons;
     procedure ClosePlayer;
     procedure OpenPlayer;
   public
+    procedure ShowPopupButtons;
     { Public declarations }
   end;
 
@@ -297,9 +297,9 @@ uses
 procedure OpenTab(Control: TTabControl; Tab: TTabItem; ToRight: Boolean = False);
 begin
   if ToRight then
-    Control.SetActiveTabWithTransitionAsync(Tab, TTabTransition.Slide, TTabTransitionDirection.Normal, nil)
+    Control.SetActiveTabWithTransition(Tab, TTabTransition.Slide, TTabTransitionDirection.Normal)
   else
-    Control.SetActiveTabWithTransitionAsync(Tab, TTabTransition.Slide, TTabTransitionDirection.Reversed, nil);
+    Control.SetActiveTabWithTransition(Tab, TTabTransition.Slide, TTabTransitionDirection.Reversed);
 end;
 
 function DownloadURL(URL: string): TMemoryStream;
@@ -838,8 +838,7 @@ begin
       PlayPrev(HandlePlay);
 end;
 
-procedure TFormMain.ListViewMusicButtonClick(const Sender: TObject; const AItem: TListItem; const AObject:
-  TListItemSimpleControl);
+procedure TFormMain.ListViewMusicButtonClick(const Sender: TObject; const AItem: TListItem; const AObject: TListItemSimpleControl);
 begin
   if AObject.Name = 'Delete' then
     if VK.Audio.Delete(FMyMusic[AItem.Index].Id, FMyMusic[AItem.Index].OwnerId) then
@@ -904,8 +903,7 @@ begin
   OpenTab(TabControlMain, TabItemMusic);
 end;
 
-procedure TFormMain.VKAuth(Sender: TObject; Url: string; var Token: string; var TokenExpiry: Int64; var
-  ChangePasswordHash: string);
+procedure TFormMain.VKAuth(Sender: TObject; Url: string; var Token: string; var TokenExpiry: Int64; var ChangePasswordHash: string);
 begin
   if FToken.IsEmpty then
   begin
@@ -1321,7 +1319,7 @@ begin
     begin
       FFriends.Clear;
       Result := False;
-      if VK.Friends.Get(Users, [ufNickname, ufSex, ufPhoto50, ufStatus, ufCanSeeAudio], fsName) then
+      if VK.Friends.Get(Users, [TVkProfileField.Nickname, TVkProfileField.Sex, TVkProfileField.Photo50, TVkProfileField.Status, TVkProfileField.CanSeeAudio], TVkFriendsOrder.Name) then
       begin
         try
           for i := Low(Users.Items) to High(Users.Items) do
@@ -1371,7 +1369,7 @@ begin
   FToken := VK.Token;
   //FSettings.SetStr('General', 'Token', FToken);
 
-  if VK.Users.Get(User, 0, [ufPhoto50]) then
+  if VK.Users.Get(User, 0, [TVkProfileField.Photo50]) then
   begin
     FVkId := User.Id;
     FVkIdCurrent := FVkId;

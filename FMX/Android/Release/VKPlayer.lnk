@@ -1,0 +1,436 @@
+"c:\\program files (x86)\\embarcadero\\studio\\20.0\\lib\\Android\\Release\\SysInit.o"
+"c:\\program files (x86)\\embarcadero\\studio\\20.0\\lib\\Android\\Release\\System.o"
+"c:\\program files (x86)\\embarcadero\\studio\\20.0\\lib\\Android\\Release\\System.Types.o"
+"c:\\program files (x86)\\embarcadero\\studio\\20.0\\lib\\Android\\Release\\Posix.Base.o"
+"c:\\program files (x86)\\embarcadero\\studio\\20.0\\lib\\Android\\Release\\Posix.Dlfcn.o"
+"c:\\program files (x86)\\embarcadero\\studio\\20.0\\lib\\Android\\Release\\Posix.StdDef.o"
+"c:\\program files (x86)\\embarcadero\\studio\\20.0\\lib\\Android\\Release\\Posix.SysTypes.o"
+"c:\\program files (x86)\\embarcadero\\studio\\20.0\\lib\\Android\\Release\\Posix.Fcntl.o"
+"c:\\program files (x86)\\embarcadero\\studio\\20.0\\lib\\Android\\Release\\Posix.SysStat.o"
+"c:\\program files (x86)\\embarcadero\\studio\\20.0\\lib\\Android\\Release\\Posix.Locale.o"
+"c:\\program files (x86)\\embarcadero\\studio\\20.0\\lib\\Android\\Release\\Posix.String_.o"
+"c:\\program files (x86)\\embarcadero\\studio\\20.0\\lib\\Android\\Release\\Posix.Signal.o"
+"c:\\program files (x86)\\embarcadero\\studio\\20.0\\lib\\Android\\Release\\Posix.Time.o"
+"c:\\program files (x86)\\embarcadero\\studio\\20.0\\lib\\Android\\Release\\Posix.SysTime.o"
+"c:\\program files (x86)\\embarcadero\\studio\\20.0\\lib\\Android\\Release\\System.SysConst.o"
+"c:\\program files (x86)\\embarcadero\\studio\\20.0\\lib\\Android\\Release\\Posix.Dirent.o"
+"c:\\program files (x86)\\embarcadero\\studio\\20.0\\lib\\Android\\Release\\Posix.Errno.o"
+"c:\\program files (x86)\\embarcadero\\studio\\20.0\\lib\\Android\\Release\\Posix.Fnmatch.o"
+"c:\\program files (x86)\\embarcadero\\studio\\20.0\\lib\\Android\\Release\\Posix.Langinfo.o"
+"c:\\program files (x86)\\embarcadero\\studio\\20.0\\lib\\Android\\Release\\Posix.Sched.o"
+"c:\\program files (x86)\\embarcadero\\studio\\20.0\\lib\\Android\\Release\\Posix.Pthread.o"
+"c:\\program files (x86)\\embarcadero\\studio\\20.0\\lib\\Android\\Release\\Posix.Stdio.o"
+"c:\\program files (x86)\\embarcadero\\studio\\20.0\\lib\\Android\\Release\\Posix.Stdlib.o"
+"c:\\program files (x86)\\embarcadero\\studio\\20.0\\lib\\Android\\Release\\Posix.SysSysctl.o"
+"c:\\program files (x86)\\embarcadero\\studio\\20.0\\lib\\Android\\Release\\Posix.Unistd.o"
+"c:\\program files (x86)\\embarcadero\\studio\\20.0\\lib\\Android\\Release\\Posix.Utime.o"
+"c:\\program files (x86)\\embarcadero\\studio\\20.0\\lib\\Android\\Release\\Posix.Wordexp.o"
+"c:\\program files (x86)\\embarcadero\\studio\\20.0\\lib\\Android\\Release\\Posix.Pwd.o"
+"c:\\program files (x86)\\embarcadero\\studio\\20.0\\lib\\Android\\Release\\Posix.Semaphore.o"
+"c:\\program files (x86)\\embarcadero\\studio\\20.0\\lib\\Android\\Release\\Androidapi.Jni.o"
+"c:\\program files (x86)\\embarcadero\\studio\\20.0\\lib\\Android\\Release\\Androidapi.AssetManager.o"
+"c:\\program files (x86)\\embarcadero\\studio\\20.0\\lib\\Android\\Release\\Androidapi.Looper.o"
+"c:\\program files (x86)\\embarcadero\\studio\\20.0\\lib\\Android\\Release\\Androidapi.KeyCodes.o"
+"c:\\program files (x86)\\embarcadero\\studio\\20.0\\lib\\Android\\Release\\Androidapi.Input.o"
+"c:\\program files (x86)\\embarcadero\\studio\\20.0\\lib\\Android\\Release\\Androidapi.Rect.o"
+"c:\\program files (x86)\\embarcadero\\studio\\20.0\\lib\\Android\\Release\\Androidapi.NativeWindow.o"
+"c:\\program files (x86)\\embarcadero\\studio\\20.0\\lib\\Android\\Release\\Androidapi.NativeActivity.o"
+"c:\\program files (x86)\\embarcadero\\studio\\20.0\\lib\\Android\\Release\\Androidapi.IOUtils.o"
+"c:\\program files (x86)\\embarcadero\\studio\\20.0\\lib\\Android\\Release\\System.Internal.ICU.o"
+"c:\\program files (x86)\\embarcadero\\studio\\20.0\\lib\\Android\\Release\\System.RTLConsts.o"
+"c:\\program files (x86)\\embarcadero\\studio\\20.0\\lib\\Android\\Release\\Posix.Wchar.o"
+"c:\\program files (x86)\\embarcadero\\studio\\20.0\\lib\\Android\\Release\\Posix.Wctype.o"
+"c:\\program files (x86)\\embarcadero\\studio\\20.0\\lib\\Android\\Release\\System.Character.o"
+"c:\\program files (x86)\\embarcadero\\studio\\20.0\\lib\\Android\\Release\\System.Internal.ExcUtils.o"
+"c:\\program files (x86)\\embarcadero\\studio\\20.0\\lib\\Android\\Release\\System.SysUtils.o"
+"c:\\program files (x86)\\embarcadero\\studio\\20.0\\lib\\Android\\Release\\System.VarUtils.o"
+"c:\\program files (x86)\\embarcadero\\studio\\20.0\\lib\\Android\\Release\\System.Variants.o"
+"c:\\program files (x86)\\embarcadero\\studio\\20.0\\lib\\Android\\Release\\System.Generics.Collections.o"
+"c:\\program files (x86)\\embarcadero\\studio\\20.0\\lib\\Android\\Release\\Posix.SysMman.o"
+"c:\\program files (x86)\\embarcadero\\studio\\20.0\\lib\\Android\\Release\\System.Hash.o"
+"c:\\program files (x86)\\embarcadero\\studio\\20.0\\lib\\Android\\Release\\System.Math.o"
+"c:\\program files (x86)\\embarcadero\\studio\\20.0\\lib\\Android\\Release\\System.Rtti.o"
+"c:\\program files (x86)\\embarcadero\\studio\\20.0\\lib\\Android\\Release\\System.TypInfo.o"
+"c:\\program files (x86)\\embarcadero\\studio\\20.0\\lib\\Android\\Release\\System.Generics.Defaults.o"
+"c:\\program files (x86)\\embarcadero\\studio\\20.0\\lib\\Android\\Release\\Posix.StrOpts.o"
+"c:\\program files (x86)\\embarcadero\\studio\\20.0\\lib\\Android\\Release\\Posix.SysSelect.o"
+"c:\\program files (x86)\\embarcadero\\studio\\20.0\\lib\\Android\\Release\\System.Classes.o"
+"c:\\program files (x86)\\embarcadero\\studio\\20.0\\lib\\Android\\Release\\System.Masks.o"
+"c:\\program files (x86)\\embarcadero\\studio\\20.0\\lib\\Android\\Release\\System.StrUtils.o"
+"c:\\program files (x86)\\embarcadero\\studio\\20.0\\lib\\Android\\Release\\System.TimeSpan.o"
+"c:\\program files (x86)\\embarcadero\\studio\\20.0\\lib\\Android\\Release\\System.DateUtils.o"
+"c:\\program files (x86)\\embarcadero\\studio\\20.0\\lib\\Android\\Release\\System.IOUtils.o"
+"c:\\program files (x86)\\embarcadero\\studio\\20.0\\lib\\Android\\Release\\System.StartUpCopy.o"
+"c:\\program files (x86)\\embarcadero\\studio\\20.0\\lib\\Android\\Release\\System.UITypes.o"
+"c:\\program files (x86)\\embarcadero\\studio\\20.0\\lib\\Android\\Release\\Androidapi.Consts.o"
+"c:\\program files (x86)\\embarcadero\\studio\\20.0\\lib\\Android\\Release\\Androidapi.JNIMarshal.o"
+"c:\\program files (x86)\\embarcadero\\studio\\20.0\\lib\\Android\\Release\\Androidapi.JNIBridge.o"
+"c:\\program files (x86)\\embarcadero\\studio\\20.0\\lib\\Android\\Release\\Androidapi.JNI.JavaTypes.o"
+"c:\\program files (x86)\\embarcadero\\studio\\20.0\\lib\\Android\\Release\\Androidapi.JNI.Java.Security.o"
+"c:\\program files (x86)\\embarcadero\\studio\\20.0\\lib\\Android\\Release\\Androidapi.JNI.Java.Net.o"
+"c:\\program files (x86)\\embarcadero\\studio\\20.0\\lib\\Android\\Release\\Androidapi.JNI.Util.o"
+"c:\\program files (x86)\\embarcadero\\studio\\20.0\\lib\\Android\\Release\\Androidapi.JNI.Os.o"
+"c:\\program files (x86)\\embarcadero\\studio\\20.0\\lib\\Android\\Release\\Androidapi.JNI.Net.o"
+"c:\\program files (x86)\\embarcadero\\studio\\20.0\\lib\\Android\\Release\\Androidapi.JNI.GraphicsContentViewText.o"
+"c:\\program files (x86)\\embarcadero\\studio\\20.0\\lib\\Android\\Release\\System.Messaging.o"
+"c:\\program files (x86)\\embarcadero\\studio\\20.0\\lib\\Android\\Release\\System.Analytics.o"
+"c:\\program files (x86)\\embarcadero\\studio\\20.0\\lib\\Android\\Release\\System.Math.Vectors.o"
+"c:\\program files (x86)\\embarcadero\\studio\\20.0\\lib\\Android\\Release\\System.Actions.o"
+"c:\\program files (x86)\\embarcadero\\studio\\20.0\\lib\\Android\\Release\\System.ImageList.o"
+"c:\\program files (x86)\\embarcadero\\studio\\20.0\\lib\\Android\\Release\\FMX.Consts.o"
+"c:\\program files (x86)\\embarcadero\\studio\\20.0\\lib\\Android\\Release\\System.Android.Devices.o"
+"c:\\program files (x86)\\embarcadero\\studio\\20.0\\lib\\Android\\Release\\System.Devices.o"
+"c:\\program files (x86)\\embarcadero\\studio\\20.0\\lib\\Android\\Release\\FMX.DialogService.Async.o"
+"c:\\program files (x86)\\embarcadero\\studio\\20.0\\lib\\Android\\Release\\FMX.Dialogs.o"
+"c:\\program files (x86)\\embarcadero\\studio\\20.0\\lib\\Android\\Release\\FMX.Surfaces.o"
+"c:\\program files (x86)\\embarcadero\\studio\\20.0\\lib\\Android\\Release\\System.UIConsts.o"
+"c:\\program files (x86)\\embarcadero\\studio\\20.0\\lib\\Android\\Release\\FMX.TextLayout.o"
+"c:\\program files (x86)\\embarcadero\\studio\\20.0\\lib\\Android\\Release\\FMX.Utils.o"
+"c:\\program files (x86)\\embarcadero\\studio\\20.0\\lib\\Android\\Release\\FMX.Graphics.o"
+"c:\\program files (x86)\\embarcadero\\studio\\20.0\\lib\\Android\\Release\\System.RegularExpressionsAPI.o"
+"c:\\program files (x86)\\embarcadero\\studio\\20.0\\lib\\Android\\Release\\System.RegularExpressionsConsts.o"
+"c:\\program files (x86)\\embarcadero\\studio\\20.0\\lib\\Android\\Release\\System.RegularExpressionsCore.o"
+"c:\\program files (x86)\\embarcadero\\studio\\20.0\\lib\\Android\\Release\\System.RegularExpressions.o"
+"c:\\program files (x86)\\embarcadero\\studio\\20.0\\lib\\Android\\Release\\FMX.Text.o"
+"c:\\program files (x86)\\embarcadero\\studio\\20.0\\lib\\Android\\Release\\Androidapi.Configuration.o"
+"c:\\program files (x86)\\embarcadero\\studio\\20.0\\lib\\Android\\Release\\Androidapi.Log.o"
+"c:\\program files (x86)\\embarcadero\\studio\\20.0\\lib\\Android\\Release\\Androidapi.AppGlue.o"
+"c:\\program files (x86)\\embarcadero\\studio\\20.0\\lib\\Android\\Release\\Androidapi.JNI.Widget.o"
+"c:\\program files (x86)\\embarcadero\\studio\\20.0\\lib\\Android\\Release\\Androidapi.JNI.App.o"
+"c:\\program files (x86)\\embarcadero\\studio\\20.0\\lib\\Android\\Release\\Androidapi.JNI.Location.o"
+"c:\\program files (x86)\\embarcadero\\studio\\20.0\\lib\\Android\\Release\\Androidapi.JNI.AdMob.o"
+"c:\\program files (x86)\\embarcadero\\studio\\20.0\\lib\\Android\\Release\\Androidapi.JNI.Hardware.o"
+"c:\\program files (x86)\\embarcadero\\studio\\20.0\\lib\\Android\\Release\\Androidapi.JNI.Accounts.o"
+"c:\\program files (x86)\\embarcadero\\studio\\20.0\\lib\\Android\\Release\\Androidapi.JNI.Support.o"
+"c:\\program files (x86)\\embarcadero\\studio\\20.0\\lib\\Android\\Release\\Androidapi.JNI.PlayServices.o"
+"c:\\program files (x86)\\embarcadero\\studio\\20.0\\lib\\Android\\Release\\Androidapi.JNI.Print.o"
+"c:\\program files (x86)\\embarcadero\\studio\\20.0\\lib\\Android\\Release\\Androidapi.JNI.Webkit.o"
+"c:\\program files (x86)\\embarcadero\\studio\\20.0\\lib\\Android\\Release\\Androidapi.JNI.Embarcadero.o"
+"c:\\program files (x86)\\embarcadero\\studio\\20.0\\lib\\Android\\Release\\FMX.DialogService.o"
+"c:\\program files (x86)\\embarcadero\\studio\\20.0\\lib\\Android\\Release\\FMX.Gestures.Android.o"
+"c:\\program files (x86)\\embarcadero\\studio\\20.0\\lib\\Android\\Release\\FMX.Gestures.o"
+"c:\\program files (x86)\\embarcadero\\studio\\20.0\\lib\\Android\\Release\\FMX.VirtualKeyboard.o"
+"c:\\program files (x86)\\embarcadero\\studio\\20.0\\lib\\Android\\Release\\FMX.BehaviorManager.o"
+"c:\\program files (x86)\\embarcadero\\studio\\20.0\\lib\\Android\\Release\\FMX.Styles.o"
+"c:\\program files (x86)\\embarcadero\\studio\\20.0\\lib\\Android\\Release\\FMX.Materials.o"
+"c:\\program files (x86)\\embarcadero\\studio\\20.0\\lib\\Android\\Release\\FMX.Types3D.o"
+"c:\\program files (x86)\\embarcadero\\studio\\20.0\\lib\\Android\\Release\\FMX.Filter.o"
+"c:\\program files (x86)\\embarcadero\\studio\\20.0\\lib\\Android\\Release\\FMX.Filter.Custom.o"
+"c:\\program files (x86)\\embarcadero\\studio\\20.0\\lib\\Android\\Release\\FMX.Effects.o"
+"c:\\program files (x86)\\embarcadero\\studio\\20.0\\lib\\Android\\Release\\System.Diagnostics.o"
+"c:\\program files (x86)\\embarcadero\\studio\\20.0\\lib\\Android\\Release\\System.SyncObjs.o"
+"c:\\program files (x86)\\embarcadero\\studio\\20.0\\lib\\Android\\Release\\FMX.MultiResBitmap.o"
+"c:\\program files (x86)\\embarcadero\\studio\\20.0\\lib\\Android\\Release\\FMX.Ani.o"
+"c:\\program files (x86)\\embarcadero\\studio\\20.0\\lib\\Android\\Release\\FMX.AcceleratorKey.o"
+"c:\\program files (x86)\\embarcadero\\studio\\20.0\\lib\\Android\\Release\\Androidapi.Bitmap.o"
+"c:\\program files (x86)\\embarcadero\\studio\\20.0\\lib\\Android\\Release\\Androidapi.Helpers.o"
+"c:\\program files (x86)\\embarcadero\\studio\\20.0\\lib\\Android\\Release\\FMX.FontGlyphs.Android.o"
+"c:\\program files (x86)\\embarcadero\\studio\\20.0\\lib\\Android\\Release\\FMX.FontGlyphs.o"
+"c:\\program files (x86)\\embarcadero\\studio\\20.0\\lib\\Android\\Release\\FMX.Objects.o"
+"c:\\program files (x86)\\embarcadero\\studio\\20.0\\lib\\Android\\Release\\FMX.ImgList.o"
+"c:\\program files (x86)\\embarcadero\\studio\\20.0\\lib\\Android\\Release\\FMX.Menus.o"
+"c:\\program files (x86)\\embarcadero\\studio\\20.0\\lib\\Android\\Release\\FMX.Controls.o"
+"c:\\program files (x86)\\embarcadero\\studio\\20.0\\lib\\Android\\Release\\FMX.Presentation.Messages.o"
+"c:\\program files (x86)\\embarcadero\\studio\\20.0\\lib\\Android\\Release\\FMX.Controls.Model.o"
+"c:\\program files (x86)\\embarcadero\\studio\\20.0\\lib\\Android\\Release\\FMX.Presentation.Factory.o"
+"c:\\program files (x86)\\embarcadero\\studio\\20.0\\lib\\Android\\Release\\FMX.Presentation.Style.o"
+"c:\\program files (x86)\\embarcadero\\studio\\20.0\\lib\\Android\\Release\\FMX.Controls.Presentation.o"
+"c:\\program files (x86)\\embarcadero\\studio\\20.0\\lib\\Android\\Release\\FMX.KeyMapping.o"
+"c:\\program files (x86)\\embarcadero\\studio\\20.0\\lib\\Android\\Release\\FMX.Helpers.Android.o"
+"c:\\program files (x86)\\embarcadero\\studio\\20.0\\lib\\Android\\Release\\FMX.MultiTouch.o"
+"c:\\program files (x86)\\embarcadero\\studio\\20.0\\lib\\Android\\Release\\FMX.MultiTouch.Android.o"
+"c:\\program files (x86)\\embarcadero\\studio\\20.0\\lib\\Android\\Release\\FMX.ZOrder.o"
+"c:\\program files (x86)\\embarcadero\\studio\\20.0\\lib\\Android\\Release\\FMX.ZOrder.Android.o"
+"c:\\program files (x86)\\embarcadero\\studio\\20.0\\lib\\Android\\Release\\FMX.Platform.Text.Android.o"
+"c:\\program files (x86)\\embarcadero\\studio\\20.0\\lib\\Android\\Release\\FMX.Maps.Android.o"
+"c:\\program files (x86)\\embarcadero\\studio\\20.0\\lib\\Android\\Release\\FMX.Maps.o"
+"c:\\program files (x86)\\embarcadero\\studio\\20.0\\lib\\Android\\Release\\FMX.Materials.Canvas.o"
+"c:\\program files (x86)\\embarcadero\\studio\\20.0\\lib\\Android\\Release\\FMX.Canvas.GPU.Helpers.o"
+"c:\\program files (x86)\\embarcadero\\studio\\20.0\\lib\\Android\\Release\\FMX.TextLayout.GPU.o"
+"c:\\program files (x86)\\embarcadero\\studio\\20.0\\lib\\Android\\Release\\FMX.StrokeBuilder.o"
+"c:\\program files (x86)\\embarcadero\\studio\\20.0\\lib\\Android\\Release\\FMX.Canvas.GPU.o"
+"c:\\program files (x86)\\embarcadero\\studio\\20.0\\lib\\Android\\Release\\FMX.Platform.Timer.Android.o"
+"c:\\program files (x86)\\embarcadero\\studio\\20.0\\lib\\Android\\Release\\FMX.Platform.UI.Android.o"
+"c:\\program files (x86)\\embarcadero\\studio\\20.0\\lib\\Android\\Release\\FMX.Presentation.Android.o"
+"c:\\program files (x86)\\embarcadero\\studio\\20.0\\lib\\Android\\Release\\FMX.Presentation.Style.Common.o"
+"c:\\program files (x86)\\embarcadero\\studio\\20.0\\lib\\Android\\Release\\Androidapi.KhrPlatform.o"
+"c:\\program files (x86)\\embarcadero\\studio\\20.0\\lib\\Android\\Release\\Androidapi.EglPlatform.o"
+"c:\\program files (x86)\\embarcadero\\studio\\20.0\\lib\\Android\\Release\\Androidapi.Egl.o"
+"c:\\program files (x86)\\embarcadero\\studio\\20.0\\lib\\Android\\Release\\Androidapi.Gles2.o"
+"c:\\program files (x86)\\embarcadero\\studio\\20.0\\lib\\Android\\Release\\Androidapi.Gles2ext.o"
+"c:\\program files (x86)\\embarcadero\\studio\\20.0\\lib\\Android\\Release\\FMX.Context.GLES.o"
+"c:\\program files (x86)\\embarcadero\\studio\\20.0\\lib\\Android\\Release\\Androidapi.Eglext.o"
+"c:\\program files (x86)\\embarcadero\\studio\\20.0\\lib\\Android\\Release\\Androidapi.NativeWindowJni.o"
+"c:\\program files (x86)\\embarcadero\\studio\\20.0\\lib\\Android\\Release\\FMX.Controls3D.o"
+"c:\\program files (x86)\\embarcadero\\studio\\20.0\\lib\\Android\\Release\\FMX.MaterialSources.o"
+"c:\\program files (x86)\\embarcadero\\studio\\20.0\\lib\\Android\\Release\\FMX.Import.o"
+"c:\\program files (x86)\\embarcadero\\studio\\20.0\\lib\\Android\\Release\\FMX.Objects3D.o"
+"c:\\program files (x86)\\embarcadero\\studio\\20.0\\lib\\Android\\Release\\FMX.Forms3D.o"
+"c:\\program files (x86)\\embarcadero\\studio\\20.0\\lib\\Android\\Release\\FMX.Context.GLES.Android.o"
+"c:\\program files (x86)\\embarcadero\\studio\\20.0\\lib\\Android\\Release\\FMX.Presentation.Android.Style.o"
+"c:\\program files (x86)\\embarcadero\\studio\\20.0\\lib\\Android\\Release\\FMX.VirtualKeyboard.Android.o"
+"c:\\program files (x86)\\embarcadero\\studio\\20.0\\lib\\Android\\Release\\FMX.Dialogs.Android.o"
+"c:\\program files (x86)\\embarcadero\\studio\\20.0\\lib\\Android\\Release\\Androidapi.JNI.Telephony.o"
+"c:\\program files (x86)\\embarcadero\\studio\\20.0\\lib\\Android\\Release\\FMX.Platform.Device.Android.o"
+"c:\\program files (x86)\\embarcadero\\studio\\20.0\\lib\\Android\\Release\\FMX.Platform.Logger.Android.o"
+"c:\\program files (x86)\\embarcadero\\studio\\20.0\\lib\\Android\\Release\\FMX.Platform.SaveState.Android.o"
+"c:\\program files (x86)\\embarcadero\\studio\\20.0\\lib\\Android\\Release\\FMX.Platform.Screen.Android.o"
+"c:\\program files (x86)\\embarcadero\\studio\\20.0\\lib\\Android\\Release\\FMX.Pickers.Android.o"
+"c:\\program files (x86)\\embarcadero\\studio\\20.0\\lib\\Android\\Release\\FMX.Pickers.o"
+"c:\\program files (x86)\\embarcadero\\studio\\20.0\\lib\\Android\\Release\\FMX.Platform.Metrics.Android.o"
+"c:\\program files (x86)\\embarcadero\\studio\\20.0\\lib\\Android\\Release\\FMX.Graphics.Android.o"
+"c:\\program files (x86)\\embarcadero\\studio\\20.0\\lib\\Android\\Release\\FMX.Controls.Android.o"
+"c:\\program files (x86)\\embarcadero\\studio\\20.0\\lib\\Android\\Release\\FMX.Platform.Android.o"
+"c:\\program files (x86)\\embarcadero\\studio\\20.0\\lib\\Android\\Release\\FMX.Platform.Common.o"
+"c:\\program files (x86)\\embarcadero\\studio\\20.0\\lib\\Android\\Release\\FMX.Clipboard.Android.o"
+"c:\\program files (x86)\\embarcadero\\studio\\20.0\\lib\\Android\\Release\\FMX.Clipboard.o"
+"c:\\program files (x86)\\embarcadero\\studio\\20.0\\lib\\Android\\Release\\FMX.Platform.o"
+"c:\\program files (x86)\\embarcadero\\studio\\20.0\\lib\\Android\\Release\\FMX.ActnList.o"
+"c:\\program files (x86)\\embarcadero\\studio\\20.0\\lib\\Android\\Release\\FMX.Types.o"
+"c:\\program files (x86)\\embarcadero\\studio\\20.0\\lib\\Android\\Release\\FMX.StdActns.o"
+"c:\\program files (x86)\\embarcadero\\studio\\20.0\\lib\\Android\\Release\\FMX.Styles.Objects.o"
+"c:\\program files (x86)\\embarcadero\\studio\\20.0\\lib\\Android\\Release\\FMX.Styles.Switch.o"
+"c:\\program files (x86)\\embarcadero\\studio\\20.0\\lib\\Android\\Release\\FMX.Switch.Style.o"
+"c:\\program files (x86)\\embarcadero\\studio\\20.0\\lib\\Android\\Release\\FMX.Switch.Android.o"
+"c:\\program files (x86)\\embarcadero\\studio\\20.0\\lib\\Android\\Release\\FMX.StdCtrls.o"
+"c:\\program files (x86)\\embarcadero\\studio\\20.0\\lib\\Android\\Release\\FMX.InertialMovement.o"
+"c:\\program files (x86)\\embarcadero\\studio\\20.0\\lib\\Android\\Release\\FMX.Layouts.o"
+"c:\\program files (x86)\\embarcadero\\studio\\20.0\\lib\\Android\\Release\\FMX.Header.o"
+"c:\\program files (x86)\\embarcadero\\studio\\20.0\\lib\\Android\\Release\\FMX.Forms.o"
+"c:\\program files (x86)\\embarcadero\\studio\\20.0\\lib\\Android\\Release\\FMX.WebBrowser.Android.o"
+"c:\\program files (x86)\\embarcadero\\studio\\20.0\\lib\\Android\\Release\\FMX.WebBrowser.o"
+"c:\\program files (x86)\\embarcadero\\studio\\20.0\\lib\\Android\\Release\\FMX.TabControl.o"
+"c:\\program files (x86)\\embarcadero\\studio\\20.0\\lib\\Android\\Release\\System.JSONConsts.o"
+"c:\\program files (x86)\\embarcadero\\studio\\20.0\\lib\\Android\\Release\\System.JSON.o"
+"c:\\program files (x86)\\embarcadero\\studio\\20.0\\lib\\Android\\Release\\System.NetConsts.o"
+"c:\\program files (x86)\\embarcadero\\studio\\20.0\\lib\\Android\\Release\\System.Threading.o"
+"c:\\program files (x86)\\embarcadero\\studio\\20.0\\lib\\Android\\Release\\System.NetEncoding.o"
+"c:\\program files (x86)\\embarcadero\\studio\\20.0\\lib\\Android\\Release\\System.Net.URLClient.o"
+"c:\\program files (x86)\\embarcadero\\studio\\20.0\\lib\\Android\\Release\\System.Net.Mime.o"
+"c:\\program files (x86)\\embarcadero\\studio\\20.0\\lib\\Android\\Release\\Androidapi.JNI.Android.Security.o"
+"c:\\program files (x86)\\embarcadero\\studio\\20.0\\lib\\Android\\Release\\System.Net.HttpClient.Android.o"
+"c:\\program files (x86)\\embarcadero\\studio\\20.0\\lib\\Android\\Release\\System.ZLib.o"
+"c:\\program files (x86)\\embarcadero\\studio\\20.0\\lib\\Android\\Release\\System.Net.HttpClient.o"
+"c:\\program files (x86)\\embarcadero\\studio\\20.0\\lib\\Android\\Release\\System.JSON.Types.o"
+"c:\\program files (x86)\\embarcadero\\studio\\20.0\\lib\\Android\\Release\\System.JSON.Utils.o"
+"c:\\program files (x86)\\embarcadero\\studio\\20.0\\lib\\Android\\Release\\System.JSON.Readers.o"
+"c:\\program files (x86)\\embarcadero\\studio\\20.0\\lib\\Android\\Release\\System.JSON.Writers.o"
+"c:\\program files (x86)\\embarcadero\\studio\\20.0\\lib\\Android\\Release\\System.Bindings.Consts.o"
+"c:\\program files (x86)\\embarcadero\\studio\\20.0\\lib\\Android\\Release\\System.Bindings.EvalProtocol.o"
+"c:\\program files (x86)\\embarcadero\\studio\\20.0\\lib\\Android\\Release\\System.Bindings.Search.o"
+"c:\\program files (x86)\\embarcadero\\studio\\20.0\\lib\\Android\\Release\\System.Bindings.Evaluator.o"
+"c:\\program files (x86)\\embarcadero\\studio\\20.0\\lib\\Android\\Release\\System.Bindings.EvalSys.o"
+"c:\\program files (x86)\\embarcadero\\studio\\20.0\\lib\\Android\\Release\\System.Bindings.CustomScope.o"
+"c:\\program files (x86)\\embarcadero\\studio\\20.0\\lib\\Android\\Release\\System.Bindings.CustomWrapper.o"
+"c:\\program files (x86)\\embarcadero\\studio\\20.0\\lib\\Android\\Release\\System.Bindings.Manager.o"
+"c:\\program files (x86)\\embarcadero\\studio\\20.0\\lib\\Android\\Release\\System.Bindings.NotifierContracts.o"
+"c:\\program files (x86)\\embarcadero\\studio\\20.0\\lib\\Android\\Release\\System.Bindings.NotifierDefaults.o"
+"c:\\program files (x86)\\embarcadero\\studio\\20.0\\lib\\Android\\Release\\System.Bindings.Graph.o"
+"c:\\program files (x86)\\embarcadero\\studio\\20.0\\lib\\Android\\Release\\System.Bindings.ExpressionDefaults.o"
+"c:\\program files (x86)\\embarcadero\\studio\\20.0\\lib\\Android\\Release\\System.Bindings.ManagerDefaults.o"
+"c:\\program files (x86)\\embarcadero\\studio\\20.0\\lib\\Android\\Release\\System.Bindings.Factories.o"
+"c:\\program files (x86)\\embarcadero\\studio\\20.0\\lib\\Android\\Release\\System.Bindings.ObjEval.o"
+"c:\\program files (x86)\\embarcadero\\studio\\20.0\\lib\\Android\\Release\\System.Bindings.Helper.o"
+"c:\\program files (x86)\\embarcadero\\studio\\20.0\\lib\\Android\\Release\\System.Bindings.Outputs.o"
+"c:\\program files (x86)\\embarcadero\\studio\\20.0\\lib\\Android\\Release\\System.Bindings.Expression.o"
+"c:\\program files (x86)\\embarcadero\\studio\\20.0\\lib\\Android\\Release\\Data.Bind.Consts.o"
+"c:\\program files (x86)\\embarcadero\\studio\\20.0\\lib\\Android\\Release\\Data.Bind.ObserverLinks.o"
+"c:\\program files (x86)\\embarcadero\\studio\\20.0\\lib\\Android\\Release\\System.Bindings.Methods.o"
+"c:\\program files (x86)\\embarcadero\\studio\\20.0\\lib\\Android\\Release\\Data.Bind.Grid.o"
+"c:\\program files (x86)\\embarcadero\\studio\\20.0\\lib\\Android\\Release\\Data.Bind.Editors.o"
+"c:\\program files (x86)\\embarcadero\\studio\\20.0\\lib\\Android\\Release\\Data.Bind.Components.o"
+"c:\\program files (x86)\\embarcadero\\studio\\20.0\\lib\\Android\\Release\\Data.Bind.ObjectScope.o"
+"c:\\program files (x86)\\embarcadero\\studio\\20.0\\lib\\Android\\Release\\REST.HttpClient.o"
+"c:\\program files (x86)\\embarcadero\\studio\\20.0\\lib\\Android\\Release\\REST.Consts.o"
+"c:\\program files (x86)\\embarcadero\\studio\\20.0\\lib\\Android\\Release\\REST.Types.o"
+"c:\\program files (x86)\\embarcadero\\studio\\20.0\\lib\\Android\\Release\\REST.BindSource.o"
+"c:\\program files (x86)\\embarcadero\\studio\\20.0\\lib\\Android\\Release\\Data.Bind.JSON.o"
+"c:\\program files (x86)\\embarcadero\\studio\\20.0\\lib\\Android\\Release\\REST.Json.Types.o"
+"c:\\program files (x86)\\embarcadero\\studio\\20.0\\lib\\Android\\Release\\REST.Json.Interceptors.o"
+"c:\\program files (x86)\\embarcadero\\studio\\20.0\\lib\\Android\\Release\\REST.JsonReflect.o"
+"c:\\program files (x86)\\embarcadero\\studio\\20.0\\lib\\Android\\Release\\REST.Json.o"
+"c:\\program files (x86)\\embarcadero\\studio\\20.0\\lib\\Android\\Release\\REST.Utils.o"
+"c:\\program files (x86)\\embarcadero\\studio\\20.0\\lib\\Android\\Release\\REST.Client.o"
+"c:\\program files (x86)\\embarcadero\\studio\\20.0\\lib\\Android\\Release\\REST.Authenticator.OAuth.o"
+D:\\Мультимедиа\\Проекты\\VKAudioPlayer\\FMX\\Android\\Release\\VK.CommonUtils.o
+D:\\Мультимедиа\\Проекты\\VKAudioPlayer\\FMX\\Android\\Release\\VK.Entity.Common.o
+D:\\Мультимедиа\\Проекты\\VKAudioPlayer\\FMX\\Android\\Release\\VK.Types.o
+D:\\Мультимедиа\\Проекты\\VKAudioPlayer\\FMX\\Android\\Release\\VK.Errors.o
+D:\\Мультимедиа\\Проекты\\VKAudioPlayer\\FMX\\Android\\Release\\VK.Handler.o
+D:\\Мультимедиа\\Проекты\\VKAudioPlayer\\FMX\\Android\\Release\\VK.Controller.o
+D:\\Мультимедиа\\Проекты\\VKAudioPlayer\\FMX\\Android\\Release\\VK.Entity.AccountInfo.o
+D:\\Мультимедиа\\Проекты\\VKAudioPlayer\\FMX\\Android\\Release\\VK.Wrap.Interceptors.o
+D:\\Мультимедиа\\Проекты\\VKAudioPlayer\\FMX\\Android\\Release\\VK.Entity.Common.List.o
+D:\\Мультимедиа\\Проекты\\VKAudioPlayer\\FMX\\Android\\Release\\VK.Entity.Database.Countries.o
+D:\\Мультимедиа\\Проекты\\VKAudioPlayer\\FMX\\Android\\Release\\VK.Entity.Database.Cities.o
+D:\\Мультимедиа\\Проекты\\VKAudioPlayer\\FMX\\Android\\Release\\VK.Entity.Info.o
+D:\\Мультимедиа\\Проекты\\VKAudioPlayer\\FMX\\Android\\Release\\VK.Entity.Attachment.o
+D:\\Мультимедиа\\Проекты\\VKAudioPlayer\\FMX\\Android\\Release\\VK.Entity.Photo.o
+D:\\Мультимедиа\\Проекты\\VKAudioPlayer\\FMX\\Android\\Release\\VK.Entity.Counters.o
+D:\\Мультимедиа\\Проекты\\VKAudioPlayer\\FMX\\Android\\Release\\VK.Entity.Market.o
+D:\\Мультимедиа\\Проекты\\VKAudioPlayer\\FMX\\Android\\Release\\VK.Entity.Group.Counters.o
+D:\\Мультимедиа\\Проекты\\VKAudioPlayer\\FMX\\Android\\Release\\VK.Entity.Group.o
+D:\\Мультимедиа\\Проекты\\VKAudioPlayer\\FMX\\Android\\Release\\VK.Entity.Audio.o
+D:\\Мультимедиа\\Проекты\\VKAudioPlayer\\FMX\\Android\\Release\\VK.Entity.Profile.o
+D:\\Мультимедиа\\Проекты\\VKAudioPlayer\\FMX\\Android\\Release\\VK.Entity.ProfileInfo.o
+D:\\Мультимедиа\\Проекты\\VKAudioPlayer\\FMX\\Android\\Release\\VK.Entity.ActiveOffers.o
+D:\\Мультимедиа\\Проекты\\VKAudioPlayer\\FMX\\Android\\Release\\VK.Entity.PushSettings.o
+D:\\Мультимедиа\\Проекты\\VKAudioPlayer\\FMX\\Android\\Release\\VK.Entity.AccountInfoRequest.o
+D:\\Мультимедиа\\Проекты\\VKAudioPlayer\\FMX\\Android\\Release\\VK.Entity.Account.Banned.o
+D:\\Мультимедиа\\Проекты\\VKAudioPlayer\\FMX\\Android\\Release\\VK.Account.o
+D:\\Мультимедиа\\Проекты\\VKAudioPlayer\\FMX\\Android\\Release\\VK.Entity.Auth.o
+D:\\Мультимедиа\\Проекты\\VKAudioPlayer\\FMX\\Android\\Release\\VK.Auth.o
+D:\\Мультимедиа\\Проекты\\VKAudioPlayer\\FMX\\Android\\Release\\VK.Entity.Subscription.o
+D:\\Мультимедиа\\Проекты\\VKAudioPlayer\\FMX\\Android\\Release\\VK.Users.o
+D:\\Мультимедиа\\Проекты\\VKAudioPlayer\\FMX\\Android\\Release\\VK.LongPollServer.o
+D:\\Мультимедиа\\Проекты\\VKAudioPlayer\\FMX\\Android\\Release\\VK.Entity.Keyboard.o
+D:\\Мультимедиа\\Проекты\\VKAudioPlayer\\FMX\\Android\\Release\\VK.Entity.Common.ExtendedList.o
+D:\\Мультимедиа\\Проекты\\VKAudioPlayer\\FMX\\Android\\Release\\VK.Entity.App.o
+D:\\Мультимедиа\\Проекты\\VKAudioPlayer\\FMX\\Android\\Release\\VK.Entity.Link.o
+D:\\Мультимедиа\\Проекты\\VKAudioPlayer\\FMX\\Android\\Release\\VK.Entity.AudioMessage.o
+D:\\Мультимедиа\\Проекты\\VKAudioPlayer\\FMX\\Android\\Release\\VK.Entity.Sticker.o
+D:\\Мультимедиа\\Проекты\\VKAudioPlayer\\FMX\\Android\\Release\\VK.Entity.Gift.o
+D:\\Мультимедиа\\Проекты\\VKAudioPlayer\\FMX\\Android\\Release\\VK.Entity.Doc.o
+D:\\Мультимедиа\\Проекты\\VKAudioPlayer\\FMX\\Android\\Release\\VK.Entity.Privacy.o
+D:\\Мультимедиа\\Проекты\\VKAudioPlayer\\FMX\\Android\\Release\\VK.Entity.Video.o
+D:\\Мультимедиа\\Проекты\\VKAudioPlayer\\FMX\\Android\\Release\\VK.Entity.Graffiti.o
+D:\\Мультимедиа\\Проекты\\VKAudioPlayer\\FMX\\Android\\Release\\VK.Entity.Note.o
+D:\\Мультимедиа\\Проекты\\VKAudioPlayer\\FMX\\Android\\Release\\VK.Entity.OldApp.o
+D:\\Мультимедиа\\Проекты\\VKAudioPlayer\\FMX\\Android\\Release\\VK.Entity.Poll.o
+D:\\Мультимедиа\\Проекты\\VKAudioPlayer\\FMX\\Android\\Release\\VK.Entity.Page.o
+D:\\Мультимедиа\\Проекты\\VKAudioPlayer\\FMX\\Android\\Release\\VK.Entity.Album.o
+D:\\Мультимедиа\\Проекты\\VKAudioPlayer\\FMX\\Android\\Release\\VK.Entity.PrettyCard.o
+D:\\Мультимедиа\\Проекты\\VKAudioPlayer\\FMX\\Android\\Release\\VK.Entity.Event.o
+D:\\Мультимедиа\\Проекты\\VKAudioPlayer\\FMX\\Android\\Release\\VK.Entity.Call.o
+D:\\Мультимедиа\\Проекты\\VKAudioPlayer\\FMX\\Android\\Release\\VK.Entity.Market.Album.o
+D:\\Мультимедиа\\Проекты\\VKAudioPlayer\\FMX\\Android\\Release\\VK.Entity.Donut.o
+D:\\Мультимедиа\\Проекты\\VKAudioPlayer\\FMX\\Android\\Release\\VK.Entity.Media.o
+D:\\Мультимедиа\\Проекты\\VKAudioPlayer\\FMX\\Android\\Release\\VK.Entity.ClientInfo.o
+D:\\Мультимедиа\\Проекты\\VKAudioPlayer\\FMX\\Android\\Release\\VK.Entity.Message.o
+D:\\Мультимедиа\\Проекты\\VKAudioPlayer\\FMX\\Android\\Release\\VK.Entity.Conversation.o
+D:\\Мультимедиа\\Проекты\\VKAudioPlayer\\FMX\\Android\\Release\\VK.Entity.Message.Chat.o
+D:\\Мультимедиа\\Проекты\\VKAudioPlayer\\FMX\\Android\\Release\\VK.Entity.Longpoll.o
+D:\\Мультимедиа\\Проекты\\VKAudioPlayer\\FMX\\Android\\Release\\VK.Messages.o
+D:\\Мультимедиа\\Проекты\\VKAudioPlayer\\FMX\\Android\\Release\\VK.Entity.Status.o
+D:\\Мультимедиа\\Проекты\\VKAudioPlayer\\FMX\\Android\\Release\\VK.Status.o
+D:\\Мультимедиа\\Проекты\\VKAudioPlayer\\FMX\\Android\\Release\\VK.Wall.o
+D:\\Мультимедиа\\Проекты\\VKAudioPlayer\\FMX\\Android\\Release\\VK.Entity.Doc.Save.o
+D:\\Мультимедиа\\Проекты\\VKAudioPlayer\\FMX\\Android\\Release\\VK.Entity.Video.Save.o
+D:\\Мультимедиа\\Проекты\\VKAudioPlayer\\FMX\\Android\\Release\\VK.Entity.Doc.Types.o
+D:\\Мультимедиа\\Проекты\\VKAudioPlayer\\FMX\\Android\\Release\\VK.Docs.o
+D:\\Мультимедиа\\Проекты\\VKAudioPlayer\\FMX\\Android\\Release\\VK.Entity.Playlist.o
+D:\\Мультимедиа\\Проекты\\VKAudioPlayer\\FMX\\Android\\Release\\VK.Entity.Audio.Upload.o
+D:\\Мультимедиа\\Проекты\\VKAudioPlayer\\FMX\\Android\\Release\\VK.Entity.Catalog.o
+D:\\Мультимедиа\\Проекты\\VKAudioPlayer\\FMX\\Android\\Release\\VK.Entity.Catalog.Section.o
+D:\\Мультимедиа\\Проекты\\VKAudioPlayer\\FMX\\Android\\Release\\VK.Entity.Audio.Catalog.o
+D:\\Мультимедиа\\Проекты\\VKAudioPlayer\\FMX\\Android\\Release\\VK.Audio.o
+D:\\Мультимедиа\\Проекты\\VKAudioPlayer\\FMX\\Android\\Release\\VK.Likes.o
+D:\\Мультимедиа\\Проекты\\VKAudioPlayer\\FMX\\Android\\Release\\VK.Entity.Board.o
+D:\\Мультимедиа\\Проекты\\VKAudioPlayer\\FMX\\Android\\Release\\VK.Entity.Board.Comment.o
+D:\\Мультимедиа\\Проекты\\VKAudioPlayer\\FMX\\Android\\Release\\VK.Board.o
+D:\\Мультимедиа\\Проекты\\VKAudioPlayer\\FMX\\Android\\Release\\VK.Friends.o
+D:\\Мультимедиа\\Проекты\\VKAudioPlayer\\FMX\\Android\\Release\\VK.Entity.Group.TimeTable.o
+D:\\Мультимедиа\\Проекты\\VKAudioPlayer\\FMX\\Android\\Release\\VK.Entity.Group.Ban.o
+D:\\Мультимедиа\\Проекты\\VKAudioPlayer\\FMX\\Android\\Release\\VK.Entity.Group.CallBackServer.o
+D:\\Мультимедиа\\Проекты\\VKAudioPlayer\\FMX\\Android\\Release\\VK.Entity.Group.CallbackSettings.o
+D:\\Мультимедиа\\Проекты\\VKAudioPlayer\\FMX\\Android\\Release\\VK.Entity.Group.Categories.o
+D:\\Мультимедиа\\Проекты\\VKAudioPlayer\\FMX\\Android\\Release\\VK.Entity.Group.LongpollSettings.o
+D:\\Мультимедиа\\Проекты\\VKAudioPlayer\\FMX\\Android\\Release\\VK.Entity.GroupSettings.o
+D:\\Мультимедиа\\Проекты\\VKAudioPlayer\\FMX\\Android\\Release\\VK.Entity.Group.TokenPermissions.o
+D:\\Мультимедиа\\Проекты\\VKAudioPlayer\\FMX\\Android\\Release\\VK.Entity.Group.Invites.o
+D:\\Мультимедиа\\Проекты\\VKAudioPlayer\\FMX\\Android\\Release\\VK.Entity.Group.Status.o
+D:\\Мультимедиа\\Проекты\\VKAudioPlayer\\FMX\\Android\\Release\\VK.Groups.o
+D:\\Мультимедиа\\Проекты\\VKAudioPlayer\\FMX\\Android\\Release\\VK.Entity.Photo.Upload.o
+D:\\Мультимедиа\\Проекты\\VKAudioPlayer\\FMX\\Android\\Release\\VK.Photos.o
+D:\\Мультимедиа\\Проекты\\VKAudioPlayer\\FMX\\Android\\Release\\VK.Catalog.o
+D:\\Мультимедиа\\Проекты\\VKAudioPlayer\\FMX\\Android\\Release\\VK.Entity.Market.Order.o
+D:\\Мультимедиа\\Проекты\\VKAudioPlayer\\FMX\\Android\\Release\\VK.Market.o
+D:\\Мультимедиа\\Проекты\\VKAudioPlayer\\FMX\\Android\\Release\\VK.Entity.Fave.o
+D:\\Мультимедиа\\Проекты\\VKAudioPlayer\\FMX\\Android\\Release\\VK.Entity.Fave.Pages.o
+D:\\Мультимедиа\\Проекты\\VKAudioPlayer\\FMX\\Android\\Release\\VK.Fave.o
+D:\\Мультимедиа\\Проекты\\VKAudioPlayer\\FMX\\Android\\Release\\VK.Notes.o
+D:\\Мультимедиа\\Проекты\\VKAudioPlayer\\FMX\\Android\\Release\\VK.Entity.ScreenName.o
+D:\\Мультимедиа\\Проекты\\VKAudioPlayer\\FMX\\Android\\Release\\VK.Utils.o
+D:\\Мультимедиа\\Проекты\\VKAudioPlayer\\FMX\\Android\\Release\\VK.Video.o
+D:\\Мультимедиа\\Проекты\\VKAudioPlayer\\FMX\\Android\\Release\\VK.Gifts.o
+D:\\Мультимедиа\\Проекты\\VKAudioPlayer\\FMX\\Android\\Release\\VK.Entity.Newsfeed.o
+D:\\Мультимедиа\\Проекты\\VKAudioPlayer\\FMX\\Android\\Release\\VK.Newsfeed.o
+D:\\Мультимедиа\\Проекты\\VKAudioPlayer\\FMX\\Android\\Release\\VK.Entity.Notifications.o
+D:\\Мультимедиа\\Проекты\\VKAudioPlayer\\FMX\\Android\\Release\\VK.Notifications.o
+D:\\Мультимедиа\\Проекты\\VKAudioPlayer\\FMX\\Android\\Release\\VK.Orders.o
+D:\\Мультимедиа\\Проекты\\VKAudioPlayer\\FMX\\Android\\Release\\VK.Pages.o
+D:\\Мультимедиа\\Проекты\\VKAudioPlayer\\FMX\\Android\\Release\\VK.Polls.o
+D:\\Мультимедиа\\Проекты\\VKAudioPlayer\\FMX\\Android\\Release\\VK.Entity.Podcast.Episode.o
+D:\\Мультимедиа\\Проекты\\VKAudioPlayer\\FMX\\Android\\Release\\VK.Entity.Podcast.o
+D:\\Мультимедиа\\Проекты\\VKAudioPlayer\\FMX\\Android\\Release\\VK.Podcasts.o
+D:\\Мультимедиа\\Проекты\\VKAudioPlayer\\FMX\\Android\\Release\\VK.Entity.Search.o
+D:\\Мультимедиа\\Проекты\\VKAudioPlayer\\FMX\\Android\\Release\\VK.Search.o
+D:\\Мультимедиа\\Проекты\\VKAudioPlayer\\FMX\\Android\\Release\\VK.Entity.Database.Chairs.o
+D:\\Мультимедиа\\Проекты\\VKAudioPlayer\\FMX\\Android\\Release\\VK.Entity.Database.Faculties.o
+D:\\Мультимедиа\\Проекты\\VKAudioPlayer\\FMX\\Android\\Release\\VK.Entity.Database.MetroStations.o
+D:\\Мультимедиа\\Проекты\\VKAudioPlayer\\FMX\\Android\\Release\\VK.Entity.Database.Regions.o
+D:\\Мультимедиа\\Проекты\\VKAudioPlayer\\FMX\\Android\\Release\\VK.Entity.Database.Schools.o
+D:\\Мультимедиа\\Проекты\\VKAudioPlayer\\FMX\\Android\\Release\\VK.Entity.Database.Universities.o
+D:\\Мультимедиа\\Проекты\\VKAudioPlayer\\FMX\\Android\\Release\\VK.Database.o
+D:\\Мультимедиа\\Проекты\\VKAudioPlayer\\FMX\\Android\\Release\\VK.Entity.Storage.o
+D:\\Мультимедиа\\Проекты\\VKAudioPlayer\\FMX\\Android\\Release\\VK.Storage.o
+D:\\Мультимедиа\\Проекты\\VKAudioPlayer\\FMX\\Android\\Release\\VK.DownloadedGames.o
+D:\\Мультимедиа\\Проекты\\VKAudioPlayer\\FMX\\Android\\Release\\VK.Entity.Secure.o
+D:\\Мультимедиа\\Проекты\\VKAudioPlayer\\FMX\\Android\\Release\\VK.Secure.o
+D:\\Мультимедиа\\Проекты\\VKAudioPlayer\\FMX\\Android\\Release\\VK.Entity.Stats.o
+D:\\Мультимедиа\\Проекты\\VKAudioPlayer\\FMX\\Android\\Release\\VK.Stats.o
+D:\\Мультимедиа\\Проекты\\VKAudioPlayer\\FMX\\Android\\Release\\VK.Entity.Stories.o
+D:\\Мультимедиа\\Проекты\\VKAudioPlayer\\FMX\\Android\\Release\\VK.Entity.Stories.Sticker.o
+D:\\Мультимедиа\\Проекты\\VKAudioPlayer\\FMX\\Android\\Release\\VK.Entity.Stories.Stats.o
+D:\\Мультимедиа\\Проекты\\VKAudioPlayer\\FMX\\Android\\Release\\VK.Entity.Stories.Viewed.o
+D:\\Мультимедиа\\Проекты\\VKAudioPlayer\\FMX\\Android\\Release\\VK.Stories.o
+D:\\Мультимедиа\\Проекты\\VKAudioPlayer\\FMX\\Android\\Release\\VK.Apps.o
+D:\\Мультимедиа\\Проекты\\VKAudioPlayer\\FMX\\Android\\Release\\VK.Clients.o
+D:\\Мультимедиа\\Проекты\\VKAudioPlayer\\FMX\\Android\\Release\\VK.Donut.o
+"c:\\program files (x86)\\embarcadero\\studio\\20.0\\lib\\Android\\Release\\FMX.MagnifierGlass.o"
+"c:\\program files (x86)\\embarcadero\\studio\\20.0\\lib\\Android\\Release\\FMX.SpellChecker.Android.o"
+"c:\\program files (x86)\\embarcadero\\studio\\20.0\\lib\\Android\\Release\\FMX.SpellChecker.o"
+"c:\\program files (x86)\\embarcadero\\studio\\20.0\\lib\\Android\\Release\\FMX.Edit.Style.o"
+"c:\\program files (x86)\\embarcadero\\studio\\20.0\\lib\\Android\\Release\\FMX.Edit.Android.o"
+"c:\\program files (x86)\\embarcadero\\studio\\20.0\\lib\\Android\\Release\\FMX.Edit.o"
+D:\\Мультимедиа\\Проекты\\VKAudioPlayer\\FMX\\Android\\Release\\VK.FMX.Captcha.o
+D:\\Мультимедиа\\Проекты\\VKAudioPlayer\\FMX\\Android\\Release\\VK.Entity.Login.o
+D:\\Мультимедиа\\Проекты\\VKAudioPlayer\\FMX\\Android\\Release\\VK.API.o
+D:\\Мультимедиа\\Проекты\\VKAudioPlayer\\FMX\\Android\\Release\\VK.GroupEvents.o
+D:\\Мультимедиа\\Проекты\\VKAudioPlayer\\FMX\\Android\\Release\\VK.UserEvents.o
+D:\\Мультимедиа\\Проекты\\VKAudioPlayer\\FMX\\Android\\Release\\VK.Components.o
+"c:\\program files (x86)\\embarcadero\\studio\\20.0\\lib\\Android\\Release\\FMX.ListView.Types.o"
+"c:\\program files (x86)\\embarcadero\\studio\\20.0\\lib\\Android\\Release\\FMX.ListView.Adapters.Base.o"
+"c:\\program files (x86)\\embarcadero\\studio\\20.0\\lib\\Android\\Release\\FMX.ListView.Appearances.o"
+"c:\\program files (x86)\\embarcadero\\studio\\20.0\\lib\\Android\\Release\\FMX.SearchBox.Style.o"
+"c:\\program files (x86)\\embarcadero\\studio\\20.0\\lib\\Android\\Release\\FMX.SearchBox.o"
+"c:\\program files (x86)\\embarcadero\\studio\\20.0\\lib\\Android\\Release\\FMX.ListView.DynamicAppearance.o"
+"c:\\program files (x86)\\embarcadero\\studio\\20.0\\lib\\Android\\Release\\FMX.ListView.Android.o"
+"c:\\program files (x86)\\embarcadero\\studio\\20.0\\lib\\Android\\Release\\FMX.ListView.o"
+D:\\Мультимедиа\\Проекты\\VKAudioPlayer\\FMX\\Android\\Release\\BassPlayer.LoadHandle.o
+"c:\\program files (x86)\\embarcadero\\studio\\20.0\\lib\\Android\\Release\\System.Android.Permissions.o"
+"c:\\program files (x86)\\embarcadero\\studio\\20.0\\lib\\Android\\Release\\System.Permissions.o"
+"c:\\program files (x86)\\embarcadero\\studio\\20.0\\lib\\Android\\Release\\Androidapi.JNI.Provider.o"
+"c:\\program files (x86)\\embarcadero\\studio\\20.0\\lib\\Android\\Release\\FMX.PhoneDialer.Android.o"
+"c:\\program files (x86)\\embarcadero\\studio\\20.0\\lib\\Android\\Release\\FMX.PhoneDialer.o"
+D:\\Мультимедиа\\Проекты\\VKAudioPlayer\\FMX\\Android\\Release\\FMX.BASS.o
+D:\\Мультимедиа\\Проекты\\VKAudioPlayer\\FMX\\Android\\Release\\FMX.BASS.AAC.o
+D:\\Мультимедиа\\Проекты\\VKAudioPlayer\\FMX\\Android\\Release\\FMX.BASS.Plugins.o
+"c:\\program files (x86)\\embarcadero\\studio\\20.0\\lib\\Android\\Release\\Androidapi.JNI.Bluetooth.o"
+"c:\\program files (x86)\\embarcadero\\studio\\20.0\\lib\\Android\\Release\\Androidapi.JNI.Media.o"
+D:\\Мультимедиа\\Проекты\\VKAudioPlayer\\FMX\\Android\\Release\\FMX.BASS.Classes.o
+D:\\Мультимедиа\\Проекты\\VKAudioPlayer\\FMX\\Android\\Release\\FMX.Player.o
+D:\\Мультимедиа\\Проекты\\VKAudioPlayer\\FMX\\Android\\Release\\FMX.Recorder.o
+D:\\Мультимедиа\\Проекты\\VKAudioPlayer\\FMX\\Android\\Release\\FMX.BassComponents.o
+"c:\\program files (x86)\\embarcadero\\studio\\20.0\\lib\\Android\\Release\\FMX.ScrollBox.Style.o"
+"c:\\program files (x86)\\embarcadero\\studio\\20.0\\lib\\Android\\Release\\FMX.ScrollBox.Android.o"
+"c:\\program files (x86)\\embarcadero\\studio\\20.0\\lib\\Android\\Release\\FMX.ScrollBox.o"
+"c:\\program files (x86)\\embarcadero\\studio\\20.0\\lib\\Android\\Release\\FMX.Memo.Types.o"
+"c:\\program files (x86)\\embarcadero\\studio\\20.0\\lib\\Android\\Release\\FMX.Memo.Style.o"
+"c:\\program files (x86)\\embarcadero\\studio\\20.0\\lib\\Android\\Release\\FMX.Memo.Android.o"
+"c:\\program files (x86)\\embarcadero\\studio\\20.0\\lib\\Android\\Release\\FMX.Memo.o"
+"c:\\program files (x86)\\embarcadero\\studio\\20.0\\lib\\Android\\Release\\FMX.Filter.Standard.o"
+"c:\\program files (x86)\\embarcadero\\studio\\20.0\\lib\\Android\\Release\\FMX.Filter.Effects.o"
+D:\\Мультимедиа\\Проекты\\VKAudioPlayer\\FMX\\Android\\Release\\VK.FMX.OAuth2.o
+D:\\Мультимедиа\\Проекты\\VKAudioPlayer\\FMX\\Android\\Release\\VKPlayer.Main.o
+.\\Android\\Release\\VKPlayer.o

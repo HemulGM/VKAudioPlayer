@@ -195,11 +195,15 @@ begin
 end;
 
 procedure TLoaders.Clear;
+{$IFNDEF AUTOREFCOUNT}
 var
   i: Integer;
+{$ENDIF}
 begin
+{$IFNDEF AUTOREFCOUNT}
   for i := 0 to Count - 1 do
     Items[i].Free;
+{$ENDIF}
   inherited;
 end;
 

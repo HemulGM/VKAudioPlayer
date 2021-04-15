@@ -314,13 +314,15 @@ type
     ButtonPlaylistClose: TButton;
     Memo1: TMemo;
     RectangleBuffer: TRectangle;
+    GlyphPlayState: TGlyph;
+    Line3: TLine;
+    StyleBook2: TStyleBook;
     procedure SpeedButtonCurrentClick(Sender: TObject);
     procedure SpeedButtonMusicClick(Sender: TObject);
     procedure SpeedButtonPlaylistsClick(Sender: TObject);
     procedure SpeedButtonRecomendsClick(Sender: TObject);
     procedure SpeedButtonUpdatesClick(Sender: TObject);
-    procedure VertScrollBoxViewportPositionChange(Sender: TObject; const OldViewportPosition, NewViewportPosition:
-      TPointF; const ContentSizeChanged: Boolean);
+    procedure VertScrollBoxViewportPositionChange(Sender: TObject; const OldViewportPosition, NewViewportPosition: TPointF; const ContentSizeChanged: Boolean);
     procedure FloatAnimationSelectionTabPosProcess(Sender: TObject);
     procedure SmallScrollBar1Change(Sender: TObject);
     procedure VertScrollBoxMouseWheel(Sender: TObject; Shift: TShiftState; WheelDelta: Integer; var Handled: Boolean);
@@ -342,8 +344,7 @@ type
     procedure VKError(Sender: TObject; E: Exception; Code: Integer; Text: string);
     procedure Rectangle30Click(Sender: TObject);
     procedure Rectangle31Click(Sender: TObject);
-    procedure ListBox1ViewportPositionChange(Sender: TObject; const OldViewportPosition, NewViewportPosition: TPointF;
-      const ContentSizeChanged: Boolean);
+    procedure ListBox1ViewportPositionChange(Sender: TObject; const OldViewportPosition, NewViewportPosition: TPointF; const ContentSizeChanged: Boolean);
     procedure Rectangle32MouseEnter(Sender: TObject);
     procedure Rectangle32MouseLeave(Sender: TObject);
     procedure SpeedButton11Click(Sender: TObject);
@@ -412,8 +413,8 @@ var
 implementation
 
 uses
-  System.Math, Vk.Types, System.Threading, HGM.FMX.Image, VK.Clients, VK.Entity.Playlist, VK.Entity.Audio.Catalog,
-  VK.FMX.OAuth2, VK.Audio, VK.Friends, VK.Entity.Catalog.Section, REST.Types;
+  System.Math, VK.Errors, VK.Types, System.Threading, HGM.FMX.Image, VK.Clients, VK.Entity.Playlist,
+  VK.Entity.Audio.Catalog, VK.FMX.OAuth2, VK.Audio, VK.Friends, VK.Entity.Catalog.Section, REST.Types;
 
 {$R *.fmx}
 
@@ -522,7 +523,7 @@ end;
 procedure TFormMain.SetBufferingPrecent(const Value: Single);
 begin
   RectangleBuffer.Margins.Right := LayoutPosition.Padding.Right + (TrackBarPosition.Width - (TrackBarPosition.Width *
-    Value / 100));
+    Value / 100)) + 2;
 end;
 
 procedure TFormMain.FMXPlayerChangePosition(Sender: TObject; const Time: Int64);
@@ -542,6 +543,10 @@ end;
 procedure TFormMain.FMXPlayerChangeState(Sender: TObject);
 begin
   SelectActiveAudio;
+  if FMXPlayer.IsPause then
+    GlyphPlayState.ImageIndex := 18
+  else
+    GlyphPlayState.ImageIndex := 17;
 end;
 
 procedure TFormMain.FMXPlayerEnd(Sender: TObject);
@@ -661,6 +666,7 @@ begin
   LabelPlayTitle.Text := 'Название трека';
   LabelPlayArtist.Text := 'Исполнитель';
   LabelPlayTime.Text := '0:00';
+  GlyphPlayState.ImageIndex := 18;
   RectangleActiveCover.Fill.Bitmap.Bitmap.LoadFromResource('cover');
   TrackBarPosition.Value := 0;
   SetBufferingPrecent(0);
@@ -822,8 +828,7 @@ begin
   end;
 end;
 
-procedure TFormMain.ListBox1ViewportPositionChange(Sender: TObject; const OldViewportPosition, NewViewportPosition:
-  TPointF; const ContentSizeChanged: Boolean);
+procedure TFormMain.ListBox1ViewportPositionChange(Sender: TObject; const OldViewportPosition, NewViewportPosition: TPointF; const ContentSizeChanged: Boolean);
 begin
   LayoutViewLeft.Visible := NewViewportPosition.X > 0;
   LayoutViewRight.Visible := ListBox1.Content.ScrollBox.ContentBounds.Width > NewViewportPosition.X + ListBox1.Width;
@@ -999,6 +1004,8 @@ begin
                   Item := TListBoxItemPlaylist.Create(ListBoxPlaylists, Playlist);
                   Item.OnOpen := FOnOpenPlaylist;
                   Item.OnPlay := FOnPlayPlaylist;
+                  Item.SVGList := SVGIconImageList1;
+                  Item.DefaultImage := ImageList.Bitmap(TSizeF.Create(143, 143), 0);
                   ListBoxPlaylists.AddObject(Item);
                 end);
             end;
@@ -1106,8 +1113,9 @@ end;
 
 procedure TFormMain.SmallScrollBar1Change(Sender: TObject);
 begin
-  VertScrollBox.ViewportPosition := TPointF.Create(0, VertScrollBox.Content.ScrollBox.ContentBounds.Height -
-    VertScrollBox.Content.Height) / 100 * (SmallScrollBar1.Value);
+  if SmallScrollBar1.Tag = 2 then
+    Exit;
+  VertScrollBox.ViewportPosition := TPointF.Create(0, VertScrollBox.Content.ScrollBox.ContentBounds.Height / 100 * SmallScrollBar1.Value);
 end;
 
 procedure TFormMain.FDoScroll(Delta: Single);
@@ -1124,13 +1132,13 @@ begin
   Handled := True;
 end;
 
-procedure TFormMain.VertScrollBoxViewportPositionChange(Sender: TObject; const OldViewportPosition, NewViewportPosition:
-  TPointF; const ContentSizeChanged: Boolean);
+procedure TFormMain.VertScrollBoxViewportPositionChange(Sender: TObject; const OldViewportPosition, NewViewportPosition: TPointF; const ContentSizeChanged: Boolean);
 begin
   if VertScrollBox.Content.ScrollBox.ContentBounds.Height - VertScrollBox.Content.Height >= 0 then
   begin
-    SmallScrollBar1.Value := 100 / (VertScrollBox.Content.ScrollBox.ContentBounds.Height - VertScrollBox.Content.Height)
-      * (NewViewportPosition.Y);
+    SmallScrollBar1.Tag := 2;
+    SmallScrollBar1.Value := 100 / VertScrollBox.Content.ScrollBox.ContentBounds.Height * NewViewportPosition.Y;
+    SmallScrollBar1.Tag := 0;
     SmallScrollBar1.Visible := True;
   end
   else
@@ -1311,8 +1319,8 @@ begin
       try
         Params.Offset(FRUsersOffset);
         Params.Count(6);
-        Params.Fields([ufPhoto50]);
-        Params.Order(TVkFriendsSort.fsHints);
+        Params.Fields([TVkProfileField.Photo50]);
+        Params.Order(TVkFriendsOrder.Hints);
         if VK.Friends.Get(Items, Params) then
         begin
           try
@@ -1347,8 +1355,7 @@ begin
     end);
 end;
 
-procedure TFormMain.VKAuth(Sender: TObject; Url: string; var Token: string; var TokenExpiry: Int64; var
-  ChangePasswordHash: string);
+procedure TFormMain.VKAuth(Sender: TObject; Url: string; var Token: string; var TokenExpiry: Int64; var ChangePasswordHash: string);
 begin
   TFormFMXOAuth2.Execute(Url,
     procedure(Form: TFormFMXOAuth2)
