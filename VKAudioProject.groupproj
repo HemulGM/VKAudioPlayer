@@ -30,9 +30,6 @@
         <Projects Include="..\VK_API\Samples\Auth\VKAuth.dproj">
             <Dependencies/>
         </Projects>
-        <Projects Include="..\FMXAudio\Sample\Recorder\MicRecordSample.dproj">
-            <Dependencies/>
-        </Projects>
     </ItemGroup>
     <ProjectExtensions>
         <Borland.Personality>Default.Personality.12</Borland.Personality>
@@ -122,23 +119,14 @@
     <Target Name="VKAuth:Make">
         <MSBuild Projects="..\VK_API\Samples\Auth\VKAuth.dproj" Targets="Make"/>
     </Target>
-    <Target Name="MicRecordSample">
-        <MSBuild Projects="..\FMXAudio\Sample\Recorder\MicRecordSample.dproj"/>
-    </Target>
-    <Target Name="MicRecordSample:Clean">
-        <MSBuild Projects="..\FMXAudio\Sample\Recorder\MicRecordSample.dproj" Targets="Clean"/>
-    </Target>
-    <Target Name="MicRecordSample:Make">
-        <MSBuild Projects="..\FMXAudio\Sample\Recorder\MicRecordSample.dproj" Targets="Make"/>
-    </Target>
     <Target Name="Build">
-        <CallTarget Targets="VKAudioPlayer;Audio;VKComponents;HGMComponents;VKPlayer;Knigavuhe;FMXAudioHGM;VKAudio;VKAuth;MicRecordSample"/>
+        <CallTarget Targets="VKAudioPlayer;Audio;VKComponents;HGMComponents;VKPlayer;Knigavuhe;FMXAudioHGM;VKAudio;VKAuth"/>
     </Target>
     <Target Name="Clean">
-        <CallTarget Targets="VKAudioPlayer:Clean;Audio:Clean;VKComponents:Clean;HGMComponents:Clean;VKPlayer:Clean;Knigavuhe:Clean;FMXAudioHGM:Clean;VKAudio:Clean;VKAuth:Clean;MicRecordSample:Clean"/>
+        <CallTarget Targets="VKAudioPlayer:Clean;Audio:Clean;VKComponents:Clean;HGMComponents:Clean;VKPlayer:Clean;Knigavuhe:Clean;FMXAudioHGM:Clean;VKAudio:Clean;VKAuth:Clean"/>
     </Target>
     <Target Name="Make">
-        <CallTarget Targets="VKAudioPlayer:Make;Audio:Make;VKComponents:Make;HGMComponents:Make;VKPlayer:Make;Knigavuhe:Make;FMXAudioHGM:Make;VKAudio:Make;VKAuth:Make;MicRecordSample:Make"/>
+        <CallTarget Targets="VKAudioPlayer:Make;Audio:Make;VKComponents:Make;HGMComponents:Make;VKPlayer:Make;Knigavuhe:Make;FMXAudioHGM:Make;VKAudio:Make;VKAuth:Make"/>
     </Target>
     <Import Project="$(BDS)\Bin\CodeGear.Group.Targets" Condition="Exists('$(BDS)\Bin\CodeGear.Group.Targets')"/>
 </Project>

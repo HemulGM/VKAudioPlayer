@@ -3,7 +3,8 @@ unit BassPlayer.LoadHandle;
 interface
 
 uses
-  System.SysUtils, System.Variants, System.Classes, System.Generics.Collections, System.Threading;
+  System.SysUtils, System.Variants, System.Classes, System.Generics.Collections,
+  System.Threading;
 
 type
   TLoadThread = class
@@ -118,7 +119,8 @@ end;
 
 class procedure TLoadThread.StopAll;
 begin
-  TaskPoll.Free;
+  if Assigned(TaskPoll) then
+    TaskPoll.Free;
   TaskPoll := TThreadPool.Create;
 end;
 
@@ -271,9 +273,13 @@ end;
 initialization
   TLoadThread.TaskPoll := TThreadPool.Create;
 
+
 finalization
   if Assigned(TLoadThread.TaskPoll) then
+  begin
     TLoadThread.TaskPoll.Free;
+    TLoadThread.TaskPoll := nil;
+  end;
 
 end.
 

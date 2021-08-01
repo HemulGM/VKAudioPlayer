@@ -17,6 +17,7 @@ type
     FOpenning: BOOL;
     FOnChangeState: TNotifyEvent;
     FVolumeChannel: Single;
+    FIsInit: Boolean;
     function GetLastErrorCode: Integer;
     function GetSize: Int64;
     procedure UnloadChannel;
@@ -81,6 +82,7 @@ type
     property Volume: Single read GetVolume write SetVolume;
     property VolumeChannel: Single read FVolumeChannel write SetVolumeChannel;
     property OnChangeState: TNotifyEvent read FOnChangeState write SetOnChangeState;
+    property IsInit: Boolean read FIsInit;
   end;
 
 var
@@ -103,6 +105,7 @@ end;
 constructor TBASSPlayer.Create;
 begin
   inherited;
+  FIsInit := False;
   FActiveChannel := 0;
   FStatusProc := nil;
   FBroadcastInfoProc := nil;
@@ -138,6 +141,7 @@ end;
 
 function TBASSPlayer.Init(Handle: THandle): Boolean;
 begin
+  FIsInit := False;
   if BASS_Available then
   begin
     BASS_SetConfig(BASS_CONFIG_DEV_DEFAULT, 1);
@@ -154,6 +158,7 @@ begin
   end
   else
     Result := False;
+  FIsInit := Result;
 end;
 
 procedure TBASSPlayer.UnloadChannel;
