@@ -3,12 +3,16 @@ unit VKAP.Main;
 interface
 
 uses
-  Winapi.Windows, Winapi.Messages, System.SysUtils, System.Variants, System.Classes, Vcl.Graphics, Vcl.Controls,
-  Vcl.Forms, Vcl.Dialogs, System.Types, VK.API, VK.Components, HGM.Common.Settings, Vcl.Grids, HGM.Controls.VirtualTable,
-  Vcl.ExtCtrls, BassPlayer, Vcl.StdCtrls, HGM.Button, Vcl.ComCtrls, HGM.Controls.PanelExt, System.ImageList, Vcl.ImgList,
-  Vcl.Imaging.pngimage, System.Generics.Collections, Vcl.Imaging.jpeg, VK.Entity.Playlist, VK.Entity.Profile,
-  BassPlayer.LoadHandle, VK.Entity.Audio, VKAP.Player, HGM.SQLite, HGM.SQLang, Vcl.Menus, Vcl.WinXCtrls,
-  HGM.Controls.TrackBar, System.Win.TaskbarCore, Vcl.Taskbar, HGM.Tools.Hint, Vcl.Styles.Utils.SysStyleHook;
+  Winapi.Windows, Winapi.Messages, System.SysUtils, System.Variants,
+  System.Classes, Vcl.Graphics, Vcl.Controls, Vcl.Forms, Vcl.Dialogs,
+  System.Types, VK.API, VK.Components, HGM.Common.Settings, Vcl.Grids,
+  HGM.Controls.VirtualTable, Vcl.ExtCtrls, BassPlayer, Vcl.StdCtrls, HGM.Button,
+  Vcl.ComCtrls, HGM.Controls.PanelExt, System.ImageList, Vcl.ImgList,
+  Vcl.Imaging.pngimage, System.Generics.Collections, Vcl.Imaging.jpeg,
+  VK.Entity.Playlist, VK.Entity.Profile, BassPlayer.LoadHandle, VK.Entity.Audio,
+  VKAP.Player, HGM.SQLite, HGM.SQLang, Vcl.Menus, Vcl.WinXCtrls,
+  HGM.Controls.TrackBar, System.Win.TaskbarCore, Vcl.Taskbar, HGM.Tools.Hint,
+  Vcl.Styles.Utils.SysStyleHook;
 
 type
   TAudio = record
@@ -308,6 +312,7 @@ type
     procedure SearchInList(List: IListFind; Query: string);
     function GetActiveList: IListFind;
   public
+    procedure DoLogin;
     procedure Quit;
     procedure Mini;
     procedure Full;
@@ -327,7 +332,8 @@ function CreateAvatar(Source: TGraphic; Mask: TPngImage): TPngImage;
 implementation
 
 uses
-  VK.Audio, Vk.Types, System.IOUtils, HGM.Common.Workspace, HGM.Common.Utils, Direct2D, D2D1, Math, VK.Vcl.OAuth2, VK.Friends, Vcl.Themes, Vcl.Styles;
+  VK.Audio, Vk.Types, System.IOUtils, HGM.Common.Workspace, HGM.Common.Utils,
+  Direct2D, D2D1, Math, VK.Vcl.OAuth2, VK.Friends, Vcl.Themes, Vcl.Styles;
 
 {$R *.dfm}
 
@@ -2285,25 +2291,28 @@ begin
   Token := FToken;
 end;
 
+procedure TFormMain.DoLogin;
+begin
+  FToken := '';
+  FSettings.SetStr('General', 'Token', FToken);
+  VK.Token := '';
+
+    //Вызываем авторизацию после того, как выйдем из всего этого стека
+  TThread.CreateAnonymousThread(
+    procedure
+    begin
+      TThread.Synchronize(TThread.CurrentThread,
+        procedure
+        begin
+          VK.Login;
+        end);
+    end).Start;
+end;
+
 procedure TFormMain.VKError(Sender: TObject; E: Exception; Code: Integer; Text: string);
 begin
   if Code = 5 then
-  begin
-    FToken := '';
-    FSettings.SetStr('General', 'Token', FToken);
-    VK.Token := '';
-
-    //Вызываем авторизацию после того, как выйдем из всего этого стека
-    TThread.CreateAnonymousThread(
-      procedure
-      begin
-        TThread.Synchronize(TThread.CurrentThread,
-          procedure
-          begin
-            VK.Login;
-          end);
-      end).Start;
-  end;
+    DoLogin;
 end;
 
 procedure TFormMain.VKLog(Sender: TObject; const Value: string);

@@ -268,6 +268,8 @@ object FormMain: TFormMain
         Margins.Bottom = 0
         Align = alClient
         BevelOuter = bvNone
+        Ctl3D = False
+        ParentCtl3D = False
         TabOrder = 0
         object LabelTitle: TLabel
           AlignWithMargins = True
@@ -1211,10 +1213,6 @@ object FormMain: TFormMain
       StyleElements = []
       object TabSheetCurrent: TTabSheet
         Caption = #1058#1077#1082#1091#1097#1080#1081
-        ExplicitLeft = 0
-        ExplicitTop = 0
-        ExplicitWidth = 0
-        ExplicitHeight = 0
         object TableExCurrent: TTableEx
           Left = 0
           Top = 0
@@ -1273,10 +1271,6 @@ object FormMain: TFormMain
       object TabSheetMyMusic: TTabSheet
         Caption = #1052#1091#1079#1099#1082#1072
         ImageIndex = 1
-        ExplicitLeft = 0
-        ExplicitTop = 0
-        ExplicitWidth = 0
-        ExplicitHeight = 0
         object TableExMyMusic: TTableEx
           Left = 0
           Top = 0
@@ -1335,10 +1329,6 @@ object FormMain: TFormMain
       object TabSheetPlaylists: TTabSheet
         Caption = #1055#1083#1077#1081#1083#1080#1089#1090#1099
         ImageIndex = 2
-        ExplicitLeft = 0
-        ExplicitTop = 0
-        ExplicitWidth = 0
-        ExplicitHeight = 0
         object TableExPlaylists: TTableEx
           Left = 0
           Top = 0
@@ -1465,10 +1455,6 @@ object FormMain: TFormMain
       object TabSheetSearch: TTabSheet
         Caption = #1055#1086#1080#1089#1082
         ImageIndex = 4
-        ExplicitLeft = 0
-        ExplicitTop = 0
-        ExplicitWidth = 0
-        ExplicitHeight = 0
         object TableExSearch: TTableEx
           Left = 0
           Top = 0
@@ -1567,7 +1553,6 @@ object FormMain: TFormMain
     OnLogin = VKLogin
     Permissions = [Friends, Audio]
     Proxy.Port = 0
-    UsePseudoAsync = True
     Left = 64
     Top = 256
   end

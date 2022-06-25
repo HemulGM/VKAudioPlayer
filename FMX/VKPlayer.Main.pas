@@ -190,6 +190,10 @@ type
     GridPanelLayout3: TGridPanelLayout;
     SpeedButtonSwitchList: TSpeedButton;
     SpeedButtonSwitchPlay: TSpeedButton;
+    ImageBlur: TImage;
+    GaussianBlurEffect1: TGaussianBlurEffect;
+    Layout7: TLayout;
+    Rectangle3: TRectangle;
     procedure GestureDone(Sender: TObject; const EventInfo: TGestureEventInfo; var Handled: Boolean);
     procedure FormCreate(Sender: TObject);
     procedure FormDestroy(Sender: TObject);
@@ -290,7 +294,7 @@ implementation
 
 uses
   VK.FMX.OAuth2, VK.Friends, VK.Entity.Playlist, System.Net.HttpClient, System.Threading, System.NetEncoding,
-  System.IOUtils, VK.Types;
+  System.IOUtils, VK.Types, VK.Clients;
 
 {$R *.fmx}
 
@@ -590,6 +594,8 @@ begin
   FPlaylist := TAudioList.Create;
   FFriends := TFriends.Create;
 
+  VK.Application := TVkApplicationData.VkAdmin;
+
   LayoutPlayer.Visible := False;
   LayoutPlayerBar.Visible := False;
   TabControlMain.ActiveTab := TabItemMusic;
@@ -675,7 +681,7 @@ begin
   end;   }
 end;
 
-procedure LoadImage(Image: TImage; Url: string);
+procedure LoadImage(Image, Image2: TImage; Url: string);
 begin
   TThread.CreateAnonymousThread(
     procedure
@@ -690,6 +696,7 @@ begin
             procedure
             begin
               Image.Bitmap := TBitmap.PictureCache[i].Image;
+              Image2.Bitmap := Image.Bitmap;
             end);
           Exit;
         end;
@@ -713,6 +720,7 @@ begin
             procedure
             begin
               Image.Bitmap := TBitmap.PictureCache[i].Image;
+              Image2.Bitmap := Image.Bitmap;
             end);
           Mem.Free;
         end;
@@ -731,7 +739,7 @@ begin
   Audio.NeedImage;
   if Assigned(Audio.Image) then
   begin
-    LoadImage(ImageAlbum, Audio.AlbumPhoto);
+    LoadImage(ImageAlbum, ImageBlur, Audio.AlbumPhoto);
     ImageAlbum.Hint := Audio.AlbumPhoto;
   end
   else

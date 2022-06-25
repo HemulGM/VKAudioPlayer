@@ -14,8 +14,6 @@ uses
   VK.API in '..\VK_API\VK.API.pas',
   BassPlayer.LoadHandle in 'BassPlayer.LoadHandle.pas',
   VKAP.Player in 'VKAP.Player.pas' {FormPlayer},
-  Vcl.Styles.Utils.SysStyleHook in '..\#Fork\vcl-styles-utils\Common\Vcl.Styles.Utils.SysStyleHook.pas',
-  Vcl.Styles.Hooks in '..\#Fork\vcl-styles-utils\Common\Vcl.Styles.Hooks.pas',
   HGM.SQLang in '..\SQLite\HGM.SQLang.pas',
   HGM.SQLite in '..\SQLite\HGM.SQLite.pas',
   HGM.SQLite.Wrapper in '..\SQLite\HGM.SQLite.Wrapper.pas';
@@ -36,7 +34,8 @@ begin
   FormMain.Show;
   FormMain.Invalidate;
   Application.ProcessMessages;
-  FormMain.VK.Login;
+  if not FormMain.VK.Login then
+    FormMain.DoLogin;
   Application.Run;
 end.
 
