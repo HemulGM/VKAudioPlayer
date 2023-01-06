@@ -3,13 +3,16 @@ unit VKAudioWin.Main;
 interface
 
 uses
-  System.SysUtils, System.Types, System.UITypes, System.Classes, System.Variants, FMX.Types, FMX.Controls, FMX.Forms,
-  FMX.Graphics, FMX.Dialogs, FMX.Layouts, FMX.TabControl, FMX.Controls.Presentation, FMX.StdCtrls, FMX.Edit, FMX.ListBox,
-  FMX.Objects, FMX.Ani, VK.API, VK.Components, FMX.Player, FMX.Trayicon.Win, HGM.Common.Settings, VK.Entity.Audio,
-  System.ImageList, VK.Entity.Profile, FMX.ImgList, FMX.Effects, FMX.Filter.Effects, VKAudioWin.Classes,
-  FMX.SVGIconImage, FMX.SVGIconImageList, VKAudioWin.View.ListItemAudio, VKAudioWin.View.ListItemPlaylist,
-  VKAudioWin.View.ListItemUser, VKAudioWin.View.ListItemSheffle, FMX.ScrollBox, FMX.Memo, FMX.BassComponents,
-  FMX.BASS.Classes;
+  System.SysUtils, System.Types, System.UITypes, System.Classes, System.Variants,
+  FMX.Types, FMX.Controls, FMX.Forms, FMX.Graphics, FMX.Dialogs, FMX.Layouts,
+  FMX.TabControl, FMX.Controls.Presentation, FMX.StdCtrls, FMX.Edit, FMX.ListBox,
+  FMX.Objects, FMX.Ani, VK.API, VK.Components, FMX.Player, FMX.Trayicon.Win,
+  HGM.Common.Settings, VK.Entity.Audio, System.ImageList, VK.Entity.Profile,
+  FMX.ImgList, FMX.Effects, FMX.Filter.Effects, VKAudioWin.Classes,
+  FMX.SVGIconImage, FMX.SVGIconImageList, VKAudioWin.View.ListItemAudio,
+  VKAudioWin.View.ListItemPlaylist, VKAudioWin.View.ListItemUser,
+  VKAudioWin.View.ListItemSheffle, FMX.ScrollBox, FMX.Memo, FMX.BassComponents,
+  FMX.BASS.Classes, FMX.Memo.Types;
 
 type
   TFormMain = class(TForm)
@@ -94,7 +97,6 @@ type
     TimerUpdateScroll: TTimer;
     VK: TVK;
     FMXPlayer: TFMXPlayer;
-    TrayIcon: TFMXTrayIcon;
     ImageList: TImageList;
     TabItemFriend: TTabItem;
     ListBoxFriendMusic: TListBox;
@@ -413,8 +415,9 @@ var
 implementation
 
 uses
-  System.Math, VK.Errors, VK.Types, System.Threading, HGM.FMX.Image, VK.Clients, VK.Entity.Playlist,
-  VK.Entity.Audio.Catalog, VK.FMX.OAuth2, VK.Audio, VK.Friends, VK.Entity.Catalog.Section, REST.Types;
+  System.Math, VK.Errors, VK.Types, System.Threading, HGM.FMX.Image, VK.Clients,
+  VK.Entity.Playlist, VK.Entity.Audio.Catalog, VK.FMX.OAuth2, VK.Audio,
+  VK.Friends, VK.Entity.Catalog.Section, REST.Types;
 
 {$R *.fmx}
 
@@ -620,8 +623,16 @@ begin
   ClearAudioInfo;
   LayoutScroll.BringToFront;
   VK.Token := FSettings.GetStr('Auth', 'Token');
-  VK.Application := TVkApplicationData.VKAdmin;
-  VK.Login;
+  VK.Application := TVkApplicationData.Marusia;
+  try
+    if not VK.Login then
+    begin
+      VK.Token := '';
+      VK.Login;
+    end;
+  except
+    VKError(nil, nil, VK_ERROR_INVALID_TOKEN, '');
+  end;
 end;
 
 procedure TFormMain.FormDestroy(Sender: TObject);
@@ -781,8 +792,8 @@ begin
 end;
 
 procedure TFormMain.PlayNext(HandlePlay: Boolean);
-var
-  Nxt: Integer;
+{var
+  Nxt: Integer; }
 begin
   if not HandlePlay then
   begin
@@ -1387,7 +1398,11 @@ end;
 
 procedure TFormMain.VKLog(Sender: TObject; const Value: string);
 begin
-  Memo1.Lines.Add(Value);
+  TThread.Queue(nil,
+    procedure
+    begin
+      Memo1.Lines.Add(Value);
+    end);
 end;
 
 procedure TFormMain.VKLogin(Sender: TObject);

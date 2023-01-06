@@ -3,12 +3,15 @@ unit VKPlayer.Main;
 interface
 
 uses
-  System.SysUtils, System.Types, System.UITypes, System.Classes, System.Variants, FMX.Types, FMX.Controls, FMX.Forms,
-  FMX.Graphics, FMX.Dialogs, FMX.TabControl, FMX.StdCtrls, FMX.Controls.Presentation, FMX.Gestures, System.Actions,
-  FMX.ActnList, VK.API, VK.Components, VK.Entity.Profile, FMX.Layouts, FMX.Objects, FMX.ListView.Types,
-  FMX.ListView.Appearances, FMX.ListView.Adapters.Base, VK.Entity.Audio, VK.Audio, FMX.ListView, BassPlayer.LoadHandle,
-  System.Generics.Collections, System.ImageList, FMX.ImgList, FMX.Effects, FMX.BassComponents, FMX.Ani, FMX.ScrollBox,
-  FMX.Memo, FMX.Filter.Effects, FMX.Edit, FMX.BASS.Classes, FMX.Player;
+  System.SysUtils, System.Types, System.UITypes, System.Classes, System.Variants,
+  FMX.Types, FMX.Controls, FMX.Forms, FMX.Graphics, FMX.Dialogs, FMX.TabControl,
+  FMX.StdCtrls, FMX.Controls.Presentation, FMX.Gestures, System.Actions,
+  FMX.ActnList, VK.API, VK.Components, VK.Entity.Profile, FMX.Layouts,
+  FMX.Objects, FMX.ListView.Types, FMX.ListView.Appearances,
+  FMX.ListView.Adapters.Base, VK.Entity.Audio, VK.Audio, FMX.ListView,
+  BassPlayer.LoadHandle, System.Generics.Collections, System.ImageList,
+  FMX.ImgList, FMX.Effects, FMX.BassComponents, FMX.Ani, FMX.ScrollBox, FMX.Memo,
+  FMX.Filter.Effects, FMX.Edit, FMX.BASS.Classes, FMX.Player;
 
 type
   TBitmapCacheItem = record
@@ -293,8 +296,8 @@ var
 implementation
 
 uses
-  VK.FMX.OAuth2, VK.Friends, VK.Entity.Playlist, System.Net.HttpClient, System.Threading, System.NetEncoding,
-  System.IOUtils, VK.Types, VK.Clients;
+  VK.FMX.OAuth2, VK.Entity.Common, VK.Friends, VK.Entity.Playlist, System.Net.HttpClient,
+  System.Threading, System.NetEncoding, System.IOUtils, VK.Types, VK.Clients;
 
 {$R *.fmx}
 
@@ -594,7 +597,7 @@ begin
   FPlaylist := TAudioList.Create;
   FFriends := TFriends.Create;
 
-  VK.Application := TVkApplicationData.VkAdmin;
+  VK.Application := TVkApplicationData.Marusia;
 
   LayoutPlayer.Visible := False;
   LayoutPlayerBar.Visible := False;
@@ -642,7 +645,11 @@ begin
   TThread.ForceQueue(nil,
     procedure
     begin
-      VK.Login;
+      try
+        VK.Login;
+      except
+        VKError(nil, nil, 5, '');
+      end;
     end);
 end;
 
@@ -1327,7 +1334,7 @@ begin
     begin
       FFriends.Clear;
       Result := False;
-      if VK.Friends.Get(Users, [TVkProfileField.Nickname, TVkProfileField.Sex, TVkProfileField.Photo50, TVkProfileField.Status, TVkProfileField.CanSeeAudio], TVkFriendsOrder.Name) then
+      if VK.Friends.Get(Users, [TVkExtendedField.Nickname, TVkExtendedField.Sex, TVkExtendedField.Photo50, TVkExtendedField.Status, TVkExtendedField.CanSeeAudio], TVkFriendsOrder.Name) then
       begin
         try
           for i := Low(Users.Items) to High(Users.Items) do
@@ -1377,7 +1384,7 @@ begin
   FToken := VK.Token;
   //FSettings.SetStr('General', 'Token', FToken);
 
-  if VK.Users.Get(User, 0, [TVkProfileField.Photo50]) then
+  if VK.Users.Get(User, 0, [TVkExtendedField.Photo50]) then
   begin
     FVkId := User.Id;
     FVkIdCurrent := FVkId;
@@ -1401,9 +1408,7 @@ begin
   Artist := Audio.Artist;
   Title := Audio.Title;
   if Assigned(Audio.Album) and Assigned(Audio.Album.Thumb) then
-    AlbumPhoto := Audio.Album.Thumb.Photo270
-  else
-    AlbumPhoto := '';
+    AlbumPhoto := Audio.Album.Thumb.Sizes.GetSizeUrlOrEmpty(50);
   Image := TBitmap.CreateLazy(AlbumPhoto);
   Id := Audio.Id;
   OwnerId := Audio.OwnerId;
