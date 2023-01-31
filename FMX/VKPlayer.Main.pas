@@ -11,7 +11,7 @@ uses
   FMX.ListView.Adapters.Base, VK.Entity.Audio, VK.Audio, FMX.ListView,
   BassPlayer.LoadHandle, System.Generics.Collections, System.ImageList,
   FMX.ImgList, FMX.Effects, FMX.BassComponents, FMX.Ani, FMX.ScrollBox, FMX.Memo,
-  FMX.Filter.Effects, FMX.Edit, FMX.BASS.Classes, FMX.Player;
+  FMX.Filter.Effects, FMX.Edit, FMX.BASS.Classes, FMX.Player, FMX.Memo.Types;
 
 type
   TBitmapCacheItem = record
@@ -296,8 +296,9 @@ var
 implementation
 
 uses
-  VK.FMX.OAuth2, VK.Entity.Common, VK.Friends, VK.Entity.Playlist, System.Net.HttpClient,
-  System.Threading, System.NetEncoding, System.IOUtils, VK.Types, VK.Clients;
+  VK.FMX.OAuth2, VK.Entity.Common, VK.Friends, VK.Entity.Playlist,
+  System.Net.HttpClient, System.Threading, System.NetEncoding, System.IOUtils,
+  VK.Types, VK.Clients;
 
 {$R *.fmx}
 
@@ -1407,9 +1408,11 @@ var
 begin
   Artist := Audio.Artist;
   Title := Audio.Title;
-  if Assigned(Audio.Album) and Assigned(Audio.Album.Thumb) then
-    AlbumPhoto := Audio.Album.Thumb.Sizes.GetSizeUrlOrEmpty(50);
-  Image := TBitmap.CreateLazy(AlbumPhoto);
+  //if Assigned(Audio.Album) and Assigned(Audio.Album.Thumb) then
+  //  AlbumPhoto := Audio.Album.Thumb.Photo300
+  //else
+  //  AlbumPhoto := '';
+  //Image := TBitmap.CreateLazy(AlbumPhoto);
   Id := Audio.Id;
   OwnerId := Audio.OwnerId;
   Restricted := Audio.ContentRestricted > 0;
