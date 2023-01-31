@@ -3,7 +3,7 @@ program VKAudioPlayer;
 {$R *.dres}
 
 uses
-  VCLFlickerReduce in '..\#Fork\VCLFlickerReduce\VCLFlickerReduce.pas',
+  //VCLFlickerReduce in '..\#Fork\VCLFlickerReduce\VCLFlickerReduce.pas',
   Vcl.Forms,
   VKAP.Main in 'VKAP.Main.pas' {FormMain},
   BassPlayer.Lib in 'BassPlayer.Lib.pas',

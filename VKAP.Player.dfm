@@ -6,6 +6,7 @@ object FormPlayer: TFormPlayer
   ClientHeight = 200
   ClientWidth = 350
   Color = 16579578
+  CustomTitleBar.Height = 42
   DoubleBuffered = True
   Font.Charset = DEFAULT_CHARSET
   Font.Color = clWindowText

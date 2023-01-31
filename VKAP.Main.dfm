@@ -255,6 +255,8 @@ object FormMain: TFormMain
       Margins.Left = 0
       Align = alClient
       BevelOuter = bvNone
+      ParentBackground = False
+      ParentColor = True
       TabOrder = 4
       object PanelTrackSinger: TPanel
         AlignWithMargins = True
@@ -268,8 +270,8 @@ object FormMain: TFormMain
         Margins.Bottom = 0
         Align = alClient
         BevelOuter = bvNone
-        Ctl3D = False
-        ParentCtl3D = False
+        ParentBackground = False
+        ParentColor = True
         TabOrder = 0
         object LabelTitle: TLabel
           AlignWithMargins = True
@@ -328,6 +330,8 @@ object FormMain: TFormMain
         Height = 36
         Align = alRight
         BevelOuter = bvNone
+        ParentBackground = False
+        ParentColor = True
         TabOrder = 1
         object LabelTime: TLabel
           AlignWithMargins = True
@@ -463,6 +467,8 @@ object FormMain: TFormMain
       Height = 56
       Align = alRight
       BevelOuter = bvNone
+      ParentBackground = False
+      ParentColor = True
       TabOrder = 7
       object ImageAvatar: TImage
         AlignWithMargins = True
@@ -615,6 +621,7 @@ object FormMain: TFormMain
       Height = 56
       Align = alRight
       BevelOuter = bvNone
+      ParentBackground = False
       ParentColor = True
       TabOrder = 8
       object TrackbarVolume: ThTrackbar
@@ -1543,8 +1550,6 @@ object FormMain: TFormMain
     end
   end
   object VK: TVK
-    AppID = '6121396'
-    AppKey = 'AlVXZFMUqyrnABp8ncuU'
     BaseURL = 'https://api.vk.com/method'
     EndPoint = 'https://oauth.vk.com/authorize'
     OnAuth = VKAuth

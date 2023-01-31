@@ -192,6 +192,8 @@ end;
 function TBASSPlayer.Play: Boolean;
 begin
   Result := False;
+  if not IsInit then
+    Exit;
   if FOpenning then
     Exit;
 

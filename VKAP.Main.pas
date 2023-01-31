@@ -11,8 +11,9 @@ uses
   Vcl.Imaging.pngimage, System.Generics.Collections, Vcl.Imaging.jpeg,
   VK.Entity.Playlist, VK.Entity.Profile, BassPlayer.LoadHandle, VK.Entity.Audio,
   VKAP.Player, HGM.SQLite, HGM.SQLang, Vcl.Menus, Vcl.WinXCtrls,
-  HGM.Controls.TrackBar, System.Win.TaskbarCore, Vcl.Taskbar, HGM.Tools.Hint,
-  Vcl.Styles.Utils.SysStyleHook;
+  HGM.Controls.TrackBar, System.Win.TaskbarCore, Vcl.Taskbar, HGM.Tools.Hint
+  {,
+  Vcl.Styles.Utils.SysStyleHook};
 
 type
   TAudio = record
@@ -333,7 +334,8 @@ implementation
 
 uses
   VK.Audio, Vk.Types, System.IOUtils, HGM.Common.Workspace, HGM.Common.Utils,
-  Direct2D, D2D1, Math, VK.Vcl.OAuth2, VK.Friends, Vcl.Themes, Vcl.Styles;
+  Direct2D, D2D1, Math, VK.Vcl.OAuth2, VK.Friends, Vcl.Themes, Vcl.Styles,
+  HGM.Common.PngUtils, VK.Clients;
 
 {$R *.dfm}
 
@@ -1498,7 +1500,7 @@ begin
       FFriends.Clear;
       Result := False;
       try
-        if VK.Friends.Get(Users, [TVkProfileField.NickName, TVkProfileField.Sex, TVkProfileField.Photo50, TVkProfileField.Status, TVkProfileField.CanSeeAudio], TVkFriendsOrder.Name) then
+        if VK.Friends.Get(Users, [TVkExtendedField.NickName, TVkExtendedField.Sex, TVkExtendedField.Photo50, TVkExtendedField.Status, TVkExtendedField.CanSeeAudio], TVkFriendsOrder.Name) then
         begin
           try
             for i := Low(Users.Items) to High(Users.Items) do
@@ -1946,6 +1948,7 @@ begin
     FAvatarDef.LoadFromResourceName(HInstance, 'def_avatar_dark');
     ButtonColorHot := $00757575;
     ButtonColorNormal := $00A2A2A2;
+
     PanelPlayer.Color := $00151515;
 
     ButtonFlatSearchBG.ColorNormal := AColor;
@@ -1991,6 +1994,11 @@ begin
     ShapeHotButton.Brush.Color := $00DBD2CA;
     ShapeHotButton.Pen.Color := $00DBD2CA;
   end;
+
+  PanelTrackSinger.Color := PanelPlayer.Color;
+  PanelTrackTime.Color := PanelPlayer.Color;
+  PanelVolume.Color := PanelPlayer.Color;
+  PanelUser.Color := PanelPlayer.Color;
 
   FStyleColor := AColor;
   FFontColor := AFont;
@@ -2067,6 +2075,7 @@ procedure TFormMain.FormCreate(Sender: TObject);
 var
   i: Integer;
 begin
+  VK.Application := TVkApplicationData.Marusia;
   //{ $IFDEF NEEDFMX}
   //TFormFMXCaptcha.Execute(CaptchaImg, Answer);
   //{$ELSE}
@@ -2336,7 +2345,7 @@ begin
   FToken := VK.Token;
   FSettings.SetStr('General', 'Token', FToken);
 
-  if VK.Users.Get(User, 0, [TVkProfileField.Photo50]) then
+  if VK.Users.Get(User, 0, [TVkExtendedField.Photo50]) then
   begin
     FVkId := User.id;
     FVkIdCurrent := FVkId;
