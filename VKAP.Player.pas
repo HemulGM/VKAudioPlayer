@@ -61,7 +61,7 @@ var
 implementation
 
 uses
-  VKAP.Main, HGM.Common.Utils;
+  VKAP.Main, HGM.Common.Utils, HGM.Common.PngUtils;
 
 {$R *.dfm}
 

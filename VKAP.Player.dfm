@@ -6,6 +6,7 @@ object FormPlayer: TFormPlayer
   ClientHeight = 200
   ClientWidth = 350
   Color = 16579578
+  CustomTitleBar.Height = 42
   DoubleBuffered = True
   Font.Charset = DEFAULT_CHARSET
   Font.Color = clWindowText
@@ -14,13 +15,11 @@ object FormPlayer: TFormPlayer
   Font.Style = []
   GlassFrame.Enabled = True
   GlassFrame.Top = 42
-  OldCreateOrder = False
   OnClose = FormClose
   OnCreate = FormCreate
   OnMouseDown = PanelPlayerMouseDown
   OnMouseMove = FormMouseMove
   OnPaint = FormPaint
-  PixelsPerInch = 96
   TextHeight = 13
   object ImageAlbum: TImage
     AlignWithMargins = True

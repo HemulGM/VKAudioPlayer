@@ -3,7 +3,7 @@ object FormMain: TFormMain
   Top = 0
   Caption = 'VK Audio Player'
   ClientHeight = 491
-  ClientWidth = 614
+  ClientWidth = 618
   Color = clWhite
   Constraints.MinHeight = 460
   Constraints.MinWidth = 630
@@ -13,7 +13,6 @@ object FormMain: TFormMain
   Font.Height = -13
   Font.Name = 'Segoe UI'
   Font.Style = []
-  OldCreateOrder = False
   Position = poScreenCenter
   ShowHint = True
   OnCloseQuery = FormCloseQuery
@@ -21,12 +20,11 @@ object FormMain: TFormMain
   OnDestroy = FormDestroy
   OnResize = FormResize
   OnShow = FormShow
-  PixelsPerInch = 96
   TextHeight = 17
   object Shape1: TShape
     Left = 0
     Top = 56
-    Width = 614
+    Width = 618
     Height = 1
     Align = alTop
     Brush.Color = 15395049
@@ -38,7 +36,7 @@ object FormMain: TFormMain
   object PanelPlayer: TPanel
     Left = 0
     Top = 0
-    Width = 614
+    Width = 618
     Height = 56
     Align = alTop
     BevelOuter = bvNone
@@ -203,7 +201,7 @@ object FormMain: TFormMain
       SubTextFont.Style = []
     end
     object ButtonFlatDownload: TButtonFlat
-      Left = 518
+      Left = 522
       Top = 0
       Width = 40
       Height = 56
@@ -250,17 +248,19 @@ object FormMain: TFormMain
       AlignWithMargins = True
       Left = 144
       Top = 3
-      Width = 224
+      Width = 228
       Height = 50
       Margins.Left = 0
       Align = alClient
       BevelOuter = bvNone
+      ParentBackground = False
+      ParentColor = True
       TabOrder = 4
       object PanelTrackSinger: TPanel
         AlignWithMargins = True
         Left = 2
         Top = 0
-        Width = 174
+        Width = 178
         Height = 36
         Margins.Left = 2
         Margins.Top = 0
@@ -269,13 +269,14 @@ object FormMain: TFormMain
         Align = alClient
         BevelOuter = bvNone
         Ctl3D = False
+        ParentColor = True
         ParentCtl3D = False
         TabOrder = 0
         object LabelTitle: TLabel
           AlignWithMargins = True
           Left = 5
           Top = 0
-          Width = 164
+          Width = 168
           Height = 17
           Margins.Left = 5
           Margins.Top = 0
@@ -300,7 +301,7 @@ object FormMain: TFormMain
           AlignWithMargins = True
           Left = 5
           Top = 17
-          Width = 164
+          Width = 168
           Height = 17
           Margins.Left = 5
           Margins.Top = 0
@@ -322,7 +323,7 @@ object FormMain: TFormMain
         end
       end
       object PanelTrackTime: TPanel
-        Left = 176
+        Left = 180
         Top = 0
         Width = 48
         Height = 36
@@ -355,7 +356,7 @@ object FormMain: TFormMain
       object TrackbarPosition: ThTrackbar
         Left = 0
         Top = 36
-        Width = 224
+        Width = 228
         Height = 14
         Align = alBottom
         OnChange = TrackbarPositionChange
@@ -369,7 +370,7 @@ object FormMain: TFormMain
       end
     end
     object ButtonFlatShuffle: TButtonFlat
-      Left = 448
+      Left = 452
       Top = 0
       Width = 35
       Height = 56
@@ -413,7 +414,7 @@ object FormMain: TFormMain
       SubTextFont.Style = []
     end
     object ButtonFlatRepeat: TButtonFlat
-      Left = 483
+      Left = 487
       Top = 0
       Width = 35
       Height = 56
@@ -457,12 +458,14 @@ object FormMain: TFormMain
       SubTextFont.Style = []
     end
     object PanelUser: TPanel
-      Left = 558
+      Left = 562
       Top = 0
       Width = 56
       Height = 56
       Align = alRight
       BevelOuter = bvNone
+      ParentBackground = False
+      ParentColor = True
       TabOrder = 7
       object ImageAvatar: TImage
         AlignWithMargins = True
@@ -609,12 +612,13 @@ object FormMain: TFormMain
       end
     end
     object PanelVolume: TPanel
-      Left = 371
+      Left = 375
       Top = 0
       Width = 77
       Height = 56
       Align = alRight
       BevelOuter = bvNone
+      ParentBackground = False
       ParentColor = True
       TabOrder = 8
       object TrackbarVolume: ThTrackbar
@@ -642,7 +646,7 @@ object FormMain: TFormMain
     AlignWithMargins = True
     Left = 20
     Top = 57
-    Width = 594
+    Width = 598
     Height = 434
     Margins.Left = 20
     Margins.Top = 0
@@ -657,7 +661,7 @@ object FormMain: TFormMain
       AlignWithMargins = True
       Left = 0
       Top = 399
-      Width = 574
+      Width = 578
       Height = 35
       Margins.Left = 0
       Margins.Top = 0
@@ -689,7 +693,7 @@ object FormMain: TFormMain
       object Shape2: TShape
         Left = 0
         Top = 0
-        Width = 574
+        Width = 578
         Height = 1
         Align = alTop
         Brush.Color = 15460326
@@ -702,7 +706,7 @@ object FormMain: TFormMain
       AlignWithMargins = True
       Left = 0
       Top = 0
-      Width = 574
+      Width = 578
       Height = 111
       Margins.Left = 0
       Margins.Top = 0
@@ -716,7 +720,7 @@ object FormMain: TFormMain
       object Shape3: TShape
         Left = 0
         Top = 110
-        Width = 574
+        Width = 578
         Height = 1
         Align = alBottom
         Brush.Color = 15460326
@@ -727,7 +731,7 @@ object FormMain: TFormMain
       object PanelPageControl: TPanel
         Left = 0
         Top = 65
-        Width = 574
+        Width = 578
         Height = 45
         Align = alBottom
         BevelOuter = bvNone
@@ -735,7 +739,7 @@ object FormMain: TFormMain
         object PanelPageInd: TPanel
           Left = 0
           Top = 43
-          Width = 574
+          Width = 578
           Height = 2
           Align = alBottom
           BevelOuter = bvNone
@@ -992,7 +996,7 @@ object FormMain: TFormMain
         end
         object ButtonFlatMyMusic: TButtonFlat
           AlignWithMargins = True
-          Left = 477
+          Left = 481
           Top = 0
           Width = 94
           Height = 43
@@ -1041,7 +1045,7 @@ object FormMain: TFormMain
       object PanelSearch: TPanel
         Left = 0
         Top = 0
-        Width = 574
+        Width = 578
         Height = 65
         Align = alClient
         BevelOuter = bvNone
@@ -1049,12 +1053,12 @@ object FormMain: TFormMain
         TabOrder = 1
         StyleElements = []
         DesignSize = (
-          574
+          578
           65)
         object ButtonFlatSearchBG: TButtonFlat
           Left = 4
           Top = 18
-          Width = 570
+          Width = 574
           Height = 36
           Anchors = [akLeft, akTop, akRight]
           Caption = ''
@@ -1095,7 +1099,7 @@ object FormMain: TFormMain
         object EditSearch: TEdit
           Left = 15
           Top = 19
-          Width = 339
+          Width = 343
           Height = 33
           Anchors = [akLeft, akTop, akRight]
           AutoSize = False
@@ -1110,7 +1114,7 @@ object FormMain: TFormMain
           OnKeyPress = EditSearchKeyPress
         end
         object ButtonFlatSearch: TButtonFlat
-          Left = 514
+          Left = 518
           Top = 18
           Width = 60
           Height = 36
@@ -1155,7 +1159,7 @@ object FormMain: TFormMain
           SubTextFont.Style = []
         end
         object CheckBoxFlatSerachType: TCheckBoxFlat
-          Left = 360
+          Left = 364
           Top = 18
           Width = 155
           Height = 36
@@ -1204,7 +1208,7 @@ object FormMain: TFormMain
     object PageControl: TPageControl
       Left = 0
       Top = 111
-      Width = 594
+      Width = 598
       Height = 288
       ActivePage = TabSheetFriends
       Align = alClient
@@ -1216,7 +1220,7 @@ object FormMain: TFormMain
         object TableExCurrent: TTableEx
           Left = 0
           Top = 0
-          Width = 586
+          Width = 590
           Height = 253
           Align = alClient
           BevelInner = bvNone
@@ -1236,7 +1240,7 @@ object FormMain: TFormMain
             end
             item
               Caption = #1053#1072#1079#1074#1072#1085#1080#1077
-              Width = 505
+              Width = 519
             end>
           DefaultDataDrawing = False
           ItemCount = 1
@@ -1274,7 +1278,7 @@ object FormMain: TFormMain
         object TableExMyMusic: TTableEx
           Left = 0
           Top = 0
-          Width = 586
+          Width = 590
           Height = 253
           Align = alClient
           BevelInner = bvNone
@@ -1294,7 +1298,7 @@ object FormMain: TFormMain
             end
             item
               Caption = #1053#1072#1079#1074#1072#1085#1080#1077
-              Width = 505
+              Width = 519
             end>
           DefaultDataDrawing = False
           ItemCount = 1
@@ -1332,7 +1336,7 @@ object FormMain: TFormMain
         object TableExPlaylists: TTableEx
           Left = 0
           Top = 0
-          Width = 586
+          Width = 590
           Height = 253
           Align = alClient
           BevelInner = bvNone
@@ -1352,7 +1356,7 @@ object FormMain: TFormMain
             end
             item
               Caption = #1053#1072#1079#1074#1072#1085#1080#1077
-              Width = 505
+              Width = 519
             end>
           DefaultDataDrawing = False
           ItemCount = 1
@@ -1390,7 +1394,7 @@ object FormMain: TFormMain
         object MemoLog: TMemo
           Left = 0
           Top = 0
-          Width = 586
+          Width = 590
           Height = 253
           Align = alClient
           BorderStyle = bsNone
@@ -1400,7 +1404,7 @@ object FormMain: TFormMain
         object TableExFriends: TTableEx
           Left = 0
           Top = 0
-          Width = 586
+          Width = 590
           Height = 253
           Align = alClient
           BevelInner = bvNone
@@ -1420,7 +1424,7 @@ object FormMain: TFormMain
             end
             item
               Caption = #1053#1072#1079#1074#1072#1085#1080#1077
-              Width = 532
+              Width = 536
             end>
           DefaultDataDrawing = False
           ItemCount = 1
@@ -1458,7 +1462,7 @@ object FormMain: TFormMain
         object TableExSearch: TTableEx
           Left = 0
           Top = 0
-          Width = 586
+          Width = 590
           Height = 253
           Align = alClient
           BevelInner = bvNone
@@ -1478,7 +1482,7 @@ object FormMain: TFormMain
             end
             item
               Caption = #1053#1072#1079#1074#1072#1085#1080#1077
-              Width = 505
+              Width = 519
             end>
           DefaultDataDrawing = False
           ItemCount = 1

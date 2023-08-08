@@ -235,6 +235,7 @@ type
     procedure TrackbarPositionMouseLeave(Sender: TObject);
   private
     FToken: string;
+    FFirstShow: Boolean;
     FMyMusic: TAudioList;
     FCurrentList: TAudioList;
     FSearchList: TAudioList;
@@ -333,7 +334,8 @@ implementation
 
 uses
   VK.Audio, Vk.Types, System.IOUtils, HGM.Common.Workspace, HGM.Common.Utils,
-  Direct2D, D2D1, Math, VK.Vcl.OAuth2, VK.Friends, Vcl.Themes, Vcl.Styles;
+  Direct2D, D2D1, Math, VK.Vcl.OAuth2, VK.Friends, Vcl.Themes, Vcl.Styles,
+  HGM.Common.PngUtils, VK.Clients;
 
 {$R *.dfm}
 
@@ -1498,7 +1500,7 @@ begin
       FFriends.Clear;
       Result := False;
       try
-        if VK.Friends.Get(Users, [TVkProfileField.NickName, TVkProfileField.Sex, TVkProfileField.Photo50, TVkProfileField.Status, TVkProfileField.CanSeeAudio], TVkFriendsOrder.Name) then
+        if VK.Friends.Get(Users, [TVkExtendedField.NickName, TVkExtendedField.Sex, TVkExtendedField.Photo50, TVkExtendedField.Status, TVkExtendedField.CanSeeAudio], TVkFriendsOrder.Name) then
         begin
           try
             for i := Low(Users.Items) to High(Users.Items) do
@@ -1946,7 +1948,7 @@ begin
     FAvatarDef.LoadFromResourceName(HInstance, 'def_avatar_dark');
     ButtonColorHot := $00757575;
     ButtonColorNormal := $00A2A2A2;
-    PanelPlayer.Color := $00151515;
+    PanelPlayer.Color := clBlack;
 
     ButtonFlatSearchBG.ColorNormal := AColor;
     ButtonFlatSearchBG.ColorPressed := AColor;
@@ -2067,6 +2069,7 @@ procedure TFormMain.FormCreate(Sender: TObject);
 var
   i: Integer;
 begin
+  FFirstShow := True;
   //{ $IFDEF NEEDFMX}
   //TFormFMXCaptcha.Execute(CaptchaImg, Answer);
   //{$ELSE}
@@ -2128,6 +2131,7 @@ begin
   for i := 0 to PageControl.PageCount - 1 do
     PageControl.Pages[i].TabVisible := False;
 
+  VK.Application := TVkApplicationData.Marusia;
   ImageListL.AddImages(ImageList);
 
   SetColors(True);
@@ -2208,6 +2212,11 @@ begin
     begin
       ActivityIndicatorLoading.Animate := False;
     end);
+  if FFirstShow then
+  begin
+    FFirstShow := False;
+    DoLogin;
+  end;
 end;
 
 procedure TFormMain.Full;
@@ -2293,20 +2302,20 @@ end;
 
 procedure TFormMain.DoLogin;
 begin
+  VK.Token := FToken;
   FToken := '';
-  FSettings.SetStr('General', 'Token', FToken);
-  VK.Token := '';
 
-    //Вызываем авторизацию после того, как выйдем из всего этого стека
-  TThread.CreateAnonymousThread(
+  //Вызываем авторизацию после того, как выйдем из всего этого стека
+  TThread.ForceQueue(TThread.CurrentThread,
     procedure
     begin
-      TThread.Synchronize(TThread.CurrentThread,
-        procedure
-        begin
-          VK.Login;
-        end);
-    end).Start;
+      try
+        if not VK.Login then
+          FToken := '';
+      except
+        FToken := '';
+      end;
+    end);
 end;
 
 procedure TFormMain.VKError(Sender: TObject; E: Exception; Code: Integer; Text: string);
@@ -2336,7 +2345,7 @@ begin
   FToken := VK.Token;
   FSettings.SetStr('General', 'Token', FToken);
 
-  if VK.Users.Get(User, 0, [TVkProfileField.Photo50]) then
+  if VK.Users.Get(User, 0, [TVkExtendedField.Photo50]) then
   begin
     FVkId := User.id;
     FVkIdCurrent := FVkId;
